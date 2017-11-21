@@ -3,6 +3,8 @@ import autobind from "autobind-decorator";
 import * as React from "react";
 import {Switch as RNSwitch} from "react-native";
 
+import {Theme} from "./Theme";
+
 type SwitchProps = {
     defaultValue?: boolean,
     onToggle?: boolean => void,
@@ -16,7 +18,7 @@ type SwitchState = {
 export default class Switch extends React.Component<SwitchProps, SwitchState> {
 
     static defaultProps = {
-        onTintColor: "rgba(255, 255, 255, .5)"
+        onTintColor: Theme.palette.primary
     };
 
     componentWillMount() {

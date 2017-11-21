@@ -43,5 +43,5 @@ jobs:
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
                 $(npm bin)/exp login --username $EXPO_USERNAME --password $EXPO_PASSWORD
-                $(npm bin)/exp publish
+                yarn deploy
             fi

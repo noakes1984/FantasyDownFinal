@@ -29,8 +29,8 @@ export default {
   badgePadding: (platform === "ios") ? 3 : 0,
 
     // Button
-  btnFontFamily: Theme.typography.normal,
-  btnDisabledBg: "#b5b5b5",
+  btnFontFamily: Theme.typography.large.fontFamily,
+  btnDisabledBg: "transparent",
   btnDisabledClr: "#f1f1f1",
 
     // CheckBox
@@ -90,8 +90,7 @@ export default {
     return this.inverseTextColor;
   },
   get btnTextSize(): number {
-    return (platform === "ios") ? this.fontSizeBase * 1.1 :
-        this.fontSizeBase - 1;
+    return Theme.typography.large.fontSize;
   },
   get btnTextSizeLarge(): number {
     return this.fontSizeBase * 1.5;
@@ -100,7 +99,7 @@ export default {
     return this.fontSizeBase * 0.8;
   },
   get borderRadiusLarge(): number {
-    return this.fontSizeBase * 3.8;
+    return 3;
   },
 
   buttonPadding: 6,
@@ -270,7 +269,7 @@ export default {
   titleFontColor: black,
 
     // Other
-  borderRadiusBase: (platform === "ios") ? 5 : 2,
+  borderRadiusBase: 3,
   borderWidth: (1/PixelRatio.getPixelSizeForLayoutSize(1)),
   contentPadding: 10,
 

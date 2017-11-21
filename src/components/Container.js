@@ -9,16 +9,18 @@ import type {BaseProps} from "./Types";
 
 type ContainerProps = BaseProps & {
     children: React.ChildrenArray<React.Element<*>>,
-    withGutter?: boolean
+    gutter: number
 };
 
 export default class Container extends React.Component<ContainerProps> {
+
+    static defaultProps = {
+        gutter: 0
+    }
+
     render(): React.Node {
-        const {withGutter, children, style} = this.props;
-        const containerStyle = [style, styles.base];
-        if (withGutter) {
-            containerStyle.push(styles.withGutter);
-        }
+        const {gutter, children, style} = this.props;
+        const containerStyle = [style, styles.base, { padding: gutter * Theme.spacing.base }];
         return <View style={containerStyle}>{children}</View>;
     }
 }
@@ -26,11 +28,6 @@ export default class Container extends React.Component<ContainerProps> {
 const styles = StyleSheet.create({
     base: {
         flex: 1,
-        paddingTop: Constants.statusBarHeight
-    },
-    withGutter: {
-        paddingLeft: Theme.spacing.base,
-        paddingRight: Theme.spacing.base,
-        paddingBottom: Theme.spacing.base
+        marginTop: Constants.statusBarHeight
     }
 });

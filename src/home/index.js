@@ -1,4 +1,4 @@
 // @flow
-export { Explore, HomeOverview } from "./explore";
-export { Profile, Settings, Currencies } from "./profile";
+export { Explore } from "./explore";
+export { Profile } from "./profile";
 export { HomeTab } from "./Home";

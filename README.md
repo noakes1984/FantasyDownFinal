@@ -1,5 +1,10 @@
 ## React Native Fiber v1.0.0
 
+[![CircleCI](https://circleci.com/gh/wcandillon/react-native-fiber.svg?style=svg&circle-token=eeaf45885197146a7bad4e4ea3d834fef498b609)](https://circleci.com/gh/wcandillon/react-native-fiber)
+
+[Try it on Expo](https://expo.io/@wcandillon/react-native-fiber)
+
+
 This project was bootstrapped with [Create React Native App](https://github.com/react-community/create-react-native-app).
 
 Below you'll find information about performing common tasks. The most recent version of this guide is available [here](https://github.com/react-community/create-react-native-app/blob/master/react-native-scripts/template/README.md).

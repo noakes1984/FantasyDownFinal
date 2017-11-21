@@ -1,0 +1,84 @@
+// @flow
+import * as React from "react";
+import {StyleSheet, View} from "react-native";
+
+import {AnimatedView, simpleInterpolation, directInterpolation} from "../components/Animations";
+
+type NoProps = {};
+
+type ShareState = {
+    visible: boolean
+};
+
+export default class Share extends React.Component<NoProps, ShareState> {
+
+    makeVisible() {
+        this.setState({ visible: true });
+    }
+
+    componentWillMount() {
+        this.setState({ visible: false });
+    }
+
+    render(): React.Node {
+        const {visible} = this.state;
+        if (!visible) {
+            return <View />;
+        }
+        const frontAnimations = {
+            opacity: directInterpolation(),
+            transform: [{ rotate: simpleInterpolation("0deg", "-15deg") }]
+        };
+        const backAnimations = {
+            opacity: directInterpolation(),
+            transform: [{ rotate: simpleInterpolation("0deg", "15deg") }]
+        };
+        return (
+            <View style={styles.container}>
+                <AnimatedView
+                    animations={frontAnimations}
+                    style={[styles.picture, styles.frontPicture]}
+                />
+                <AnimatedView
+                    animations={backAnimations}
+                    style={[styles.picture, styles.backPicture]}
+                />
+            </View>
+        );
+    }
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flexDirection: "row"
+    },
+    picture: {
+        backgroundColor: "#E0F5FF",
+        borderColor: "white",
+        borderRadius: 7
+    },
+    frontPicture: {
+        width: 105,
+        height: 130,
+        borderTopWidth: 10,
+        borderLeftWidth: 10,
+        borderRightWidth: 10,
+        borderBottomWidth: 42,
+        zIndex: 200,
+        shadowColor: "#0091FF",
+        shadowOffset: { width: 5, height: 10 },
+        shadowOpacity: 0.54,
+        shadowRadius: 9
+    },
+    backPicture: {
+        width: 91,
+        height: 113,
+        borderTopWidth: 10,
+        borderLeftWidth: 10,
+        borderRightWidth: 10,
+        borderBottomWidth: 49,
+        position: "relative",
+        top: 20,
+        left: -10
+    }
+});

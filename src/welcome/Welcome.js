@@ -3,7 +3,7 @@ import autobind from "autobind-decorator";
 import * as React from "react";
 import {StyleSheet} from "react-native";
 
-import {Text, Button, Container, Logo} from "../components";
+import {Text, Button, Container, Logo, Theme, AnimatedView} from "../components";
 import type {ScreenProps} from "../components/Types";
 
 export default class Welcome extends React.Component<ScreenProps<>> {
@@ -20,19 +20,31 @@ export default class Welcome extends React.Component<ScreenProps<>> {
 
     render(): React.Node {
         return (
-            <Container withGutter={true} style={styles.container}>
-                <Logo size={100} />
-                <Text type="header1" gutterBottom={true}>Fiber</Text>
-                <Button label="Login" full={true} primary={true} onPress={this.login} />
-                <Button label="Sign Up" full={true} onPress={this.signUp} />
+            <Container gutter={2} style={styles.root}>
+                <Logo />
+                <AnimatedView style={styles.container}>
+                    <Text type="header1" style={styles.header}>Fiber</Text>
+                </AnimatedView>
+                <AnimatedView style={styles.container} delay={150} duration={150}>
+                    <Button label="Login" full={true} primary={true} onPress={this.login} />
+                    <Button label="Sign Up" full={true} onPress={this.signUp} />
+                </AnimatedView>
             </Container>
         );
     }
 }
 
 const styles = StyleSheet.create({
-    container: {
-        justifyContent: "center",
+    root: {
+        justifyContent: "flex-end",
         alignItems: "center"
+    },
+    container: {
+        alignSelf: "stretch"
+    },
+    header: {
+        textAlign: "center",
+        marginTop: Theme.spacing.base * 2,
+        marginBottom: Theme.spacing.base * 2
     }
 });

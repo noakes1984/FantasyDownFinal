@@ -1,56 +1,55 @@
 // @flow
 import * as React from "react";
-import {View, StyleSheet} from "react-native";
+import {StyleSheet, View} from "react-native";
 
-type LogoProps = {
-    size: number
-};
+import {AnimatedView, simpleInterpolation, directInterpolation} from "../components/Animations";
+
+type LogoProps = {};
 
 export default class Logo extends React.Component<LogoProps> {
 
-    render(): React$Element<*> {
-        const {size} = this.props;
-        const container = { height: size, width: size };
-        const root = { height: size * Math.sqrt(2), width: size * Math.sqrt(2), alignItems: "center" };
-        const margin = Math.ceil(size * 0.02);
-        const square = { height: size/2 - margin, width: size/2 - margin };
+    render(): React.Node {
+        const animations = {
+            opacity: directInterpolation(),
+            transform: [{ translateY: simpleInterpolation(-200, 0) }]
+        };
         return (
-            <View style={root}>
-                <View style={[container, styles.container]}>
-                    <View style={[square, styles.square1, styles.square]} />
-                    <View style={[square, styles.square2, styles.square]} />
-                    <View style={[square, styles.square3, styles.square]} />
-                    <View style={[square, styles.square4, styles.square]} />
-                </View>
+            <View style={styles.container}>
+                <AnimatedView style={[styles.square, styles.a]} {...{ animations }}  />
+                <AnimatedView delay={100} duration={200} style={[styles.square, styles.b]} {...{ animations }} />
+                <AnimatedView duration={100} delay={200} style={[styles.square, styles.c]} {...{ animations }} />
             </View>
         );
     }
 }
 
+const n = 75;
+const d = n * Math.sqrt(2);
+const translation = (d-n) * 0.5 + n * 0.5;
 const styles = StyleSheet.create({
     container: {
-        transform: [{ rotate: "45deg" }]
+        justifyContent: "center",
+        alignItems: "center",
+        width: d * 2,
+        height: d * 2
     },
     square: {
-        position: "absolute"
+        borderColor: "white",
+        borderWidth: 5,
+        position: "absolute",
+        width: n,
+        height: n
     },
-    square1: {
-        backgroundColor: "#b1ecfd",
-        top: 0,
-        left: 0
+    a: {
+        backgroundColor: "#004DFF",
+        transform: [{ translateY: translation  }, { rotate: "45deg" }]
     },
-    square2: {
-        backgroundColor: "#49abf8",
-        top: 0,
-        right: 0
+    b: {
+        backgroundColor: "#00AAFF",
+        transform: [{ translateX: translation }, { rotate: "45deg" }]
     },
-    square3: {
-        bottom: 0,
-        left: 0
-    },
-    square4: {
-        backgroundColor: "#1058f5",
-        bottom: 0,
-        right: 0
+    c: {
+        backgroundColor: "#A0EEFF",
+        transform: [{ translateY: - translation }, { rotate: "45deg" }]
     }
 });

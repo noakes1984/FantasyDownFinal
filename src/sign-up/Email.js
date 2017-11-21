@@ -7,22 +7,20 @@ import {TextField, Switch, Theme, Text} from "../components";
 import type {NavigationProps} from "../components/Types";
 
 import SignUpContainer from "./SignUpContainer";
-import SubmitButton from "./SubmitButton";
 
 export default class Email extends React.Component<NavigationProps<*>> {
 
     @autobind
     next() {
-        this.props.navigation.navigate("SignUpBirthday");
+        this.props.navigation.navigate("SignUpPassword");
     }
 
     render(): React.Node {
         const {navigation} = this.props;
         return (
-            <SignUpContainer back={true} {...{ navigation }}>
-                <Text type="header2" gutterBottom={true} style={styles.header}>And, your email?</Text>
+            <SignUpContainer title="Your Email" subtitle="We won't span" next={this.next} {...{ navigation }}>
                 <TextField
-                    label="email"
+                    placeholder="Email"
                     keyboardType="email-address"
                     contrast={true}
                     autoFocus={true}
@@ -32,12 +30,11 @@ export default class Email extends React.Component<NavigationProps<*>> {
                     onSubmitEditing={this.next}
                 />
                 <View style={styles.row}>
-                    <Text style={styles.text}>
-                    I’d like to receive marketing and policy communications from Ting and its partners.
-                    </Text>
                     <Switch />
+                    <Text style={styles.text}>
+                    Sign up for the newsletter
+                    </Text>
                 </View>
-                <SubmitButton onPress={this.next} />
             </SignUpContainer>
         );
     }
@@ -46,12 +43,13 @@ export default class Email extends React.Component<NavigationProps<*>> {
 const styles = StyleSheet.create({
     text: {
         flexWrap: "wrap",
-        flex: 1,
-        color: "white"
+        marginLeft: Theme.spacing.small,
+        textAlign: "right",
+        flexGrow: 1
     },
     row: {
         flexDirection: "row",
-        marginBottom: Theme.spacing.small
+        alignItems: "center"
     },
     header: {
         color: "white"

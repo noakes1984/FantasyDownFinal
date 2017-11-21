@@ -21,13 +21,17 @@ export default class Text extends React.Component<TypographyProps> {
 
     render(): React.Node {
         const {type, style, numberOfLines, gutterBottom, children} = this.props;
-        const defaultStyle = [Theme.typography[type]];
+        const defaultStyle = [Theme.typography[type], { backgroundColor: "transparent" }];
         const isHeader = type.startsWith("header");
         defaultStyle.push({
-            color: isHeader ? "black" : Theme.typography.color,
+            color: isHeader ? "black" : (type === "large" ? Theme.palette.lightGray : Theme.typography.color),
             marginBottom: gutterBottom ? (isHeader ? Theme.spacing.base : Theme.spacing.small) : 0
         });
         defaultStyle.push(style);
-        return <RNText style={defaultStyle} {...{numberOfLines}}>{children}</RNText>;
+        return (
+            <RNText style={defaultStyle} {...{numberOfLines}}>
+                {type === "large" ? children.toUpperCase() : children}
+            </RNText>
+        );
     }
 }

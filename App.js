@@ -4,12 +4,11 @@ import {StyleProvider} from "native-base";
 import {StackNavigator, TabNavigator} from "react-navigation";
 import {Font, AppLoading} from "expo";
 
-import {Images, APIStore} from "./src/components";
+import {Images} from "./src/components";
 import {Welcome} from "./src/welcome";
-import {SignUpName, SignUpEmail, SignUpBirthday, SignUpPassword, Login} from "./src/sign-up";
-import {
-    Profile, Explore, HomeTab
-} from "./src/home";
+import {Walkthrough} from "./src/walkthrough";
+import {SignUpName, SignUpEmail, SignUpPassword, Login} from "./src/sign-up";
+import {Profile, Explore, HomeTab} from "./src/home";
 
 import getTheme from "./native-base-theme/components";
 import variables from "./native-base-theme/variables/commonColor";
@@ -31,14 +30,14 @@ export default class App extends React.Component<{}, AppState> {
     async loadStaticResources(): Promise<void> {
         try {
             await Font.loadAsync({
-                "SFProDisplay-Heavy": require("./fonts/SF-Pro-Display-Heavy.otf"),
-                "SFProDisplay-Bold": require("./fonts/SF-Pro-Display-Bold.otf"),
-                "SFProDisplay-Semibold": require("./fonts/SF-Pro-Display-Semibold.otf"),
-                "SFProDisplay-Regular": require("./fonts/SF-Pro-Display-Regular.otf"),
-                "SFProDisplay-Light": require("./fonts/SF-Pro-Display-Light.otf"),
+                "SFProText-Medium": require("./fonts/SF-Pro-Text-Medium.otf"),
+                "SFProText-Heavy": require("./fonts/SF-Pro-Text-Heavy.otf"),
+                "SFProText-Bold": require("./fonts/SF-Pro-Text-Bold.otf"),
+                "SFProText-Semibold": require("./fonts/SF-Pro-Text-Semibold.otf"),
+                "SFProText-Regular": require("./fonts/SF-Pro-Text-Regular.otf"),
+                "SFProText-Light": require("./fonts/SF-Pro-Text-Light.otf")
             });
             await Images.downloadAsync();
-            await APIStore.load();
             this.setState({ ready: true });
         } catch(error) {
             // eslint-disable-next-line no-console
@@ -85,10 +84,10 @@ const Home = TabNavigator({
 
 const AppNavigator = StackNavigator({
     Welcome: { screen: Welcome },
+    Walkthrough: { screen: Walkthrough },
     Login: { screen: Login },
     SignUp: { screen: SignUpName },
     SignUpEmail: { screen: SignUpEmail },
-    SignUpBirthday: { screen: SignUpBirthday },
     SignUpPassword: { screen: SignUpPassword },
     Home: { screen: Home }
 }, StackNavigatorOptions);

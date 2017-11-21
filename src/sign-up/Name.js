@@ -1,13 +1,12 @@
 // @flow
 import autobind from "autobind-decorator";
 import * as React from "react";
-import {TextInput, StyleSheet} from "react-native";
+import {TextInput} from "react-native";
 
-import {Text, TextField} from "../components";
+import {TextField} from "../components";
 import type {NavigationProps} from "../components/Types";
 
 import SignUpContainer from "./SignUpContainer";
-import SubmitButton from "./SubmitButton";
 
 export default class Name extends React.Component<NavigationProps<*>> {
 
@@ -31,34 +30,24 @@ export default class Name extends React.Component<NavigationProps<*>> {
     render(): React.Node {
         const {navigation} = this.props;
         return (
-            <SignUpContainer back={true} {...{ navigation }}>
-                <Text type="header2" gutterBottom={true} style={styles.text}>What is your name?</Text>
-                <TextField
-                    label="First Name"
-                    contrast={true}
-                    autoFocus={true}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    returnKeyType="next"
-                    onSubmitEditing={this.goToLastName}
-                />
-                <TextField
-                    label="Last Name"
-                    contrast={true}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    returnKeyType="go"
-                    textInputRef={this.setLastNameRef}
-                    onSubmitEditing={this.next}
-                />
-                <SubmitButton onPress={this.next} />
-            </SignUpContainer>
+                <SignUpContainer title="Your Name" subtitle="Who are you" next={this.next} {...{navigation}}>
+                    <TextField
+                        placeholder="First Name"
+                        autoFocus={true}
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        returnKeyType="next"
+                        onSubmitEditing={this.goToLastName}
+                    />
+                    <TextField
+                        placeholder="Last Name"
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        returnKeyType="go"
+                        textInputRef={this.setLastNameRef}
+                        onSubmitEditing={this.next}
+                    />
+                </SignUpContainer>
         );
     }
 }
-
-const styles = StyleSheet.create({
-    text: {
-        color: "white"
-    }
-});

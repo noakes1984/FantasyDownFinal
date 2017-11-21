@@ -9,8 +9,7 @@
         "primaryColor": "#00AAFF",
         "loading": {
             "hideExponentText": true,
-            "backgroundColor": "#ffffff",
-            "icon": "./app.png"
+            "backgroundColor": "#ffffff"
         },
         "packagerOpts": {
             "assetExts": ["otf"]

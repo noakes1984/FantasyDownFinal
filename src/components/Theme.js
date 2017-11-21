@@ -50,48 +50,48 @@ const theme: Theme = {
         danger: "#d93900",
         warning: "#f0ad4e",
         sidebar: "#484848",
-        lightGray: "rgba(72, 72, 72, 0.2)"
+        lightGray: "#BFBFBF"
     },
     typography: {
         color: "#666666",
-        bold: "SFProDisplay-Bold",
-        semibold: "SFProDisplay-Semibold",
-        normal: "SFProDisplay-Light",
-        light: "SFProDisplay-Light",
+        bold: "SFProText-Bold",
+        semibold: "SFProText-Semibold",
+        normal: "SFProText-Medium",
+        light: "SFProText-Light",
         header1: {
             fontSize: 48,
             lineHeight: 58,
-            fontFamily: "SFProDisplay-Heavy"
+            fontFamily: "SFProText-Heavy"
         },
         header2: {
             fontSize: 36,
             lineHeight: 43,
-            fontFamily: "SFProDisplay-Heavy"
+            fontFamily: "SFProText-Heavy"
         },
         header3: {
             fontSize: 24,
             lineHeight: 28,
-            fontFamily: "SFProDisplay-Light"
+            fontFamily: "SFProText-Light"
         },
         large: {
             fontSize: 14,
-            lineHeight: 17,
-            fontFamily: "SFProDisplay-Heavy"
+            lineHeight: 21,
+            fontFamily: "SFProText-Heavy"
         },
         regular: {
             fontSize: 14,
             lineHeight: 21,
-            fontFamily: "SFProDisplay-Regular"
+            fontFamily: "SFProText-Medium"
         },
         small: {
             fontSize: 14,
             lineHeight: 18,
-            fontFamily: "SFProDisplay-Regular"
+            fontFamily: "SFProText-Regular"
         },
         micro: {
             fontSize: 8,
             lineHeight: 8,
-            fontFamily: "SFProDisplay-Bold"
+            fontFamily: "SFProText-Bold"
         }
     },
     spacing: {

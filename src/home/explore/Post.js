@@ -1,9 +1,11 @@
 // @flow
 import * as React from "react";
 import moment from "moment";
-import {StyleSheet, View, Image, Dimensions} from "react-native";
+import {StyleSheet, View, Dimensions} from "react-native";
 
-import {Text, Avatar, Theme} from "../../components";
+import Likes from "./Likes";
+
+import {Text, Avatar, Theme, SmartImage} from "../../components";
 import type {Post} from "../../components/APIStore";
 
 type PostProps = {
@@ -14,14 +16,13 @@ export default class PostComp extends React.Component<PostProps> {
 
     render(): React.Node {
         const {post} = this.props;
-        const hasPicture = post.picture !== undefined;
         const contentStyle = [styles.content];
         const nameStyle = [styles.name];
         const textStyle = [styles.text];
         const dateStyle = [];
-        if (hasPicture) {
+        if (post.picture) {
             contentStyle.push(StyleSheet.absoluteFill);
-            contentStyle.push({ backgroundColor: "rgba(0, 0, 0, 0.38)", borderRadius: 5 });
+            contentStyle.push({ backgroundColor: "rgba(0, 0, 0, 0.25)", borderRadius: 5 });
             nameStyle.push({ color: "white" });
             textStyle.push({ color: "white" });
             dateStyle.push({ color: "rgba(255, 255, 255, 0.8)" });
@@ -29,11 +30,17 @@ export default class PostComp extends React.Component<PostProps> {
         return (
             <View style={styles.container}>
                 {
-                    hasPicture && <Image source={{ uri: post.picture }} resizeMode="cover" style={styles.picture} />
+                    post.picture && (
+                        <SmartImage
+                            preview={post.picture.preview}
+                            uri={post.picture.uri}
+                            style={styles.picture}
+                        />
+                    )
                 }
                 <View style={contentStyle}>
                     <View style={styles.header}>
-                        <Avatar uri={post.profilePicture} />
+                        <Avatar {...post.profilePicture} />
                         <View style={styles.metadata}>
                             <Text style={nameStyle}>{post.name}</Text>
                             <Text style={dateStyle}>{moment(post.timestamp, "X").fromNow()}</Text>
@@ -41,6 +48,9 @@ export default class PostComp extends React.Component<PostProps> {
                     </View>
                     <View>
                         <Text style={textStyle}>{post.text}</Text>
+                    </View>
+                    <View style={styles.likes}>
+                        <Likes />
                     </View>
                 </View>
             </View>
@@ -77,5 +87,9 @@ const styles = StyleSheet.create({
     picture: {
         height: width,
         borderRadius: 5
+    },
+    likes: {
+        flex: 1,
+        justifyContent: "flex-end"
     }
 });

@@ -5,7 +5,12 @@ import {Animated, StyleSheet, Easing} from "react-native";
 
 import type {BaseProps} from "../components/Types";
 
-import type { InterpolationConfigType } from "Interpolation";
+type AtomicType = string | number;
+type AtomicTypes = AtomicType[];
+type InterpolationConfigType = {
+    inputRange: AtomicTypes,
+    outputRange: AtomicTypes
+};
 
 type TransformKey = "perspective" | "rotate" | "rotateX" | "rotateY" | "rotateZ" | "scale" | "scaleX" | "scaleY" |
     "translateX" | "translateY" | "skewX" | "skewY";
@@ -25,9 +30,9 @@ type AnimatedViewState = {
     animation: Animated.Value
 };
 
-export const simpleInterpolation = (start: number | string, finish: number | string): InterpolationConfigType =>
+export const simpleInterpolation = (start: AtomicType, finish: AtomicType): InterpolationConfigType =>
     ({ inputRange: [0, 1], outputRange: [start, finish] });
-
+export const directInverseInterpolation = (): InterpolationConfigType => simpleInterpolation(1, 0);
 export const directInterpolation = (): InterpolationConfigType => simpleInterpolation(0, 1);
 
 export class AnimatedView extends React.Component<AnimatedViewProps, AnimatedViewState> {
@@ -57,7 +62,8 @@ export class AnimatedView extends React.Component<AnimatedViewProps, AnimatedVie
                 toValue: 1,
                 duration,
                 delay,
-                easing
+                easing,
+                useNativeDriver: true
             }
         )
         .start();

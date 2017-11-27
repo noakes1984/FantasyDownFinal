@@ -11,4 +11,5 @@ export { default as Logo } from "./Logo";
 export { Theme } from "./Theme";
 export { AnimatedView } from "./Animations";
 export { default as Avatar } from "./Avatar";
+export { default as SmartImage } from "./SmartImage";
 export { default as APIStore } from "./APIStore";

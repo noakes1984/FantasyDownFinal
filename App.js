@@ -50,7 +50,7 @@ export default class App extends React.Component<{}, AppState> {
         return <StyleProvider style={getTheme(variables)}>
             {
                 ready ?
-                    <AppNavigator onNavigationStateChange={() => undefined} />
+                    <Home onNavigationStateChange={() => undefined} />
                 :
                     <AppLoading />
             }

@@ -1,27 +1,28 @@
 // @flow
 import * as React from "react";
-import {StyleSheet, Image} from "react-native";
 
+import SmartImage from "./SmartImage";
 import type {BaseProps} from "./Types";
 
 type AvatarProps = BaseProps & {
-    uri: string
+    preview: string,
+    uri: string,
+    size: number
 };
 
 export default class Avatar extends React.Component<AvatarProps> {
 
-    static SIZE = 50;
+    static defaultProps = {
+        size: 50
+    };
 
     render(): React.Node {
-        const {uri, style} = this.props;
-        return <Image source={{ uri }} style={[style, styles.image]} />;
+        const {preview, uri, style, size} = this.props;
+        const computedStyle = {
+            height: size,
+            width: size,
+            borderRadius: size / 2
+        };
+        return <SmartImage {...{ preview, uri }} style={[style, computedStyle]} />;
     }
 }
-
-const styles = StyleSheet.create({
-    image: {
-        height: Avatar.SIZE,
-        width: Avatar.SIZE,
-        borderRadius: Avatar.SIZE / 2
-    }
-});

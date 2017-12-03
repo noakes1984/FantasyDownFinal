@@ -1,6 +1,6 @@
 // @flow
 import * as React from "react";
-import {StyleSheet, View} from "react-native";
+import {StyleSheet, View, Platform} from "react-native";
 
 import {AnimatedView, simpleInterpolation, directInterpolation} from "../components/Animations";
 
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
     picture: {
         backgroundColor: "#E0F5FF",
         borderColor: "white",
-        borderRadius: 7
+        borderRadius: Platform.OS === "ios" ? 7 : 0
     },
     frontPicture: {
         width: 105,
@@ -68,7 +68,8 @@ const styles = StyleSheet.create({
         shadowColor: "#0091FF",
         shadowOffset: { width: 5, height: 10 },
         shadowOpacity: 0.54,
-        shadowRadius: 9
+        shadowRadius: 9,
+        elevation: 4
     },
     backPicture: {
         width: 91,

@@ -6,7 +6,8 @@ import {directInverseInterpolation, directInterpolation, simpleInterpolation} fr
 import {Theme, Text} from "../../components";
 
 type OdometerProps = {
-    count: number
+    count: number,
+    color: string
 };
 
 type OdometerState = {
@@ -31,11 +32,12 @@ export default class Odometer extends React.Component<OdometerProps, OdometerSta
     }
 
     render(): React.Node {
+        const {color} = this.props;
         const numbers = `${this.state.count}`.split("").map(char => parseInt(char, 10));
         return (
             <View style={styles.row}>
             {
-                numbers.map((digit, key) => <Digit {...{ key, digit }} />)
+                numbers.map((digit, key) => <Digit {...{ key, digit, color }} />)
             }
             </View>
         );
@@ -43,7 +45,8 @@ export default class Odometer extends React.Component<OdometerProps, OdometerSta
 }
 
 type DigitProps = {
-    digit: number
+    digit: number,
+    color: string
 };
 
 type DigitState = {
@@ -87,14 +90,15 @@ class Digit extends React.Component<DigitProps, DigitState> {
     }
 
      render(): React.Node {
+         const {color} = this.props;
          const {digit, lastDigit, animation, goesUp} = this.state;
          const height = Theme.typography.regular.fontSize;
          const opacity = animation.interpolate(directInverseInterpolation());
          const translateY = animation.interpolate(simpleInterpolation(0, goesUp * height));
          const newOpacity = animation.interpolate(directInterpolation());
          const newTranslateY = animation.interpolate(simpleInterpolation(goesUp * -height, 0));
-         const lastDigitStyle = [styles.text, { opacity, transform: [{ translateY }]}];
-         const digitStyle = [styles.text, { opacity: newOpacity, transform: [{ translateY: newTranslateY }]}];
+         const lastDigitStyle = [styles.text, {color}, { opacity, transform: [{ translateY }]}];
+         const digitStyle = [styles.text, {color}, { opacity: newOpacity, transform: [{ translateY: newTranslateY }]}];
          return (
              <View style={styles.container}>
                 <AnimatedText style={lastDigitStyle}>{`${lastDigit}`}</AnimatedText>
@@ -116,7 +120,6 @@ const styles = StyleSheet.create({
     text: {
         position: "absolute",
         top: 0,
-        color: "white",
         fontFamily: Theme.typography.semibold,
         lineHeight: Theme.typography.regular.fontSize
     }

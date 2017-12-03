@@ -7,12 +7,17 @@
         "privacy": "public",
         "icon": "./app.png",
         "primaryColor": "#00AAFF",
-        "loading": {
-            "hideExponentText": true,
+        "splash": {
+            "image": "./splash.png",
+            "resizeMode": "cover",
             "backgroundColor": "#ffffff"
         },
         "packagerOpts": {
             "assetExts": ["otf"]
+        },
+        "androidStatusBar": {
+            "backgroundColor": "#ffffff",
+            "barStyle": "dark-content"
         }
     }
 }

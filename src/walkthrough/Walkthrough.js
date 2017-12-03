@@ -1,7 +1,7 @@
 // @flow
 import autobind from "autobind-decorator";
 import * as React from "react";
-import {View, StyleSheet} from "react-native";
+import {View, StyleSheet, SafeAreaView} from "react-native";
 import Swiper from "react-native-swiper";
 
 import Slide from "./Slide";
@@ -9,7 +9,7 @@ import Connect from "./Connect";
 import Chat from "./Chat";
 import Share from "./Share";
 
-import {Button, NavigationHelpers} from "../components";
+import {Button, NavigationHelpers, Theme} from "../components";
 import type {ScreenProps} from "../components/Types";
 
 export default class Walkthrough extends React.Component<ScreenProps<>> {
@@ -26,10 +26,10 @@ export default class Walkthrough extends React.Component<ScreenProps<>> {
         const back = () => context.scrollBy(-1);
         const next = () => isLast ? this.home() : context.scrollBy(1);
         return (
-            <View style={styles.footer}>
+            <SafeAreaView style={styles.footer}>
                 <Button label="Back" onPress={back} disabled={isFirst} />
                 <Button label={isLast ? "Start" : "Next"} onPress={next} primary={true} transparent={true} />
-            </View>
+            </SafeAreaView>
         );
     }
 
@@ -85,6 +85,7 @@ const styles = StyleSheet.create({
     },
     footer: {
         flexDirection: "row",
-        justifyContent: "space-between"
+        justifyContent: "space-between",
+        marginHorizontal: Theme.spacing.base
     }
 });

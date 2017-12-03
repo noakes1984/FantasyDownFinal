@@ -25,7 +25,7 @@ export default class Welcome extends React.Component<ScreenProps<>> {
                 <AnimatedView style={styles.container}>
                     <Text type="header1" style={styles.header}>Fiber</Text>
                 </AnimatedView>
-                <AnimatedView style={styles.container} delay={150} duration={150}>
+                <AnimatedView style={styles.container} delay={600} duration={300}>
                     <Button label="Login" full={true} primary={true} onPress={this.login} />
                     <Button label="Sign Up" full={true} onPress={this.signUp} />
                 </AnimatedView>

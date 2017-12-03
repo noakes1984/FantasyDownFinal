@@ -1,9 +1,9 @@
 // @flow
 import { NavigationActions } from "react-navigation"
-import type {NavigationScreenProp, NavigationState} from "react-navigation/src/TypeDefinition";
+import type {NavigationScreenProp} from "react-navigation/src/TypeDefinition";
 
 export default class NavigationHelpers {
-    static reset(navigation: NavigationScreenProp<NavigationState>, routeName: string, key: string | null = null) {
+    static reset(navigation: NavigationScreenProp<*>, routeName: string, key: string | null = null) {
         const action = NavigationActions.reset({
             index: 0,
             key,

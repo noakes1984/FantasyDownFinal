@@ -1,7 +1,7 @@
 // @flow
 import * as _ from "lodash";
 import * as React from "react";
-import {Animated, StyleSheet, Easing} from "react-native";
+import {Animated, StyleSheet, Easing, Platform} from "react-native";
 
 import type {BaseProps} from "../components/Types";
 
@@ -63,7 +63,7 @@ export class AnimatedView extends React.Component<AnimatedViewProps, AnimatedVie
                 duration,
                 delay,
                 easing,
-                useNativeDriver: true
+                useNativeDriver: Platform.OS === "ios"
             }
         )
         .start();

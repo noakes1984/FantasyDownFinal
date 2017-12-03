@@ -13,7 +13,7 @@ type ButtonProps = BaseProps & {
     transparent?: boolean,
     disabled?: boolean,
     full?: boolean,
-    onPress: () => void
+    onPress: () => mixed
 };
 
 export default class Button extends React.Component<ButtonProps> {
@@ -51,7 +51,6 @@ export default class Button extends React.Component<ButtonProps> {
 
 const styles = StyleSheet.create({
     base: {
-        marginBottom: Theme.spacing.base
     },
     primary: {
         shadowColor: "rgba(0, 170, 255, 0.29)",

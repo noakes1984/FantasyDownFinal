@@ -13,6 +13,7 @@ export class HomeTab extends React.Component<NavigationProps<*>> {
 
     static tabs: Tab[] = [
         { label: "Explore", icon: "home" },
+        { label: "Share", icon: "camera" },
         { label: "Profile", icon: "user" }
     ];
 
@@ -31,7 +32,9 @@ export class HomeTab extends React.Component<NavigationProps<*>> {
                                 key={info.label}
                                 onPress={() => i !== currentIndex ? this.props.navigation.navigate(info.label) : null}
                             >
-                                <Icon name={info.icon} size={25} {...{ color }} />
+                                <View style={styles.tab}>
+                                    <Icon name={info.icon} size={25} {...{ color }} />
+                                </View>
                             </TouchableWithoutFeedback>
                         );
                     })
@@ -48,13 +51,20 @@ const styles = StyleSheet.create({
         shadowColor: "black",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
-        shadowRadius: 5
+        shadowRadius: 5,
+        elevation: 8
     },
     container: {
         alignItems: "center",
         flexDirection: "row",
         justifyContent: "space-around",
         height: 57
+    },
+    tab: {
+        flexGrow: 1,
+        height: 57,
+        justifyContent: "center",
+        alignItems: "center"
     },
     label: {
         ...Theme.typography.micro

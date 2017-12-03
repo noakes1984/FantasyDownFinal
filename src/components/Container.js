@@ -1,9 +1,8 @@
 // @flow
 import * as React from "react";
-import {View, StyleSheet} from "react-native";
-import {Constants} from "expo";
+import {StyleSheet, SafeAreaView, View} from "react-native";
 
-import { Theme } from "./Theme";
+import {Theme} from "./Theme";
 
 import type {BaseProps} from "./Types";
 
@@ -20,14 +19,20 @@ export default class Container extends React.Component<ContainerProps> {
 
     render(): React.Node {
         const {gutter, children, style} = this.props;
-        const containerStyle = [style, styles.base, { padding: gutter * Theme.spacing.base }];
-        return <View style={containerStyle}>{children}</View>;
+        const containerStyle = [style, styles.container, { padding: gutter * Theme.spacing.base }];
+        return (
+            <SafeAreaView style={styles.root}>
+                <View style={containerStyle}>{children}</View>
+            </SafeAreaView>
+        );
     }
 }
 
 const styles = StyleSheet.create({
-    base: {
-        flex: 1,
-        marginTop: Constants.statusBarHeight
+    root: {
+        flexGrow: 1
+    },
+    container: {
+        flexGrow: 1
     }
 });

@@ -1,21 +1,22 @@
 // @flow
 import * as React from "react";
 import moment from "moment";
-import {StyleSheet, View, Dimensions} from "react-native";
+import {StyleSheet, View, Dimensions, Platform} from "react-native";
 
-import Likes from "./Likes";
+import LikesAndComments from "./LikesAndComments";
 
 import {Text, Avatar, Theme, SmartImage} from "../../components";
 import type {Post} from "../../components/APIStore";
+import type {NavigationProps} from "../../components/Types";
 
-type PostProps = {
+type PostProps = NavigationProps<> & {
     post: Post
 };
 
 export default class PostComp extends React.Component<PostProps> {
 
     render(): React.Node {
-        const {post} = this.props;
+        const {post, navigation} = this.props;
         const contentStyle = [styles.content];
         const nameStyle = [styles.name];
         const textStyle = [styles.text];
@@ -47,11 +48,13 @@ export default class PostComp extends React.Component<PostProps> {
                         </View>
                     </View>
                     <View>
-                        <Text style={textStyle}>{post.text}</Text>
+                        <Text style={textStyle} gutterBottom={true}>{post.text}</Text>
                     </View>
-                    <View style={styles.likes}>
-                        <Likes />
-                    </View>
+                    <LikesAndComments
+                        color={post.picture ? "white" : Theme.typography.color}
+                        id={post.id}
+                        {...{navigation}}
+                    />
                 </View>
             </View>
         );
@@ -66,6 +69,8 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.14,
         shadowRadius: 6,
+        borderColor: Theme.palette.borderColor,
+        borderWidth: Platform.OS === "ios" ? 0 : 1,
         marginVertical: Theme.spacing.small
     },
     content: {
@@ -87,9 +92,5 @@ const styles = StyleSheet.create({
     picture: {
         height: width,
         borderRadius: 5
-    },
-    likes: {
-        flex: 1,
-        justifyContent: "flex-end"
     }
 });

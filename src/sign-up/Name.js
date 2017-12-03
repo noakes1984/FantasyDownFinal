@@ -33,7 +33,6 @@ export default class Name extends React.Component<NavigationProps<*>> {
                 <SignUpContainer title="Your Name" subtitle="Who are you" next={this.next} {...{navigation}}>
                     <TextField
                         placeholder="First Name"
-                        autoFocus={true}
                         autoCapitalize="none"
                         autoCorrect={false}
                         returnKeyType="next"

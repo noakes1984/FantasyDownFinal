@@ -41,7 +41,6 @@ export default class Login extends React.Component<NavigationProps<*>> {
                     placeholder="Email"
                     keyboardType="email-address"
                     contrast={true}
-                    autoFocus={true}
                     autoCapitalize="none"
                     autoCorrect={false}
                     returnKeyType="next"

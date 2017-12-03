@@ -1,6 +1,6 @@
 // @flow
 import * as React from "react";
-import {StyleSheet, View} from "react-native";
+import {StyleSheet, View, Platform} from "react-native";
 
 import {AnimatedView} from "../components";
 
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
         height: 134
     },
     phone: {
-        borderRadius: 4,
+        borderRadius: Platform.OS === "ios" ? 4 : undefined,
         width: 54,
         height: 94,
         backgroundColor: "#E0F5FF",
@@ -62,7 +62,8 @@ const styles = StyleSheet.create({
         shadowColor: "#0091FF",
         shadowOffset: { width: 3, height: 6 },
         shadowOpacity: 0.54,
-        shadowRadius: 9
+        shadowRadius: 9,
+        elevation: 4
     },
     screenContainer: {
         position: "absolute",
@@ -71,7 +72,7 @@ const styles = StyleSheet.create({
         alignItems: "center"
     },
     screen: {
-        borderRadius: 6,
+        borderRadius: Platform.OS === "ios" ? 6 : undefined,
         width: 151,
         height: 108,
         backgroundColor: "#E0F5FF",

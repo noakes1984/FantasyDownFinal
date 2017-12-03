@@ -16,7 +16,8 @@ type Theme = {
         danger: Color,
         warning: Color,
         sidebar: Color,
-        lightGray: Color
+        lightGray: Color,
+        borderColor: Color
     },
     typography: {
         color: string,
@@ -50,7 +51,8 @@ const theme: Theme = {
         danger: "#d93900",
         warning: "#f0ad4e",
         sidebar: "#484848",
-        lightGray: "#BFBFBF"
+        lightGray: "#BFBFBF",
+        borderColor: "#F5F5F5"
     },
     typography: {
         color: "#666666",
@@ -71,7 +73,7 @@ const theme: Theme = {
         header3: {
             fontSize: 24,
             lineHeight: 28,
-            fontFamily: "SFProText-Light"
+            fontFamily: "SFProText-Heavy"
         },
         large: {
             fontSize: 14,

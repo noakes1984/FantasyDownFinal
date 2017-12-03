@@ -23,7 +23,6 @@ export default class Password extends React.Component<NavigationProps<*>> {
                     toggleSecureEntry={true}
                     placeholder="Password"
                     contrast={true}
-                    autoFocus={true}
                     autoCapitalize="none"
                     autoCorrect={false}
                     returnKeyType="go"

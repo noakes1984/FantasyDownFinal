@@ -32,7 +32,7 @@ export class TextField extends React.Component<TextFieldProps> {
 
 const styles = StyleSheet.create({
     textInput: {
-        borderColor: "#F5F5F5",
+        borderColor: Theme.palette.borderColor,
         borderWidth: 1,
         borderRadius: 3,
         ...Theme.typography.regular,

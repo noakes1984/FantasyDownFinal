@@ -2,22 +2,23 @@
 import autobind from "autobind-decorator";
 import * as React from "react";
 import moment from "moment"
-import {FlatList, StyleSheet, View, Animated, SafeAreaView, RefreshControl} from "react-native";
+import {FlatList, StyleSheet, View, Animated, SafeAreaView, RefreshControl, Platform} from "react-native";
 import {Constants} from "expo";
 
 import Post from "./Post";
-import RefreshIndicator from "./RefreshIndicator";
 
-import {Text, APIStore, Theme, Avatar} from "../../components";
+import {Text, APIStore, Theme, Avatar, RefreshIndicator} from "../../components";
+
 import type {ScreenProps} from "../../components/Types";
+import type {Post as PostModel} from "../../components/APIStore";
 
-const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 const AnimatedText = Animated.createAnimatedComponent(Text);
 const AnimatedSafeAreaView = Animated.createAnimatedComponent(SafeAreaView);
 
 type ExploreState = {
     scrollAnimation: Animated.Value,
-    refreshing: boolean
+    refreshing: boolean,
+    posts: PostModel[]
 };
 
 export default class Explore extends React.Component<ScreenProps<>, ExploreState> {
@@ -31,14 +32,15 @@ export default class Explore extends React.Component<ScreenProps<>, ExploreState
     componentWillMount() {
         this.setState({
             scrollAnimation: new Animated.Value(0),
-            refreshing: false
+            refreshing: false,
+            posts: APIStore.posts()
         });
     }
 
     render(): React.Node {
         const {onRefresh} = this;
-        const {scrollAnimation, refreshing} = this.state;
-        const posts = APIStore.posts();
+        const {navigation} = this.props;
+        const {scrollAnimation, refreshing, posts} = this.state;
         const profile = APIStore.profile();
         const opacity = scrollAnimation.interpolate({
             inputRange: [0, 60],
@@ -76,7 +78,7 @@ export default class Explore extends React.Component<ScreenProps<>, ExploreState
                                 type="large"
                                 style={{ position: "absolute", top: 0, opacity, transform: [{ translateY }] }}
                             >
-                            3 new posts
+                            New posts
                             </AnimatedText>
                             <AnimatedText
                                 type="header2"
@@ -88,12 +90,12 @@ export default class Explore extends React.Component<ScreenProps<>, ExploreState
                         <Avatar {...profile.picture} />
                     </Animated.View>
                 </AnimatedSafeAreaView>
-                <AnimatedFlatList
+                <FlatList
                     showsVerticalScrollIndicator={false}
                     style={styles.list}
                     data={posts}
                     keyExtractor={post => post.id}
-                    renderItem={({ item }) => <Post post={item} />}
+                    renderItem={({ item }) => <Post post={item} {...{navigation}} />}
                     scrollEventThrottle={1}
                     onScroll={Animated.event(
                         [{
@@ -104,14 +106,14 @@ export default class Explore extends React.Component<ScreenProps<>, ExploreState
                             }
                         }]
                     )}
-                    refreshControl={(
+                    refreshControl={(Platform.OS === "ios" && (
                         <RefreshControl
                             tintColor="transparent"
                             colors={["transparent"]}
                             style={{ backgroundColor: "transparent" }}
                             {...{onRefresh, refreshing}}
                         />
-                    )}
+                    ) || undefined)}
                 />
             </View>
         );
@@ -120,7 +122,7 @@ export default class Explore extends React.Component<ScreenProps<>, ExploreState
 
 const styles = StyleSheet.create({
     container: {
-        flexGrow: 1
+        flex: 1
     },
     RefreshIndicator: {
         ...StyleSheet.absoluteFillObject,
@@ -130,7 +132,9 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         shadowColor: "black",
         shadowOffset: { width: 0, height: 2 },
-        shadowRadius: 5
+        shadowRadius: 5,
+        elevation: 8,
+        zIndex: 10000
     },
     innerHeader: {
         marginHorizontal: Theme.spacing.base,

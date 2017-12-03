@@ -15,9 +15,9 @@ export default class Logo extends React.Component<LogoProps> {
         };
         return (
             <View style={styles.container}>
-                <AnimatedView style={[styles.square, styles.a]} {...{ animations }}  />
-                <AnimatedView delay={100} duration={200} style={[styles.square, styles.b]} {...{ animations }} />
-                <AnimatedView duration={100} delay={200} style={[styles.square, styles.c]} {...{ animations }} />
+                <AnimatedView duration={400} style={[styles.square, styles.a]} {...{ animations }}  />
+                <AnimatedView delay={200} duration={500} style={[styles.square, styles.b]} {...{ animations }} />
+                <AnimatedView duration={600} delay={400} style={[styles.square, styles.c]} {...{ animations }} />
             </View>
         );
     }

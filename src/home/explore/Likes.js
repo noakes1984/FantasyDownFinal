@@ -8,7 +8,9 @@ import Odometer from "./Odometer";
 
 import {Theme} from "../../components";
 
-type LikesProps = {};
+type LikesProps = {
+    color: string
+};
 
 type LikesState = {
     liked: boolean,
@@ -45,6 +47,7 @@ export default class Likes extends React.Component<LikesProps, LikesState> {
     }
 
     render(): React.Node {
+        const {color} = this.props;
         const {liked, animation} = this.state;
         const computedStyle = [styles.icon];
         if (animation) {
@@ -61,9 +64,9 @@ export default class Likes extends React.Component<LikesProps, LikesState> {
             <TouchableWithoutFeedback onPress={this.toggle}>
                 <View style={styles.container}>
                     <View style={styles.iconContainer}>
-                        <AnimatedIcon name="thumbs-up" style={computedStyle} />
+                        <AnimatedIcon name="thumbs-up" color={color} style={computedStyle} />
                     </View>
-                    <Odometer ref={ref => ref ? this.counter = ref : undefined} count={18} />
+                    <Odometer ref={ref => ref ? this.counter = ref : undefined} count={18} {...{ color }} />
                 </View>
             </TouchableWithoutFeedback>
         );
@@ -84,7 +87,6 @@ const styles = StyleSheet.create({
         justifyContent: "center"
     },
     icon: {
-        color: "white",
         fontSize: iconSize
     },
     likedIcon: {

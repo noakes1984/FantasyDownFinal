@@ -1,4 +1,5 @@
 // @flow
+import autobind from "autobind-decorator";
 import * as React from "react";
 import {StyleProvider} from "native-base";
 import {StackNavigator, TabNavigator} from "react-navigation";
@@ -8,7 +9,7 @@ import {Images} from "./src/components";
 import {Welcome} from "./src/welcome";
 import {Walkthrough} from "./src/walkthrough";
 import {SignUpName, SignUpEmail, SignUpPassword, Login} from "./src/sign-up";
-import {Profile, Explore, HomeTab} from "./src/home";
+import {Profile, Explore, Share, SharePicture, HomeTab, Comments} from "./src/home";
 
 import getTheme from "./native-base-theme/components";
 import variables from "./native-base-theme/variables/commonColor";
@@ -46,15 +47,21 @@ export default class App extends React.Component<{}, AppState> {
     }
 
     render(): React.Node {
+        const {onNavigationStateChange} = this;
         const {ready} = this.state;
         return <StyleProvider style={getTheme(variables)}>
             {
                 ready ?
-                    <Home onNavigationStateChange={() => undefined} />
+                    <AppNavigator {...{onNavigationStateChange}} />
                 :
                     <AppLoading />
             }
         </StyleProvider>;
+    }
+
+    @autobind
+    onNavigationStateChange() {
+        return undefined;
     }
 }
 
@@ -66,15 +73,22 @@ const StackNavigatorOptions = {
 };
 
 const ExploreNavigator = StackNavigator({
-    Explore: { screen: Explore }
+    Explore: { screen: Explore },
+    Comments: { screen: Comments }
 }, StackNavigatorOptions);
 
 const ProfileNavigator =  StackNavigator({
     Profile: { screen: Profile }
 }, StackNavigatorOptions);
 
+const ShareNavigator = StackNavigator({
+    Share: { screen: Share },
+    SharePicture: { screen: SharePicture }
+}, StackNavigatorOptions);
+
 const Home = TabNavigator({
     Explore: { screen: ExploreNavigator },
+    Share: { screen: ShareNavigator },
     Profile: { screen: ProfileNavigator }
 }, {
     animationEnabled: false,

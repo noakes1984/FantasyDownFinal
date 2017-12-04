@@ -1,7 +1,7 @@
 // @flow
 import autobind from "autobind-decorator";
 import * as React from "react";
-import {View, StyleSheet, Dimensions, FlatList, TouchableOpacity, SafeAreaView, Platform} from "react-native";
+import {View, StyleSheet, Dimensions, FlatList, TouchableOpacity, SafeAreaView} from "react-native";
 import {Feather as Icon} from "@expo/vector-icons";
 
 import Post from "../explore/Post";
@@ -18,34 +18,45 @@ export default class Profile extends React.Component<ScreenProps<>> {
         NavigationHelpers.reset(navigation, "Welcome");
     }
 
+    renderHeader(): React.Node {
+        const profile = APIStore.profile();
+        return (
+            <View style={styles.header}>
+                <SmartImage style={styles.cover} {...profile.cover} />
+                <SafeAreaView style={styles.logout}>
+                    <TouchableOpacity onPress={this.logout}>
+                        <View>
+                            <Icon name="log-out" size={25} color="white" />
+                        </View>
+                    </TouchableOpacity>
+                </SafeAreaView>
+                <View style={styles.title}>
+                    <Text type="large" style={styles.outline}>{profile.outline}</Text>
+                    <Text type="header2" style={styles.name}>{profile.name}</Text>
+                </View>
+                <Avatar size={avatarSize} style={styles.avatar} {...profile.picture} />
+            </View>
+        );
+    }
+
     render(): React.Node {
         const {navigation} = this.props;
         const profile = APIStore.profile();
         const posts = APIStore.posts().filter(post => post.name === profile.name);
         return (
             <View style={styles.container}>
-                <View style={styles.header}>
-                    <SmartImage style={styles.cover} {...profile.cover} />
-                    <SafeAreaView style={styles.logout}>
-                        <TouchableOpacity onPress={this.logout}>
-                            <View>
-                                <Icon name="log-out" size={25} color="white" />
-                            </View>
-                        </TouchableOpacity>
-                    </SafeAreaView>
-                    <View style={styles.title}>
-                        <Text type="large" style={styles.outline}>{profile.outline}</Text>
-                        <Text type="header2" style={styles.name}>{profile.name}</Text>
-                    </View>
-                    <Avatar size={avatarSize} style={styles.avatar} {...profile.picture} />
-                </View>
                 <FlatList
                     showsVerticalScrollIndicator={false}
                     style={styles.list}
                     data={posts}
                     keyExtractor={post => post.id}
-                    renderItem={({ item }) => <Post post={item} {...{navigation}} />}
+                    renderItem={({ item }) => (
+                        <View style={styles.post}>
+                            <Post post={item} {...{navigation}} />
+                        </View>
+                    )}
                     ListEmptyComponent={<FirstPost {...{navigation}} />}
+                    ListHeaderComponent={this.renderHeader()}
                 />
             </View>
         );
@@ -59,16 +70,16 @@ const styles = StyleSheet.create({
         flex: 1
     },
     header: {
-        zIndex: 10000
+        marginBottom: -50
     },
     cover: {
         height: width
     },
     avatar: {
-        position: "absolute",
-        top: Platform.OS === "ios" ? (width - avatarSize * 0.62) : undefined,
-        bottom: Platform.OS === "ios" ? undefined : Theme.spacing.small,
-        right: Theme.spacing.base
+        zIndex: 10000,
+        position: "relative",
+        top: -50,
+        left: width - 100
     },
     title: {
         position: "absolute",
@@ -88,7 +99,9 @@ const styles = StyleSheet.create({
         color: "white"
     },
     list: {
-        paddingHorizontal: Theme.spacing.small,
         paddingBottom: 57 + Theme.spacing.small
+    },
+    post: {
+        paddingHorizontal: Theme.spacing.small
     }
 });

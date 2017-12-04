@@ -1,4 +1,4 @@
-# React Native DO
+# React Native Fiber
 
 <img src="images/react-native-fiber.gif" width="300" style="margin: 16px;" />
 

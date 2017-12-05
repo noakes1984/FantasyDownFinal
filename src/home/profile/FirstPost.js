@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        marginVertical: Theme.spacing.base * 2
+        margin: Theme.spacing.base * 2
     },
     text: {
         marginTop: Theme.spacing.base

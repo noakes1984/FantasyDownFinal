@@ -72,7 +72,7 @@ export default class Login extends React.Component<NavigationProps<*>, LoginStat
                     onChangeText={this.setEmail}
                 />
                 <TextField
-                    toggleSecureEntry={true}
+                    secureTextEntry={true}
                     placeholder="Password"
                     contrast={true}
                     autoCapitalize="none"

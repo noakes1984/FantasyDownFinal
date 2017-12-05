@@ -81,7 +81,6 @@ export default class Login extends React.Component<NavigationProps<*>, LoginStat
                     textInputRef={this.setPasswordRef}
                     onSubmitEditing={this.login}
                     onChangeText={this.setPassword}
-                    secureTextEntry={true}
                 />
             </SignUpContainer>
         );

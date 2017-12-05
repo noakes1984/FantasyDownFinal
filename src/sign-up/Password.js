@@ -46,7 +46,6 @@ export default class Password extends React.Component<NavigationProps<*>, Passwo
                     returnKeyType="go"
                     onSubmitEditing={this.next}
                     onChangeText={this.setPassword}
-                    secureTextEntry={true}
                 />
             </SignUpContainer>
         );

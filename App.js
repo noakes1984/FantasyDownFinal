@@ -29,8 +29,8 @@ export default class App extends React.Component<{}, AppState> {
     };
 
     componentWillMount() {
-        Firebase.init();
         this.loadStaticResources();
+        Firebase.init();
         Firebase.auth.onAuthStateChanged(user => {
             this.setState({
                 authStatusReported: true,
@@ -103,7 +103,7 @@ const ShareNavigator = StackNavigator({
     SharePicture: { screen: SharePicture }
 }, StackNavigatorOptions);
 
-const Home = TabNavigator({
+const HomeTabs = TabNavigator({
     Explore: { screen: ExploreNavigator },
     Share: { screen: ShareNavigator },
     Profile: { screen: ProfileNavigator }
@@ -113,14 +113,17 @@ const Home = TabNavigator({
     tabBarPosition: "bottom"
 });
 
+const Home = StackNavigator({
+    Home: { screen: HomeTabs }
+}, StackNavigatorOptions);
+
 const AppNavigator = StackNavigator({
     Welcome: { screen: Welcome },
     Walkthrough: { screen: Walkthrough },
     Login: { screen: Login },
     SignUp: { screen: SignUpName },
     SignUpEmail: { screen: SignUpEmail },
-    SignUpPassword: { screen: SignUpPassword },
-    Home: { screen: Home }
+    SignUpPassword: { screen: SignUpPassword }
 }, StackNavigatorOptions);
 
 export {AppNavigator};

@@ -18,6 +18,7 @@ export default class Profile extends React.Component<ScreenProps<>> {
     }
 
     renderHeader(): React.Node {
+        const {displayName} = Firebase.auth.currentUser.providerData[0];
         const profile = APIStore.profile();
         return (
             <View style={styles.header}>
@@ -32,7 +33,7 @@ export default class Profile extends React.Component<ScreenProps<>> {
                 <View style={styles.headerContent}>
                     <View style={styles.title}>
                         <Text type="large" style={styles.outline}>{profile.outline}</Text>
-                        <Text type="header2" style={styles.name}>{profile.name}</Text>
+                        <Text type="header2" style={styles.name}>{displayName}</Text>
                     </View>
                     <Avatar size={avatarSize} style={styles.avatar} {...profile.picture} />
                 </View>
@@ -87,13 +88,14 @@ const styles = StyleSheet.create({
     title: {
         position: "absolute",
         left: Theme.spacing.small,
-        bottom: Theme.spacing.small
+        bottom: 50 + Theme.spacing.small
     },
     logout: {
         position: "absolute",
         top: Theme.spacing.small,
         right: Theme.spacing.base,
-        backgroundColor: "transparent"
+        backgroundColor: "transparent",
+        zIndex: 10000
     },
     outline: {
         color: "rgba(255, 255, 255, 0.8)"

@@ -37,6 +37,8 @@ jobs:
       - run: yarn lint
       - run: yarn flow
       - run: yarn test
+      # Fail if branch is firebase to avoid accidental merging in master
+      - run: if [ "${CIRCLE_BRANCH}" == "firebase" ]; then exit 1 if
 
       - deploy:
           name: Expo Deployment

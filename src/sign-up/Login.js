@@ -45,6 +45,12 @@ export default class Login extends React.Component<NavigationProps<*>, LoginStat
     async login(): Promise<void> {
         const {email, password} = this.state;
         try {
+            if (email === "") {
+                throw new Error("Please provide an email address.");
+            }
+            if (password === "") {
+                throw new Error("Please provide a password.");
+            }
             await Firebase.auth.signInWithEmailAndPassword(email, password);
         } catch(e) {
             alert(e);

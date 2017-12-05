@@ -26,8 +26,12 @@ export default class Email extends React.Component<NavigationProps<*>, EmailStat
     @autobind
     next() {
         const {email} = this.state;
-        Firebase.registrationInfo.email = email;
-        this.props.navigation.navigate("SignUpPassword");
+        if (email === "") {
+            alert("Please provide an email.");
+        } else {
+            Firebase.registrationInfo.email = email;
+            this.props.navigation.navigate("SignUpPassword");
+        }
     }
 
     render(): React.Node {

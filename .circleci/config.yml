@@ -41,7 +41,7 @@ jobs:
       - deploy:
           name: Expo Deployment
           command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+            if [ "${CIRCLE_BRANCH}" == "master" ] || [ "${CIRCLE_BRANCH}" == "firebase" ]; then
                 $(npm bin)/exp login --username $EXPO_USERNAME --password $EXPO_PASSWORD
                 yarn deploy
             fi

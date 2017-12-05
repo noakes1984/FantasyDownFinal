@@ -44,8 +44,15 @@ export default class Name extends React.Component<NavigationProps<*>, NameState>
     @autobind
     next() {
         const {firstName, lastName} = this.state;
-        Firebase.registrationInfo.displayName = firstName + " " + lastName;
-        this.props.navigation.navigate("SignUpEmail");
+        if (firstName === "") {
+            alert("Please provide a first name.");
+        } else if (lastName === "") {
+            alert("Please provide a last name.");
+        } else {
+            Firebase.registrationInfo.displayName = firstName + " " + lastName;
+            this.props.navigation.navigate("SignUpEmail");
+        }
+
     }
 
     render(): React.Node {

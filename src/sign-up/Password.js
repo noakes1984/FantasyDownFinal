@@ -25,9 +25,13 @@ export default class Password extends React.Component<NavigationProps<*>, Passwo
     @autobind
     async next(): Promise<void> {
         const {password} = this.state;
-        const {email} = Firebase.registrationInfo;
+        const {email, displayName} = Firebase.registrationInfo;
         try {
-            await Firebase.auth.createUserWithEmailAndPassword(email, password);
+            if (password === "") {
+                throw new Error("Please provide a password.");
+            }
+            const user = await Firebase.auth.createUserWithEmailAndPassword(email, password);
+            await user.updateProfile({ displayName });
         } catch(e) {
             alert(e);
         }

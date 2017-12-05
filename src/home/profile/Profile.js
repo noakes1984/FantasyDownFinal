@@ -30,11 +30,13 @@ export default class Profile extends React.Component<ScreenProps<>> {
                         </View>
                     </TouchableOpacity>
                 </SafeAreaView>
-                <View style={styles.title}>
-                    <Text type="large" style={styles.outline}>{profile.outline}</Text>
-                    <Text type="header2" style={styles.name}>{profile.name}</Text>
+                <View style={styles.headerContent}>
+                    <View style={styles.title}>
+                        <Text type="large" style={styles.outline}>{profile.outline}</Text>
+                        <Text type="header2" style={styles.name}>{profile.name}</Text>
+                    </View>
+                    <Avatar size={avatarSize} style={styles.avatar} {...profile.picture} />
                 </View>
-                <Avatar size={avatarSize} style={styles.avatar} {...profile.picture} />
             </View>
         );
     }
@@ -70,21 +72,23 @@ const styles = StyleSheet.create({
         flex: 1
     },
     header: {
-        marginBottom: -50
+        marginBottom: 50
+    },
+    headerContent: {
+        ...StyleSheet.absoluteFillObject
     },
     cover: {
         height: width
     },
     avatar: {
-        zIndex: 10000,
-        position: "relative",
-        top: -50,
-        left: width - 100 - Theme.spacing.small
+        position: "absolute",
+        right: Theme.spacing.small,
+        bottom: -50
     },
     title: {
         position: "absolute",
-        bottom: Theme.spacing.base,
-        left: Theme.spacing.base
+        left: Theme.spacing.small,
+        bottom: Theme.spacing.small
     },
     logout: {
         position: "absolute",

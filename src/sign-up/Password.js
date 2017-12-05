@@ -20,7 +20,7 @@ export default class Password extends React.Component<NavigationProps<*>> {
         return (
             <SignUpContainer title="Your Password" subtitle="Stay Safe" next={this.next} {...{ navigation }}>
                 <TextField
-                    toggleSecureEntry={true}
+                    secureTextEntry={true}
                     placeholder="Password"
                     contrast={true}
                     autoCapitalize="none"

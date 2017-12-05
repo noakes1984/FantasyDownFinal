@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
         zIndex: 10000,
         position: "relative",
         top: -50,
-        left: width - 100
+        left: width - 100 - Theme.spacing.small
     },
     title: {
         position: "absolute",

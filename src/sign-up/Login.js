@@ -47,7 +47,7 @@ export default class Login extends React.Component<NavigationProps<*>> {
                     onSubmitEditing={this.goToPassword}
                 />
                 <TextField
-                    toggleSecureEntry={true}
+                    secureTextEntry={true}
                     placeholder="Password"
                     contrast={true}
                     autoCapitalize="none"

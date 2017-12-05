@@ -94,7 +94,8 @@ const styles = StyleSheet.create({
         position: "absolute",
         top: Theme.spacing.small,
         right: Theme.spacing.base,
-        backgroundColor: "transparent"
+        backgroundColor: "transparent",
+        zIndex: 10000
     },
     outline: {
         color: "rgba(255, 255, 255, 0.8)"

@@ -8,7 +8,8 @@ import type {NavigationProps} from "../components/Types";
 import SignUpContainer from "./SignUpContainer";
 
 type PasswordState = {
-    password: string
+    password: string,
+    loading: boolean
 };
 
 export default class Password extends React.Component<NavigationProps<*>, PasswordState> {
@@ -30,17 +31,20 @@ export default class Password extends React.Component<NavigationProps<*>, Passwo
             if (password === "") {
                 throw new Error("Please provide a password.");
             }
+            this.setState({ loading: true });
             const user = await Firebase.auth.createUserWithEmailAndPassword(email, password);
             await user.updateProfile({ displayName });
         } catch(e) {
             alert(e);
+            this.setState({ loading: false });
         }
     }
 
     render(): React.Node {
         const {navigation} = this.props;
+        const {loading} = this.state;
         return (
-            <SignUpContainer title="Your Password" subtitle="Stay Safe" next={this.next} {...{ navigation }}>
+            <SignUpContainer title="Your Password" subtitle="Stay Safe" next={this.next} {...{ navigation, loading }}>
                 <TextField
                     secureTextEntry={true}
                     placeholder="Password"

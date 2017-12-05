@@ -11,7 +11,8 @@ type SignUpContainerProps = NavigationProps<*> & {
     subtitle: string,
     next: () => void | Promise<void>,
     children?: React.ChildrenArray<React.Element<*>>,
-    nextLabel: string
+    nextLabel: string,
+    loading?: boolean
 };
 
 export default class SignUpContainer extends React.Component<SignUpContainerProps> {
@@ -26,7 +27,7 @@ export default class SignUpContainer extends React.Component<SignUpContainerProp
     }
 
     render(): React.Node {
-        const {title, subtitle, next, children, nextLabel} = this.props;
+        const {title, subtitle, next, children, nextLabel, loading} = this.props;
         return (
             <Container gutter={2}>
                 <ScrollView contentContainerStyle={styles.container}>
@@ -37,7 +38,7 @@ export default class SignUpContainer extends React.Component<SignUpContainerProp
                         </View>
                         <View>{children}</View>
                         <View>
-                            <Button label={nextLabel} full={true} primary={true} onPress={next} />
+                            <Button label={nextLabel} full={true} primary={true} onPress={next} {...{loading}} />
                             <Button label="Back" full={true} onPress={this.back} />
                         </View>
                     </KeyboardAvoidingView>

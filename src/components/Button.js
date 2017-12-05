@@ -1,7 +1,7 @@
 // @flow
 import * as React from "react";
 import {StyleSheet} from "react-native";
-import {Button as NBButton, Text} from "native-base";
+import {Button as NBButton, Text, Spinner} from "native-base";
 
 import {Theme} from "./Theme";
 
@@ -13,12 +13,13 @@ type ButtonProps = BaseProps & {
     transparent?: boolean,
     disabled?: boolean,
     full?: boolean,
-    onPress: () => mixed
+    onPress: () => mixed,
+    loading?: boolean
 };
 
 export default class Button extends React.Component<ButtonProps> {
     render(): React.Node {
-        const {label, full, primary, disabled, transparent, onPress, style} = this.props;
+        const {label, full, primary, disabled, transparent, onPress, style, loading} = this.props;
         const computedStyle = [styles.base];
         if (primary && !transparent) {
             computedStyle.push(styles.primary);
@@ -30,20 +31,34 @@ export default class Button extends React.Component<ButtonProps> {
                     rounded: true, transparent: !primary || transparent, disabled
                 }}
             >
-                <Text
-                    style={[
-                        primary ? Theme.typography.large : Theme.typography.regular,
-                        {
-                            color: disabled
-                                ? "transparent"
-                                : (primary ? (transparent ? Theme.palette.primary : "white") : Theme.typography.color),
-                            fontSize: primary ? 16 : Theme.typography.regular.fontSize,
-                            fontFamily: Theme.typography.semibold
-                        }
-                    ]}
-                >
-                {label}
-                </Text>
+            {
+                !!loading && (
+                    <Spinner color="white" />
+                )
+            }
+            {
+                !loading && (
+                    <Text
+                        style={[
+                            primary ? Theme.typography.large : Theme.typography.regular,
+                            {
+                                color: disabled
+                                    ? "transparent"
+                                    : (
+                                        primary ?
+                                            (transparent ? Theme.palette.primary : "white")
+                                                :
+                                            Theme.typography.color
+                                    ),
+                                fontSize: primary ? 16 : Theme.typography.regular.fontSize,
+                                fontFamily: Theme.typography.semibold
+                            }
+                        ]}
+                    >
+                    {label}
+                    </Text>
+                )
+            }
             </NBButton>
         );
     }

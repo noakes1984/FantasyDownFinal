@@ -10,16 +10,19 @@ import type {NavigationProps} from "../components/Types";
 
 type LoginState = {
     email: string,
-    password: string
+    password: string,
+    loading: boolean
 };
 
 export default class Login extends React.Component<NavigationProps<*>, LoginState> {
 
-    password: TextInput;
+    state: LoginState = {
+        email: "",
+        password: "",
+        loading: false
+    };
 
-    componentWillMount() {
-        this.setState({ email: "", password: "" });
-    }
+    password: TextInput;
 
     @autobind
     setEmail(email: string) {
@@ -51,21 +54,24 @@ export default class Login extends React.Component<NavigationProps<*>, LoginStat
             if (password === "") {
                 throw new Error("Please provide a password.");
             }
+            this.setState({ loading: true });
             await Firebase.auth.signInWithEmailAndPassword(email, password);
         } catch(e) {
             alert(e);
+            this.setState({ loading: false });
         }
     }
 
     render(): React.Node {
         const {navigation} = this.props;
+        const {loading} = this.state;
         return (
             <SignUpContainer
                 title="Login"
                 subtitle="Get Started"
                 nextLabel="Login"
                 next={this.login}
-                {...{ navigation }}
+                {...{ navigation, loading }}
             >
                 <TextField
                     placeholder="Email"

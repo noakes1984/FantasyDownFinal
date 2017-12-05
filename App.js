@@ -114,12 +114,12 @@ const HomeTabs = TabNavigator({
 });
 
 const Home = StackNavigator({
+    Walkthrough: { screen: Walkthrough },
     Home: { screen: HomeTabs }
 }, StackNavigatorOptions);
 
 const AppNavigator = StackNavigator({
     Welcome: { screen: Welcome },
-    Walkthrough: { screen: Walkthrough },
     Login: { screen: Login },
     SignUp: { screen: SignUpName },
     SignUpEmail: { screen: SignUpEmail },

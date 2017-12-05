@@ -5,12 +5,31 @@ import {TextInput} from "react-native";
 
 import SignUpContainer from "./SignUpContainer";
 
-import {TextField} from "../components";
+import {TextField, Firebase} from "../components";
 import type {NavigationProps} from "../components/Types";
 
-export default class Login extends React.Component<NavigationProps<*>> {
+type LoginState = {
+    email: string,
+    password: string
+};
+
+export default class Login extends React.Component<NavigationProps<*>, LoginState> {
 
     password: TextInput;
+
+    componentWillMount() {
+        this.setState({ email: "", password: "" });
+    }
+
+    @autobind
+    setEmail(email: string) {
+        this.setState({ email });
+    }
+
+    @autobind
+    setPassword(password: string) {
+        this.setState({ password });
+    }
 
     @autobind
     setPasswordRef(input: TextInput) {
@@ -23,8 +42,13 @@ export default class Login extends React.Component<NavigationProps<*>> {
     }
 
     @autobind
-    login() {
-        this.props.navigation.navigate("Walkthrough");
+    async login(): Promise<void> {
+        const {email, password} = this.state;
+        try {
+            await Firebase.auth.signInWithEmailAndPassword(email, password);
+        } catch(e) {
+            alert(e);
+        }
     }
 
     render(): React.Node {
@@ -45,6 +69,7 @@ export default class Login extends React.Component<NavigationProps<*>> {
                     autoCorrect={false}
                     returnKeyType="next"
                     onSubmitEditing={this.goToPassword}
+                    onChangeText={this.setEmail}
                 />
                 <TextField
                     toggleSecureEntry={true}
@@ -55,6 +80,8 @@ export default class Login extends React.Component<NavigationProps<*>> {
                     returnKeyType="go"
                     textInputRef={this.setPasswordRef}
                     onSubmitEditing={this.login}
+                    onChangeText={this.setPassword}
+                    secureTextEntry={true}
                 />
             </SignUpContainer>
         );

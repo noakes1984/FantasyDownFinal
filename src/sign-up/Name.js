@@ -3,14 +3,33 @@ import autobind from "autobind-decorator";
 import * as React from "react";
 import {TextInput} from "react-native";
 
-import {TextField} from "../components";
+import {TextField, Firebase} from "../components";
 import type {NavigationProps} from "../components/Types";
 
 import SignUpContainer from "./SignUpContainer";
 
-export default class Name extends React.Component<NavigationProps<*>> {
+type NameState = {
+    firstName: string,
+    lastName: string
+};
+
+export default class Name extends React.Component<NavigationProps<*>, NameState> {
 
     lastName: TextInput;
+
+    componentWillMount() {
+        this.setState({ firstName: "", lastName: "" });
+    }
+
+    @autobind
+    setFirstName(firstName: string) {
+        this.setState({ firstName });
+    }
+
+    @autobind
+    setLastName(lastName: string) {
+        this.setState({ lastName });
+    }
 
     @autobind
     setLastNameRef(input: TextInput) {
@@ -24,6 +43,8 @@ export default class Name extends React.Component<NavigationProps<*>> {
 
     @autobind
     next() {
+        const {firstName, lastName} = this.state;
+        Firebase.registrationInfo.displayName = firstName + " " + lastName;
         this.props.navigation.navigate("SignUpEmail");
     }
 
@@ -37,6 +58,7 @@ export default class Name extends React.Component<NavigationProps<*>> {
                         autoCorrect={false}
                         returnKeyType="next"
                         onSubmitEditing={this.goToLastName}
+                        onChangeText={this.setFirstName}
                     />
                     <TextField
                         placeholder="Last Name"
@@ -45,6 +67,7 @@ export default class Name extends React.Component<NavigationProps<*>> {
                         returnKeyType="go"
                         textInputRef={this.setLastNameRef}
                         onSubmitEditing={this.next}
+                        onChangeText={this.setLastName}
                     />
                 </SignUpContainer>
         );

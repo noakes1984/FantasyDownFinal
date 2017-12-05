@@ -7,15 +7,14 @@ import {Feather as Icon} from "@expo/vector-icons";
 import Post from "../explore/Post";
 import FirstPost from "./FirstPost";
 
-import {Text, SmartImage, APIStore, Avatar, NavigationHelpers, Theme} from "../../components";
+import {Text, SmartImage, APIStore, Avatar, Theme, Firebase} from "../../components";
 import type {ScreenProps} from "../../components/Types";
 
 export default class Profile extends React.Component<ScreenProps<>> {
 
     @autobind
     logout() {
-        const {navigation} = this.props;
-        NavigationHelpers.reset(navigation, "Welcome");
+        Firebase.auth.signOut();
     }
 
     renderHeader(): React.Node {

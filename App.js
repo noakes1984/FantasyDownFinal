@@ -5,7 +5,7 @@ import {StyleProvider} from "native-base";
 import {StackNavigator, TabNavigator} from "react-navigation";
 import {Font, AppLoading} from "expo";
 
-import {Images} from "./src/components";
+import {Images, Firebase} from "./src/components";
 import {Welcome} from "./src/welcome";
 import {Walkthrough} from "./src/walkthrough";
 import {SignUpName, SignUpEmail, SignUpPassword, Login} from "./src/sign-up";
@@ -15,17 +15,28 @@ import getTheme from "./native-base-theme/components";
 import variables from "./native-base-theme/variables/commonColor";
 
 interface AppState {
-    ready: boolean
+    staticAssetsLoaded: boolean,
+    authStatusReported: boolean,
+    isUserAuthenticated: boolean
 }
 
 export default class App extends React.Component<{}, AppState> {
 
     state: AppState = {
-        ready: false,
+        staticAssetsLoaded: false,
+        authStatusReported: false,
+        isUserAuthenticated: false
     };
 
     componentWillMount() {
+        Firebase.init();
         this.loadStaticResources();
+        Firebase.auth.onAuthStateChanged(user => {
+            this.setState({
+                authStatusReported: true,
+                isUserAuthenticated: !!user
+            })
+        });
     }
 
     async loadStaticResources(): Promise<void> {
@@ -39,7 +50,7 @@ export default class App extends React.Component<{}, AppState> {
                 "SFProText-Light": require("./fonts/SF-Pro-Text-Light.otf")
             });
             await Images.downloadAsync();
-            this.setState({ ready: true });
+            this.setState({ staticAssetsLoaded: true });
         } catch(error) {
             // eslint-disable-next-line no-console
             console.error(error);
@@ -48,11 +59,17 @@ export default class App extends React.Component<{}, AppState> {
 
     render(): React.Node {
         const {onNavigationStateChange} = this;
-        const {ready} = this.state;
+        const {staticAssetsLoaded, authStatusReported, isUserAuthenticated} = this.state;
         return <StyleProvider style={getTheme(variables)}>
             {
-                ready ?
-                    <AppNavigator {...{onNavigationStateChange}} />
+                (staticAssetsLoaded && authStatusReported) ?
+                    (
+                        isUserAuthenticated
+                            ?
+                                <Home {...{onNavigationStateChange}} />
+                            :
+                                <AppNavigator {...{onNavigationStateChange}} />
+                    )
                 :
                     <AppLoading />
             }

@@ -9,7 +9,7 @@ import type {NavigationProps} from "../components/Types";
 type SignUpContainerProps = NavigationProps<*> & {
     title: string,
     subtitle: string,
-    next: () => void,
+    next: () => void | Promise<void>,
     children?: React.ChildrenArray<React.Element<*>>,
     nextLabel: string
 };

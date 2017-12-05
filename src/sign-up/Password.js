@@ -2,17 +2,35 @@
 import autobind from "autobind-decorator";
 import * as React from "react";
 
-import {TextField, NavigationHelpers} from "../components";
+import {TextField, Firebase} from "../components";
 import type {NavigationProps} from "../components/Types";
 
 import SignUpContainer from "./SignUpContainer";
 
-export default class Password extends React.Component<NavigationProps<*>> {
+type PasswordState = {
+    password: string
+};
+
+export default class Password extends React.Component<NavigationProps<*>, PasswordState> {
+
+    componentWillMount() {
+        this.setState({ password: "" });
+    }
 
     @autobind
-    next() {
-        const {navigation} = this.props;
-        NavigationHelpers.reset(navigation, "Home");
+    setPassword(password: string) {
+        this.setState({ password });
+    }
+
+    @autobind
+    async next(): Promise<void> {
+        const {password} = this.state;
+        const {email} = Firebase.registrationInfo;
+        try {
+            await Firebase.auth.createUserWithEmailAndPassword(email, password);
+        } catch(e) {
+            alert(e);
+        }
     }
 
     render(): React.Node {
@@ -27,6 +45,8 @@ export default class Password extends React.Component<NavigationProps<*>> {
                     autoCorrect={false}
                     returnKeyType="go"
                     onSubmitEditing={this.next}
+                    onChangeText={this.setPassword}
+                    secureTextEntry={true}
                 />
             </SignUpContainer>
         );

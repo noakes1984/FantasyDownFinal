@@ -3,15 +3,30 @@ import autobind from "autobind-decorator";
 import * as React from "react";
 import {StyleSheet, View} from "react-native";
 
-import {TextField, Switch, Theme, Text} from "../components";
+import {TextField, Switch, Theme, Text, Firebase} from "../components";
 import type {NavigationProps} from "../components/Types";
 
 import SignUpContainer from "./SignUpContainer";
 
-export default class Email extends React.Component<NavigationProps<*>> {
+type EmailState = {
+    email: string
+};
+
+export default class Email extends React.Component<NavigationProps<*>, EmailState> {
+
+    componentWillMount() {
+        this.setState({ email: "" });
+    }
+
+    @autobind
+    setEmail(email: string) {
+        this.setState({ email });
+    }
 
     @autobind
     next() {
+        const {email} = this.state;
+        Firebase.registrationInfo.email = email;
         this.props.navigation.navigate("SignUpPassword");
     }
 
@@ -27,6 +42,7 @@ export default class Email extends React.Component<NavigationProps<*>> {
                     autoCorrect={false}
                     returnKeyType="go"
                     onSubmitEditing={this.next}
+                    onChangeText={this.setEmail}
                 />
                 <View style={styles.row}>
                     <Switch />

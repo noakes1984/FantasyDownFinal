@@ -40,11 +40,11 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
         this.setState({ loading: false, caption: "" });
     }
 
-    static buildPreview(picture: Picture): Promise<string> {
+    static buildPreview({ uri, width, height }: Picture): Promise<string> {
         return new Promise((resolve, reject) =>
             ImageEditor.cropImage(
-                picture.uri,
-                previewParams(picture.width, picture.height),
+                uri,
+                previewParams(width, height),
                 uri => ImageStore.getBase64ForTag(
                     uri, data => resolve(`data:image/jpeg;base64,${data}`), err => reject(err)
                 ),

@@ -1,7 +1,7 @@
 // @flow
 import autobind from "autobind-decorator";
 import * as React from "react";
-import {StyleSheet} from "react-native";
+import {StyleSheet, Dimensions, Linking, TouchableOpacity} from "react-native";
 
 import {Text, Button, Container, Logo, Theme, AnimatedView} from "../components";
 import type {ScreenProps} from "../components/Types";
@@ -18,6 +18,11 @@ export default class Welcome extends React.Component<ScreenProps<>> {
         this.props.navigation.navigate("Login");
     }
 
+    @autobind
+    framer() {
+        Linking.openURL("https://framer.com/fiber");
+    }
+
     render(): React.Node {
         return (
             <Container gutter={2} style={styles.root}>
@@ -29,11 +34,15 @@ export default class Welcome extends React.Component<ScreenProps<>> {
                     <Button label="Login" full={true} primary={true} onPress={this.login} />
                     <Button label="Sign Up" full={true} onPress={this.signUp} />
                 </AnimatedView>
+                <TouchableOpacity style={styles.framer} onPress={this.framer}>
+                    <Text style={styles.framerText}>Designed by Framer</Text>
+                </TouchableOpacity>
             </Container>
         );
     }
 }
 
+const {width} = Dimensions.get("window");
 const styles = StyleSheet.create({
     root: {
         justifyContent: "flex-end",
@@ -46,5 +55,14 @@ const styles = StyleSheet.create({
         textAlign: "center",
         marginTop: Theme.spacing.base * 2,
         marginBottom: Theme.spacing.base * 2
+    },
+    framer: {
+        position: "absolute",
+        bottom: 0,
+        width
+    },
+    framerText: {
+        textAlign: "center",
+        fontSize: 12
     }
 });

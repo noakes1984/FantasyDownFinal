@@ -35,7 +35,7 @@ export default class App extends React.Component<{}, AppState> {
             this.setState({
                 authStatusReported: true,
                 isUserAuthenticated: !!user
-            })
+            });
         });
     }
 

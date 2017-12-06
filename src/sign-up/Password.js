@@ -5,6 +5,7 @@ import * as React from "react";
 import {TextField, Firebase} from "../components";
 import type {NavigationProps} from "../components/Types";
 
+import SignUpStore from "./SignUpStore";
 import SignUpContainer from "./SignUpContainer";
 
 type PasswordState = {
@@ -26,7 +27,7 @@ export default class Password extends React.Component<NavigationProps<*>, Passwo
     @autobind
     async next(): Promise<void> {
         const {password} = this.state;
-        const {email, displayName} = Firebase.registrationInfo;
+        const {email, displayName} = SignUpStore;
         try {
             if (password === "") {
                 throw new Error("Please provide a password.");

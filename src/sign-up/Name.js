@@ -3,9 +3,10 @@ import autobind from "autobind-decorator";
 import * as React from "react";
 import {TextInput} from "react-native";
 
-import {TextField, Firebase} from "../components";
+import {TextField} from "../components";
 import type {NavigationProps} from "../components/Types";
 
+import SignUpStore from "./SignUpStore";
 import SignUpContainer from "./SignUpContainer";
 
 type NameState = {
@@ -49,7 +50,7 @@ export default class Name extends React.Component<NavigationProps<*>, NameState>
         } else if (lastName === "") {
             alert("Please provide a last name.");
         } else {
-            Firebase.registrationInfo.displayName = firstName + " " + lastName;
+            SignUpStore.displayName = firstName + " " + lastName;
             this.props.navigation.navigate("SignUpEmail");
         }
 

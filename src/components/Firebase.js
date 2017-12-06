@@ -12,14 +12,14 @@ const config = {
 
 export default class Firebase {
 
-    static auth;
-    static registrationInfo = {
-        displayName: "",
-        email: ""
-    };
+    static database: firebase.database.Database;
+    static auth: firebase.auth.Auth;
+    static storage: firebase.storage.Storage;
 
     static init() {
         firebase.initializeApp(config);
         Firebase.auth = firebase.auth();
+        Firebase.database = firebase.database();
+        Firebase.storage = firebase.storage();
     }
 }

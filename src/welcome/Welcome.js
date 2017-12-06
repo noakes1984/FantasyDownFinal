@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     },
     framer: {
         position: "absolute",
-        bottom: 0,
+        bottom: Theme.spacing.tiny,
         width
     },
     framerText: {

@@ -13,8 +13,6 @@ import SHA1 from "crypto-js/sha1";
 import type {Picture} from "./Picture";
 import type {ScreenParams} from "../../components/Types";
 
-import {atob, convertToByteArray, uploadAsByteArray} from "../../components/UploadHelper";
-
 const id = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
 
 type SharePictureState = {
@@ -76,13 +74,21 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
             }
         });
         try {
-            const task = Firebase.storage.ref("pictures").put(convertToByteArray(preview), { contentType: "image/jpeg"});
-            task.on("state_changed", snapshot => {
-
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                console.log('Upload is ' + progress + '% done');
-
-            }, error => console.error(error), () => console.log("DONE"));
+            const body = new FormData();
+            body.append("picture", {
+                uri: picture.uri,
+                name: "picture.jpg",
+                type: "image/jpg"
+            });
+            const res = await fetch("http://localhost:5000/react-native-fiber/us-central1/api/picture", {
+                method: "POST",
+                body,
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "multipart/form-data"
+                }
+            });
+            console.log(res);
         } catch(e) {
             console.log("ERROR");
             console.log(e);

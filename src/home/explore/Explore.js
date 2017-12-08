@@ -6,8 +6,9 @@ import {FlatList, StyleSheet, View, Animated, SafeAreaView, RefreshControl, Plat
 import {Constants} from "expo";
 
 import Post from "./Post";
+import FirstPost from "../profile/FirstPost";
 
-import {Text, APIStore, Theme, Avatar, RefreshIndicator} from "../../components";
+import {Text, APIStore, Theme, Avatar, RefreshIndicator, Firebase} from "../../components";
 
 import type {ScreenProps} from "../../components/Types";
 import type {Post as PostModel} from "../../components/APIStore";
@@ -18,7 +19,8 @@ const AnimatedSafeAreaView = Animated.createAnimatedComponent(SafeAreaView);
 type ExploreState = {
     scrollAnimation: Animated.Value,
     refreshing: boolean,
-    posts: PostModel[]
+    posts: PostModel[],
+    loading: boolean
 };
 
 export default class Explore extends React.Component<ScreenProps<>, ExploreState> {
@@ -29,18 +31,26 @@ export default class Explore extends React.Component<ScreenProps<>, ExploreState
         setTimeout(() => this.setState({ refreshing: false }), 3000);
     }
 
-    componentWillMount() {
+    async componentWillMount(): Promise<void> {
         this.setState({
             scrollAnimation: new Animated.Value(0),
             refreshing: false,
-            posts: APIStore.posts()
+            loading: true
+        });
+        const query = await Firebase.firestore.collection("feed").get();
+        const posts: PostModel[] = [];
+        query.forEach(doc => posts.push(doc.data()));
+        this.setState({
+            posts,
+            loading: false
         });
     }
 
     render(): React.Node {
         const {onRefresh} = this;
         const {navigation} = this.props;
-        const {scrollAnimation, refreshing, posts} = this.state;
+        const {scrollAnimation, refreshing, posts, loading} = this.state;
+        const ListEmptyComponent = loading ? <RefreshIndicator refreshing={true} /> : <FirstPost {...{navigation}} />;
         const profile = APIStore.profile();
         const opacity = scrollAnimation.interpolate({
             inputRange: [0, 60],
@@ -114,6 +124,7 @@ export default class Explore extends React.Component<ScreenProps<>, ExploreState
                             {...{onRefresh, refreshing}}
                         />
                     ) || undefined)}
+                    {...{ ListEmptyComponent }}
                 />
             </View>
         );

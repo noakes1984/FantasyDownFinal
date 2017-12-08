@@ -48,6 +48,7 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
     @autobind
     async snap(): Promise<void> {
         const {navigation} = this.props;
+        // use base64 option
         const picture = await this.camera.takePictureAsync();
         navigation.navigate("SharePicture", picture);
     }

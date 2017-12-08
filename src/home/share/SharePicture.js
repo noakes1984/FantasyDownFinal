@@ -6,12 +6,16 @@ import {
     StyleSheet, TextInput, Image, Dimensions, KeyboardAvoidingView, ScrollView, ImageEditor, ImageStore, View
 } from "react-native";
 
-import {Container, NavHeader, Button, Theme, APIStore, RefreshIndicator, NavigationHelpers} from "../../components";
+import {
+    Container, NavHeader, Button, Theme, APIStore, RefreshIndicator, Firebase, NavigationHelpers
+} from "../../components";
 
 import type {Picture} from "./Picture";
 import type {ScreenParams} from "../../components/Types";
+import type {Post} from "../../components/APIStore";
 
 const id = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+const uid = () => id() + id() + "-" + id() + "-" + id() + "-" + id() + "-" + id() + id() + id();
 
 type SharePictureState = {
     loading: boolean,
@@ -60,18 +64,43 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
         const picture = navigation.state.params;
         this.setState({ loading: true });
         const preview = await SharePicture.buildPreview(picture);
-        APIStore.addPost({
-            id: id(),
-            timestamp: parseInt(moment().format("X"), 10),
-            name: "John Doe",
-            profilePicture: APIStore.profile().picture,
-            text: caption,
-            picture: {
+        const id = uid();
+        try {
+            const body = new FormData();
+            const name = `${id}.jpg`;
+            body.append("picture", {
                 uri: picture.uri,
-                preview
-            }
-        });
-        NavigationHelpers.reset(navigation, "Home");
+                name,
+                type: "image/jpg"
+            });
+            await fetch(`${Firebase.endpoint}/picture`, {
+                method: "POST",
+                body,
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "multipart/form-data"
+                }
+            });
+            const url = await Firebase.storage.ref(name).getDownloadURL();
+            const {uid} = Firebase.auth.currentUser;
+            const post: Post = {
+                id,
+                uid,
+                timestamp: parseInt(moment().format("X"), 10),
+                name: "John Doe",
+                profilePicture: APIStore.profile().picture,
+                text: caption,
+                picture: {
+                    uri: url,
+                    preview
+                }
+            };
+            await Firebase.firestore.collection("feed").doc(id).set(post);
+            NavigationHelpers.reset(navigation, "Home");
+        } catch(e) {
+            console.log(e);
+            alert(e);
+        }
     }
 
     @autobind

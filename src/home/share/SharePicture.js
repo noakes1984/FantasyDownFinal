@@ -77,12 +77,13 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
         });
         try {
             const body = new FormData();
+            const name = `${id}.jpg`;
             body.append("picture", {
                 uri: picture.uri,
-                name: `${id}.jpg`,
+                name,
                 type: "image/jpg"
             });
-            const response = await fetch("http://localhost:5000/react-native-fiber/us-central1/api/picture", {
+            await fetch("http://localhost:5000/react-native-fiber/us-central1/api/picture", {
                 method: "POST",
                 body,
                 headers: {
@@ -90,8 +91,8 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
                     "Content-Type": "multipart/form-data"
                 }
             });
-            const metadata = await response.json();
-            console.log(JSON.stringify(metadata, null, 2));
+            const url = await Firebase.storage.ref(name).getDownloadURL();
+            console.log(url);
         } catch(e) {
             alert(e);
         }

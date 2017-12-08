@@ -14,6 +14,7 @@ export type Profile = {
 };
 
 export type Post = {
+    uid: string,
     id: string,
     timestamp: number,
     name: string,
@@ -34,14 +35,6 @@ export default class APIStore {
 
     static profile(): Profile {
         return data.profile;
-    }
-
-    static posts(): Post[] {
-        return data.posts;
-    }
-
-    static addPost(post: Post) {
-        data.posts.push(post);
     }
 
     static comments(post: string): Comment[] {

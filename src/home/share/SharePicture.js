@@ -5,13 +5,14 @@ import * as React from "react";
 import {
     StyleSheet, TextInput, Image, Dimensions, KeyboardAvoidingView, ScrollView, ImageEditor, ImageStore, View
 } from "react-native";
-import {FileSystem} from "expo";
 
-import {Container, NavHeader, Button, Theme, APIStore, RefreshIndicator, NavigationHelpers, Firebase} from "../../components";
-import SHA1 from "crypto-js/sha1";
+import {
+    Container, NavHeader, Button, Theme, APIStore, RefreshIndicator, Firebase, NavigationHelpers
+} from "../../components";
 
 import type {Picture} from "./Picture";
 import type {ScreenParams} from "../../components/Types";
+import type {Post} from "../../components/APIStore";
 
 const id = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
 const uid = () => id() + id() + "-" + id() + "-" + id() + "-" + id() + "-" + id() + id() + id();
@@ -64,17 +65,6 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
         this.setState({ loading: true });
         const preview = await SharePicture.buildPreview(picture);
         const id = uid();
-        APIStore.addPost({
-            id,
-            timestamp: parseInt(moment().format("X"), 10),
-            name: "John Doe",
-            profilePicture: APIStore.profile().picture,
-            text: caption,
-            picture: {
-                uri: picture.uri,
-                preview
-            }
-        });
         try {
             const body = new FormData();
             const name = `${id}.jpg`;
@@ -83,7 +73,7 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
                 name,
                 type: "image/jpg"
             });
-            await fetch("http://localhost:5000/react-native-fiber/us-central1/api/picture", {
+            await fetch(`${Firebase.endpoint}/picture`, {
                 method: "POST",
                 body,
                 headers: {
@@ -92,11 +82,25 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
                 }
             });
             const url = await Firebase.storage.ref(name).getDownloadURL();
-            console.log(url);
+            const {uid} = Firebase.auth.currentUser;
+            const post: Post = {
+                id,
+                uid,
+                timestamp: parseInt(moment().format("X"), 10),
+                name: "John Doe",
+                profilePicture: APIStore.profile().picture,
+                text: caption,
+                picture: {
+                    uri: url,
+                    preview
+                }
+            };
+            await Firebase.firestore.collection("feed").doc(id).set(post);
+            NavigationHelpers.reset(navigation, "Home");
         } catch(e) {
+            console.log(e);
             alert(e);
         }
-        // NavigationHelpers.reset(navigation, "Home");
     }
 
     @autobind

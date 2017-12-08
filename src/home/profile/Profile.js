@@ -7,10 +7,30 @@ import {Feather as Icon} from "@expo/vector-icons";
 import Post from "../explore/Post";
 import FirstPost from "./FirstPost";
 
-import {Text, SmartImage, APIStore, Avatar, Theme, Firebase} from "../../components";
+import {Text, SmartImage, APIStore, Avatar, Theme, Firebase, RefreshIndicator} from "../../components";
 import type {ScreenProps} from "../../components/Types";
+import type {Post as PostModel} from "../../components/APIStore";
 
-export default class Profile extends React.Component<ScreenProps<>> {
+type ProfileState = {
+    loading: boolean,
+    posts: PostModel[]
+};
+
+export default class Profile extends React.Component<ScreenProps<>, ProfileState> {
+
+    async componentWillMount(): Promise<void> {
+        this.setState({
+            loading: true
+        });
+        const {uid} = Firebase.auth.currentUser;
+        const query = await Firebase.firestore.collection("feed").where("uid", "==", uid).get();
+        const posts: PostModel[] = [];
+        query.forEach(doc => posts.push(doc.data()));
+        this.setState({
+            posts,
+            loading: false
+        });
+    }
 
     @autobind
     logout() {
@@ -43,8 +63,8 @@ export default class Profile extends React.Component<ScreenProps<>> {
 
     render(): React.Node {
         const {navigation} = this.props;
-        const profile = APIStore.profile();
-        const posts = APIStore.posts().filter(post => post.name === profile.name);
+        const {loading, posts} = this.state;
+        const ListEmptyComponent = loading ? <RefreshIndicator refreshing={true} /> : <FirstPost {...{navigation}} />;
         return (
             <View style={styles.container}>
                 <FlatList
@@ -57,8 +77,8 @@ export default class Profile extends React.Component<ScreenProps<>> {
                             <Post post={item} {...{navigation}} />
                         </View>
                     )}
-                    ListEmptyComponent={<FirstPost {...{navigation}} />}
                     ListHeaderComponent={this.renderHeader()}
+                    {...{ListEmptyComponent}}
                 />
             </View>
         );

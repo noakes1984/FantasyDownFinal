@@ -14,6 +14,7 @@ import type {Picture} from "./Picture";
 import type {ScreenParams} from "../../components/Types";
 
 const id = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+const uid = () => id() + id() + "-" + id() + "-" + id() + "-" + id() + "-" + id() + id() + id();
 
 type SharePictureState = {
     loading: boolean,
@@ -62,8 +63,9 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
         const picture = navigation.state.params;
         this.setState({ loading: true });
         const preview = await SharePicture.buildPreview(picture);
+        const id = uid();
         APIStore.addPost({
-            id: id(),
+            id,
             timestamp: parseInt(moment().format("X"), 10),
             name: "John Doe",
             profilePicture: APIStore.profile().picture,
@@ -77,10 +79,10 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
             const body = new FormData();
             body.append("picture", {
                 uri: picture.uri,
-                name: "picture.jpg",
+                name: `${id}.jpg`,
                 type: "image/jpg"
             });
-            const res = await fetch("http://localhost:5000/react-native-fiber/us-central1/api/picture", {
+            const response = await fetch("http://localhost:5000/react-native-fiber/us-central1/api/picture", {
                 method: "POST",
                 body,
                 headers: {
@@ -88,10 +90,10 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
                     "Content-Type": "multipart/form-data"
                 }
             });
-            console.log(res);
+            const metadata = await response.json();
+            console.log(JSON.stringify(metadata, null, 2));
         } catch(e) {
-            console.log("ERROR");
-            console.log(e);
+            alert(e);
         }
         // NavigationHelpers.reset(navigation, "Home");
     }

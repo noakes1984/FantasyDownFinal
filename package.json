@@ -29,8 +29,9 @@
         "flow": "flow check --show-all-errors | flow-result-checker",
         "lint": "eslint App.js App.test.js src/",
         "react-devtools": "react-devtools",
-        "deploy": "exp publish",
+        "deploy:expo": "exp publish",
         "deploy:functions": "firebase deploy --only functions",
+        "deploy": "yarn deploy:functions && yarn deploy:expo",
         "backend": "firebase serve --only functions"
     },
     "jest": {

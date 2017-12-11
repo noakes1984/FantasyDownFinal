@@ -77,7 +77,6 @@ export default class ProfileComp extends React.Component<ScreenProps<>, ProfileS
     render(): React.Node {
         const {navigation} = this.props;
         const {loading, posts, profile} = this.state;
-        const ListEmptyComponent = loading ? <RefreshIndicator refreshing={true} /> : <FirstPost {...{navigation}} />;
         return (
             <View style={styles.container}>
                 <FlatList
@@ -92,11 +91,10 @@ export default class ProfileComp extends React.Component<ScreenProps<>, ProfileS
                     )}
                     ListEmptyComponent={(
                         <View style={styles.post}>
-                            <FirstPost {...{navigation}} />
+                            {loading ? <RefreshIndicator refreshing={true} /> : <FirstPost {...{navigation}} />}
                         </View>
                     )}
                     ListHeaderComponent={this.renderHeader()}
-                    {...{ListEmptyComponent}}
                 />
             </View>
         );

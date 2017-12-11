@@ -31,7 +31,7 @@
         "react-devtools": "react-devtools",
         "deploy:expo": "exp publish",
         "deploy:functions": "firebase deploy --only functions",
-        "deploy": "yarn deploy:functions && yarn deploy:expo",
+        "deploy": "firebase deploy && yarn deploy:expo",
         "backend": "firebase serve --only functions"
     },
     "jest": {

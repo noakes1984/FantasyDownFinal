@@ -47,10 +47,10 @@ export default class Explore extends React.Component<ScreenProps<>, ExploreState
             const profileDoc = await Firebase.firestore.collection("users").doc(post.uid).get();
             const profile = profileDoc.data();
             posts.push({ post, profile });
+            this.setState({ posts });
         });
         this.setState({
             profile,
-            posts,
             loading: false
         });
     }

@@ -44,7 +44,7 @@ export default class SmartImage extends React.Component<SmartImageProps, SmartIm
     onLoadEnd(uri: string) {
         const {preview} = this.props;
         const isPreview = uri === preview;
-        if (isPreview && Platform.OS === "ios") {
+        if (!isPreview && Platform.OS === "ios") {
             const intensity = new Animated.Value(100);
             this.setState({ intensity });
             Animated.timing(intensity, { duration: 300, toValue: 0, useNativeDriver: true }).start();

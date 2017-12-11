@@ -3,16 +3,18 @@ import * as React from "react";
 import {StyleSheet, View, Platform} from "react-native";
 
 import {Text, Avatar, Theme} from "../../components";
-import type {Comment} from "../../components/APIStore";
+import type {Comment, Profile} from "../../components/Model";
 
 type CommentProps = {
-    comment: Comment
+    comment: Comment,
+    profile: Profile
 };
 
 export default class CommentComp extends React.Component<CommentProps> {
 
     render(): React.Node {
-        const {name, text, picture} = this.props.comment;
+        const {text} = this.props.comment;
+        const {picture, name} = this.props.profile;
         return (
             <View style={styles.container}>
                 <Avatar {...picture} />

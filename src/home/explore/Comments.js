@@ -1,5 +1,6 @@
 // @flow
 import autobind from "autobind-decorator";
+import moment from "moment";
 import * as React from "react";
 import {
     StyleSheet, FlatList, KeyboardAvoidingView, TextInput, View, Platform, TouchableOpacity
@@ -7,41 +8,62 @@ import {
 
 import CommentComp from "./Comment";
 
-import {Text, NavHeader, APIStore, Theme, NavigationHelpers} from "../../components";
+import {Text, NavHeader, Theme, NavigationHelpers, Firebase} from "../../components";
 import type {ScreenParams} from "../../components/Types";
-import type {Comment} from "../../components/APIStore";
+import type {Comment, Profile} from "../../components/Model";
+
+type Comments = { comment: Comment, profile: Profile }[];
 
 type CommentsState = {
-    comments: Comment[],
-    text: string
+    profile: Profile,
+    comments: Comments,
+    text: string,
+    loading: boolean
 };
 
-export default class Comments extends React.Component<ScreenParams<{ post: string }>, CommentsState> {
+export default class CommentsComp extends React.Component<ScreenParams<{ post: string }>, CommentsState> {
 
-    componentWillMount() {
+    async componentWillMount(): Promise<void> {
         const {post} = this.props.navigation.state.params;
-        const comments = APIStore.comments(post);
-        this.setState({ comments, text: "" });
+        this.setState({ loading: true, text: "" });
+        const {uid} = Firebase.auth.currentUser;
+        const profileDoc = await Firebase.firestore.collection("users").doc(uid).get();
+        const profile = profileDoc.data();
+        const query = await Firebase.firestore.collection("feed").doc(post).collection("comments").get();
+        const comments: Comments = [];
+        query.forEach(async commentDoc => {
+            const comment = commentDoc.data();
+            const profileDoc = await Firebase.firestore.collection("users").doc(comment.uid).get();
+            const profile = profileDoc.data();
+            comments.push({ comment, profile });
+        });
+        this.setState({ comments, loading: false, profile });
     }
 
     @autobind
-    send() {
+    async send(): Promise<void> {
         const {post} = this.props.navigation.state.params;
-        const {text} = this.state;
+        const {text, profile} = this.state;
         const comments =  this.state.comments.slice();
-        const profile = APIStore.profile();
+        const {uid} = Firebase.auth.currentUser;
         const comment = {
             text,
             id: Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1),
-            name: profile.name,
-            picture: profile.picture
+            uid,
+            timestamp: parseInt(moment().format("X"), 10)
         };
         if (text.trim() === "") {
             return;
         }
-        comments.unshift(comment);
+        comments.unshift({ comment, profile });
         this.setState({ comments, text: "" });
-        APIStore.addComment(post, comment);
+        const postRef = Firebase.firestore.collection("feed").doc(post);
+        await postRef.collection("comments").add(comment);
+        await Firebase.firestore.runTransaction(async transaction => {
+            const postDoc = await transaction.get(postRef);
+            const comments = postDoc.data().comments + 1;
+            transaction.update(postRef, { comments });
+        });
     }
 
     @autobind
@@ -64,8 +86,8 @@ export default class Comments extends React.Component<ScreenParams<{ post: strin
                 <FlatList
                     inverted={true}
                     data={comments}
-                    keyExtractor={message => message.id}
-                    renderItem={({ item }) => <CommentComp key={item.id} comment={item} />}
+                    keyExtractor={item => item.comment.id}
+                    renderItem={({ item }) => <CommentComp comment={item.comment} profile={item.profile} />}
                 />
                 <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
                     <View style={styles.footer}>

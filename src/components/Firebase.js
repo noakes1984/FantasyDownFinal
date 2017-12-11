@@ -17,12 +17,12 @@ const endpoint = {
 }
 
 export default class Firebase {
-  
+
+    static endpoint = endpoint.prod;
+
     static firestore: firebase.firestore.Firestore;
     static auth: firebase.auth.Auth;
     static storage: firebase.storage.Storage;
-
-    static endpoint = endpoint.prod
 
     static init() {
         firebase.initializeApp(config);

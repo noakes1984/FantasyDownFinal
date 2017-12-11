@@ -6,11 +6,15 @@ import {StyleSheet, View, TouchableWithoutFeedback} from "react-native";
 import Likes from "./Likes";
 import {Feather as Icon} from "@expo/vector-icons";
 
-import {Text, Theme, APIStore} from "../../components";
-import type {NavigationProps} from "../../components/Types";
+import Text from "../Text";
+import {Theme} from "../Theme";
+
+import type {NavigationProps} from "../Types";
 
 type LikesAndCommentsProps = NavigationProps<> & {
     id: string,
+    comments: number,
+    likes: string[],
     color: string
 };
 
@@ -23,16 +27,15 @@ export default class LikesAndComments extends React.Component<LikesAndCommentsPr
     }
 
     render(): React.Node {
-        const {id, color} = this.props;
-        const comments = APIStore.comments(id);
+        const {comments, likes, color, id} = this.props;
         return (
             <View style={styles.container}>
                 <View style={styles.content}>
-                    <Likes {...{color}} />
+                    <Likes post={id} {...{color, likes}} />
                     <TouchableWithoutFeedback onPress={this.goToComments}>
                         <View style={styles.comments}>
                             <Icon name="message-circle" size={18} {...{color}} />
-                            <Text style={[styles.commentCount, { color }]}>{`${comments.length}`}</Text>
+                            <Text style={[styles.commentCount, { color }]}>{`${comments}`}</Text>
                         </View>
                     </TouchableWithoutFeedback>
                 </View>

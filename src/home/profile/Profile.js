@@ -1,69 +1,82 @@
 // @flow
 import autobind from "autobind-decorator";
 import * as React from "react";
-import {View, StyleSheet, Dimensions, FlatList, TouchableOpacity, SafeAreaView} from "react-native";
+import {View, StyleSheet, Dimensions, FlatList, TouchableOpacity, SafeAreaView, Image} from "react-native";
 import {Feather as Icon} from "@expo/vector-icons";
 
-import Post from "../explore/Post";
-import FirstPost from "./FirstPost";
+import {Text, Avatar, Theme, Firebase, RefreshIndicator, Post, FirstPost, Images} from "../../components";
 
-import {Text, SmartImage, APIStore, Avatar, Theme, Firebase, RefreshIndicator} from "../../components";
 import type {ScreenProps} from "../../components/Types";
-import type {Post as PostModel} from "../../components/APIStore";
+import type {Post as PostModel, Profile} from "../../components/Model";
 
 type ProfileState = {
     loading: boolean,
-    posts: PostModel[]
+    posts: PostModel[],
+    profile: Profile
 };
 
-export default class Profile extends React.Component<ScreenProps<>, ProfileState> {
+export default class ProfileComp extends React.Component<ScreenProps<>, ProfileState> {
 
     async componentWillMount(): Promise<void> {
         this.setState({
             loading: true
         });
         const {uid} = Firebase.auth.currentUser;
-        const query = await Firebase.firestore.collection("feed").where("uid", "==", uid).get();
+        const profileDoc = await Firebase.firestore.collection("users").doc(uid).get();
+        const profile = profileDoc.data();
+        const query = await Firebase.firestore.collection("feed")
+                                                .where("uid", "==", uid)
+                                                .orderBy("timestamp", "desc")
+                                                .get();
         const posts: PostModel[] = [];
         query.forEach(doc => posts.push(doc.data()));
         this.setState({
+            profile,
             posts,
             loading: false
         });
     }
 
     @autobind
-    logout() {
-        Firebase.auth.signOut();
+    settings() {
+        const {profile} = this.state;
+        this.props.navigation.navigate("Settings", { profile });
     }
 
     renderHeader(): React.Node {
-        const {displayName} = Firebase.auth.currentUser.providerData[0];
-        const profile = APIStore.profile();
+        const {profile} = this.state;
         return (
             <View style={styles.header}>
-                <SmartImage style={styles.cover} {...profile.cover} />
-                <SafeAreaView style={styles.logout}>
-                    <TouchableOpacity onPress={this.logout}>
-                        <View>
-                            <Icon name="log-out" size={25} color="white" />
-                        </View>
-                    </TouchableOpacity>
+                <Image style={styles.cover} source={Images.cover} />
+                <SafeAreaView style={styles.settings}>
+                {
+                    profile && (
+                        <TouchableOpacity onPress={this.settings}>
+                            <View>
+                                <Icon name="settings" size={25} color="white" />
+                            </View>
+                        </TouchableOpacity>
+                    )
+                }
                 </SafeAreaView>
-                <View style={styles.headerContent}>
-                    <View style={styles.title}>
-                        <Text type="large" style={styles.outline}>{profile.outline}</Text>
-                        <Text type="header2" style={styles.name}>{displayName}</Text>
-                    </View>
-                    <Avatar size={avatarSize} style={styles.avatar} {...profile.picture} />
-                </View>
+                {
+                    profile && (
+                        <View style={styles.headerContent}>
+                            <View style={styles.title}>
+                                <Text type="large" style={styles.outline}>{profile.outline}</Text>
+                                <Text type="header2" style={styles.name}>{profile.name}</Text>
+                            </View>
+                            <Avatar size={avatarSize} style={styles.avatar} {...profile.picture} />
+                        </View>
+                    )
+                }
             </View>
         );
     }
 
     render(): React.Node {
         const {navigation} = this.props;
-        const {loading, posts} = this.state;
+        const {loading, posts, profile} = this.state;
         const ListEmptyComponent = loading ? <RefreshIndicator refreshing={true} /> : <FirstPost {...{navigation}} />;
         return (
             <View style={styles.container}>
@@ -74,7 +87,12 @@ export default class Profile extends React.Component<ScreenProps<>, ProfileState
                     keyExtractor={post => post.id}
                     renderItem={({ item }) => (
                         <View style={styles.post}>
-                            <Post post={item} {...{navigation}} />
+                            <Post post={item} {...{navigation, profile}} />
+                        </View>
+                    )}
+                    ListEmptyComponent={(
+                        <View style={styles.post}>
+                            <FirstPost {...{navigation}} />
                         </View>
                     )}
                     ListHeaderComponent={this.renderHeader()}
@@ -110,7 +128,7 @@ const styles = StyleSheet.create({
         left: Theme.spacing.small,
         bottom: 50 + Theme.spacing.small
     },
-    logout: {
+    settings: {
         position: "absolute",
         top: Theme.spacing.small,
         right: Theme.spacing.base,

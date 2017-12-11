@@ -5,18 +5,24 @@ import {StyleSheet, View, Dimensions, Platform} from "react-native";
 
 import LikesAndComments from "./LikesAndComments";
 
-import {Text, Avatar, Theme, SmartImage} from "../../components";
-import type {Post} from "../../components/APIStore";
-import type {NavigationProps} from "../../components/Types";
+import Text from "../Text";
+import Avatar from "../Avatar";
+import {Theme} from "../Theme";
+import SmartImage from "../SmartImage";
+
+import type {Post, Profile} from "../Model";
+import type {NavigationProps} from "../Types";
 
 type PostProps = NavigationProps<> & {
-    post: Post
+    post: Post,
+    profile: Profile
 };
 
 export default class PostComp extends React.Component<PostProps> {
 
     render(): React.Node {
-        const {post, navigation} = this.props;
+        const {post, navigation, profile} = this.props;
+        const {likes, comments} = post;
         const contentStyle = [styles.content];
         const nameStyle = [styles.name];
         const textStyle = [styles.text];
@@ -41,9 +47,9 @@ export default class PostComp extends React.Component<PostProps> {
                 }
                 <View style={contentStyle}>
                     <View style={styles.header}>
-                        <Avatar {...post.profilePicture} />
+                        <Avatar {...profile.picture} />
                         <View style={styles.metadata}>
-                            <Text style={nameStyle}>{post.name}</Text>
+                            <Text style={nameStyle}>{profile.name}</Text>
                             <Text style={dateStyle}>{moment(post.timestamp, "X").fromNow()}</Text>
                         </View>
                     </View>
@@ -53,7 +59,7 @@ export default class PostComp extends React.Component<PostProps> {
                     <LikesAndComments
                         color={post.picture ? "white" : Theme.typography.color}
                         id={post.id}
-                        {...{navigation}}
+                        {...{navigation, likes, comments}}
                     />
                 </View>
             </View>

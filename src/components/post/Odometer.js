@@ -2,8 +2,9 @@
 import * as React from "react";
 import {StyleSheet, View, Animated, Easing} from "react-native";
 
-import {directInverseInterpolation, directInterpolation, simpleInterpolation} from "../../components/Animations";
-import {Theme, Text} from "../../components";
+import {directInverseInterpolation, directInterpolation, simpleInterpolation} from "../Animations";
+import {Theme} from "../Theme";
+import Text from "../Text";
 
 type OdometerProps = {
     count: number,

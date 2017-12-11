@@ -5,21 +5,21 @@ import moment from "moment"
 import {FlatList, StyleSheet, View, Animated, SafeAreaView, RefreshControl, Platform} from "react-native";
 import {Constants} from "expo";
 
-import Post from "./Post";
-import FirstPost from "../profile/FirstPost";
-
-import {Text, APIStore, Theme, Avatar, RefreshIndicator, Firebase} from "../../components";
+import {Text, Theme, Avatar, RefreshIndicator, Firebase, Post, FirstPost} from "../../components";
 
 import type {ScreenProps} from "../../components/Types";
-import type {Post as PostModel} from "../../components/APIStore";
+import type {Post as PostModel, Profile} from "../../components/Model";
 
 const AnimatedText = Animated.createAnimatedComponent(Text);
 const AnimatedSafeAreaView = Animated.createAnimatedComponent(SafeAreaView);
 
+type Posts = { post: PostModel, profile: Profile }[];
+
 type ExploreState = {
     scrollAnimation: Animated.Value,
     refreshing: boolean,
-    posts: PostModel[],
+    posts: Posts,
+    profile: Profile,
     loading: boolean
 };
 
@@ -37,10 +37,19 @@ export default class Explore extends React.Component<ScreenProps<>, ExploreState
             refreshing: false,
             loading: true
         });
-        const query = await Firebase.firestore.collection("feed").get();
-        const posts: PostModel[] = [];
-        query.forEach(doc => posts.push(doc.data()));
+        const {uid} = Firebase.auth.currentUser;
+        const profileDoc = await Firebase.firestore.collection("users").doc(uid).get();
+        const profile = profileDoc.data();
+        const query = await Firebase.firestore.collection("feed").orderBy("timestamp", "desc").get();
+        const posts: Posts = [];
+        query.forEach(async postDoc => {
+            const post = postDoc.data();
+            const profileDoc = await Firebase.firestore.collection("users").doc(post.uid).get();
+            const profile = profileDoc.data();
+            posts.push({ post, profile });
+        });
         this.setState({
+            profile,
             posts,
             loading: false
         });
@@ -49,9 +58,8 @@ export default class Explore extends React.Component<ScreenProps<>, ExploreState
     render(): React.Node {
         const {onRefresh} = this;
         const {navigation} = this.props;
-        const {scrollAnimation, refreshing, posts, loading} = this.state;
+        const {scrollAnimation, refreshing, posts, profile, loading} = this.state;
         const ListEmptyComponent = loading ? <RefreshIndicator refreshing={true} /> : <FirstPost {...{navigation}} />;
-        const profile = APIStore.profile();
         const opacity = scrollAnimation.interpolate({
             inputRange: [0, 60],
             outputRange: [1, 0]
@@ -97,15 +105,15 @@ export default class Explore extends React.Component<ScreenProps<>, ExploreState
                             {moment().format("dddd")}
                             </AnimatedText>
                         </View>
-                        <Avatar {...profile.picture} />
+                        { profile && <Avatar {...profile.picture} /> }
                     </Animated.View>
                 </AnimatedSafeAreaView>
                 <FlatList
                     showsVerticalScrollIndicator={false}
                     style={styles.list}
                     data={posts}
-                    keyExtractor={post => post.id}
-                    renderItem={({ item }) => <Post post={item} {...{navigation}} />}
+                    keyExtractor={item => item.post.id}
+                    renderItem={({ item }) => <Post post={item.post} profile={item.profile} {...{navigation}} />}
                     scrollEventThrottle={1}
                     onScroll={Animated.event(
                         [{

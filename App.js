@@ -9,7 +9,7 @@ import {Images, Firebase} from "./src/components";
 import {Welcome} from "./src/welcome";
 import {Walkthrough} from "./src/walkthrough";
 import {SignUpName, SignUpEmail, SignUpPassword, Login} from "./src/sign-up";
-import {Profile, Explore, Share, SharePicture, HomeTab, Comments} from "./src/home";
+import {Profile, Explore, Share, SharePicture, HomeTab, Comments, Settings} from "./src/home";
 
 import getTheme from "./native-base-theme/components";
 import variables from "./native-base-theme/variables/commonColor";
@@ -95,7 +95,8 @@ const ExploreNavigator = StackNavigator({
 }, StackNavigatorOptions);
 
 const ProfileNavigator =  StackNavigator({
-    Profile: { screen: Profile }
+    Profile: { screen: Profile },
+    Settings: { screen: Settings }
 }, StackNavigatorOptions);
 
 const ShareNavigator = StackNavigator({

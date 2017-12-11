@@ -6,14 +6,17 @@ import {Feather as Icon} from "@expo/vector-icons";
 
 import Odometer from "./Odometer";
 
-import {Theme} from "../../components";
+import {Theme} from "../Theme";
+import Firebase from "../Firebase";
 
 type LikesProps = {
-    color: string
+    color: string,
+    likes: string[],
+    post: string
 };
 
 type LikesState = {
-    liked: boolean,
+    likes: string[],
     animation: Animated.Value
 };
 
@@ -22,14 +25,19 @@ export default class Likes extends React.Component<LikesProps, LikesState> {
     counter: Odometer;
 
     componentWillMount() {
-        this.setState({ liked: false });
+        const {likes} = this.props;
+        this.setState({ likes });
     }
 
     @autobind
     toggle() {
-        const liked = !this.state.liked;
-        this.setState({ liked });
-        if (liked) {
+        const {post} = this.props;
+        const {uid} = Firebase.auth.currentUser;
+        const {likes} = this.state;
+        const idx = likes.indexOf(uid);
+        if (idx === -1) {
+            likes.push(uid);
+            this.setState({ likes });
             this.counter.increment();
             const animation = new Animated.Value(0);
             this.setState({ animation });
@@ -37,18 +45,32 @@ export default class Likes extends React.Component<LikesProps, LikesState> {
                 animation,
                 {
                     toValue: 1,
-                    duration: 300,
+                    duration: 500,
                     easing: Easing.ease
                 }
             ).start();
         } else {
+            likes.splice(uid, 1);
+            this.setState({ likes });
             this.counter.decrement();
         }
+        const postRef = Firebase.firestore.collection("feed").doc(post);
+        Firebase.firestore.runTransaction(async transaction => {
+            const postDoc = await transaction.get(postRef);
+            const likes = postDoc.data().likes;
+            if (idx === -1) {
+                likes.push(uid);
+            } else {
+                likes.splice(uid, 1);
+            }
+            transaction.update(postRef, { likes });
+        });
     }
 
     render(): React.Node {
         const {color} = this.props;
-        const {liked, animation} = this.state;
+        const {likes, animation} = this.state;
+        const {uid} = Firebase.auth.currentUser;
         const computedStyle = [styles.icon];
         if (animation) {
             const fontSize = animation.interpolate({
@@ -57,7 +79,7 @@ export default class Likes extends React.Component<LikesProps, LikesState> {
             });
             computedStyle.push({ fontSize });
         }
-        if (liked) {
+        if (likes.indexOf(uid) !== -1) {
             computedStyle.push(styles.likedIcon);
         }
         return (
@@ -66,7 +88,7 @@ export default class Likes extends React.Component<LikesProps, LikesState> {
                     <View style={styles.iconContainer}>
                         <AnimatedIcon name="thumbs-up" color={color} style={computedStyle} />
                     </View>
-                    <Odometer ref={ref => ref ? this.counter = ref : undefined} count={18} {...{ color }} />
+                    <Odometer ref={ref => ref ? this.counter = ref : undefined} count={likes.length} {...{ color }} />
                 </View>
             </TouchableWithoutFeedback>
         );

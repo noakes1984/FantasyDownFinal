@@ -4,10 +4,12 @@ import * as React from "react";
 import {StyleSheet, View, TouchableWithoutFeedback} from "react-native";
 import {Feather as Icon} from "@expo/vector-icons";
 
-import {Text, Theme} from "../../components";
-import type {NavigationProps} from "../../components/Types";
+import Text from "./Text";
+import {Theme} from "./Theme";
 
-export default class First extends React.Component<NavigationProps<>> {
+import type {NavigationProps} from "./Types";
+
+export default class FirstPost extends React.Component<NavigationProps<>> {
 
     @autobind
     share() {
@@ -33,8 +35,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: "center",
-        alignItems: "center",
-        margin: Theme.spacing.base * 2
+        alignItems: "center"
     },
     text: {
         marginTop: Theme.spacing.base

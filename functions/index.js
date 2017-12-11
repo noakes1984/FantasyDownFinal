@@ -2,14 +2,15 @@ const admin = require("firebase-admin");
 const functions = require("firebase-functions");
 const Cors = require("cors");
 const express = require("express");
-const multer = require("multer");
-const upload = multer();
+const fileUpload = require("./cloud-function-file-upload");
 
 const api = express().use(Cors({ origin: true }));
+fileUpload("/picture", api);
+
 admin.initializeApp(functions.config().firebase);
 
-api.post("/picture", upload.single("picture"), function (req, response, next) {
-    uploadImageToStorage(req.file)
+api.post("/picture", function (req, response, next) {
+    uploadImageToStorage(req.files.file[0])
     .then(metadata => {
         response.status(200).json(metadata[0]);
         next();

@@ -1,5 +1,5 @@
 // @flow
 export {Explore, Comments} from "./explore";
-export {Profile} from "./profile";
+export {Profile, Settings} from "./profile";
 export {Share, SharePicture}   from "./share";
 export {HomeTab} from "./Home";

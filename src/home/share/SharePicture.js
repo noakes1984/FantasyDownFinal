@@ -3,58 +3,26 @@ import moment from "moment";
 import autobind from "autobind-decorator";
 import * as React from "react";
 import {
-    StyleSheet, TextInput, Image, Dimensions, KeyboardAvoidingView, ScrollView, ImageEditor, ImageStore, View
+    StyleSheet, TextInput, Image, Dimensions, KeyboardAvoidingView, ScrollView, View
 } from "react-native";
 
 import {
-    Container, NavHeader, Button, Theme, APIStore, RefreshIndicator, Firebase, NavigationHelpers
+    Container, NavHeader, Button, Theme, RefreshIndicator, Firebase, NavigationHelpers, ImageUpload
 } from "../../components";
 
-import type {Picture} from "./Picture";
 import type {ScreenParams} from "../../components/Types";
-import type {Post} from "../../components/APIStore";
-
-const id = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-const uid = () => id() + id() + "-" + id() + "-" + id() + "-" + id() + "-" + id() + id() + id();
+import type {Post} from "../../components/Model";
+import type {Picture} from "../../components/ImageUpload";
 
 type SharePictureState = {
     loading: boolean,
     caption: string
 };
 
-const previewParams = (width: number, height: number) => ({
-    offset: {
-        x: 0,
-        y: 0
-    },
-    size: {
-        width,
-        height
-    },
-    displaySize: {
-        width: 50,
-        height: 50
-    },
-    resizeMode: "cover"
-});
-
 export default class SharePicture extends React.Component<ScreenParams<Picture>, SharePictureState> {
 
     componentWillMount() {
         this.setState({ loading: false, caption: "" });
-    }
-
-    static buildPreview({ uri, width, height }: Picture): Promise<string> {
-        return new Promise((resolve, reject) =>
-            ImageEditor.cropImage(
-                uri,
-                previewParams(width, height),
-                uri => ImageStore.getBase64ForTag(
-                    uri, data => resolve(`data:image/jpeg;base64,${data}`), err => reject(err)
-                ),
-                err => reject(err)
-            )
-        );
     }
 
     @autobind
@@ -63,32 +31,19 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
         const {caption} = this.state;
         const picture = navigation.state.params;
         this.setState({ loading: true });
-        const preview = await SharePicture.buildPreview(picture);
-        const id = uid();
+        const id = ImageUpload.uid();
+        const name = `${id}.jpg`;
         try {
-            const body = new FormData();
-            const name = `${id}.jpg`;
-            body.append("picture", {
-                uri: picture.uri,
-                name,
-                type: "image/jpg"
-            });
-            await fetch(`${Firebase.endpoint}/picture`, {
-                method: "POST",
-                body,
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "multipart/form-data"
-                }
-            });
+            const preview = await ImageUpload.preview(picture);
+            await ImageUpload.upload(picture, name);
             const url = await Firebase.storage.ref(name).getDownloadURL();
             const {uid} = Firebase.auth.currentUser;
             const post: Post = {
                 id,
                 uid,
+                comments: 0,
+                likes: [],
                 timestamp: parseInt(moment().format("X"), 10),
-                name: "John Doe",
-                profilePicture: APIStore.profile().picture,
                 text: caption,
                 picture: {
                     uri: url,
@@ -98,7 +53,6 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
             await Firebase.firestore.collection("feed").doc(id).set(post);
             NavigationHelpers.reset(navigation, "Home");
         } catch(e) {
-            console.log(e);
             alert(e);
         }
     }

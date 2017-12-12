@@ -4,26 +4,23 @@ import * as React from "react";
 import moment from "moment"
 import {FlatList, StyleSheet, View, Animated, SafeAreaView, RefreshControl, Platform} from "react-native";
 import {Constants} from "expo";
+import {inject, observer} from "mobx-react/native";
 
-import {Text, Theme, Avatar, RefreshIndicator, Firebase, Post, FirstPost} from "../../components";
+import HomeStore from "../HomeStore";
 
+import {Text, Theme, Avatar, RefreshIndicator, Post} from "../../components";
 import type {ScreenProps} from "../../components/Types";
-import type {Post as PostModel, Profile} from "../../components/Model";
 
 const AnimatedText = Animated.createAnimatedComponent(Text);
 const AnimatedSafeAreaView = Animated.createAnimatedComponent(SafeAreaView);
 
-type Posts = { post: PostModel, profile: Profile }[];
-
 type ExploreState = {
     scrollAnimation: Animated.Value,
-    refreshing: boolean,
-    posts: Posts,
-    profile: Profile,
-    loading: boolean
+    refreshing: boolean
 };
 
-export default class Explore extends React.Component<ScreenProps<>, ExploreState> {
+@inject("store") @observer
+export default class Explore extends React.Component<ScreenProps<> & { store: HomeStore }, ExploreState> {
 
     @autobind
     onRefresh() {
@@ -34,32 +31,15 @@ export default class Explore extends React.Component<ScreenProps<>, ExploreState
     async componentWillMount(): Promise<void> {
         this.setState({
             scrollAnimation: new Animated.Value(0),
-            refreshing: false,
-            loading: true
-        });
-        const {uid} = Firebase.auth.currentUser;
-        const profileDoc = await Firebase.firestore.collection("users").doc(uid).get();
-        const profile = profileDoc.data();
-        const query = await Firebase.firestore.collection("feed").orderBy("timestamp", "desc").get();
-        const posts: Posts = [];
-        query.forEach(async postDoc => {
-            const post = postDoc.data();
-            const profileDoc = await Firebase.firestore.collection("users").doc(post.uid).get();
-            const profile = profileDoc.data();
-            posts.push({ post, profile });
-            this.setState({ posts });
-        });
-        this.setState({
-            profile,
-            loading: false
+            refreshing: false
         });
     }
 
     render(): React.Node {
         const {onRefresh} = this;
-        const {navigation} = this.props;
-        const {scrollAnimation, refreshing, posts, profile, loading} = this.state;
-        const ListEmptyComponent = loading ? <RefreshIndicator refreshing={true} /> : <FirstPost {...{navigation}} />;
+        const {navigation, store} = this.props;
+        const {scrollAnimation, refreshing} = this.state;
+        const {feed, profile} = store;
         const opacity = scrollAnimation.interpolate({
             inputRange: [0, 60],
             outputRange: [1, 0]
@@ -111,7 +91,7 @@ export default class Explore extends React.Component<ScreenProps<>, ExploreState
                 <FlatList
                     showsVerticalScrollIndicator={false}
                     style={styles.list}
-                    data={posts}
+                    data={feed}
                     keyExtractor={item => item.post.id}
                     renderItem={({ item }) => <Post post={item.post} profile={item.profile} {...{navigation}} />}
                     scrollEventThrottle={1}
@@ -132,7 +112,7 @@ export default class Explore extends React.Component<ScreenProps<>, ExploreState
                             {...{onRefresh, refreshing}}
                         />
                     ) || undefined)}
-                    {...{ ListEmptyComponent }}
+                    ListEmptyComponent={<RefreshIndicator refreshing={true} />}
                 />
             </View>
         );

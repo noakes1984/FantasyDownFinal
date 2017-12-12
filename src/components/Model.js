@@ -26,3 +26,9 @@ export type Comment = {
     uid: string,
     timestamp: number
 };
+
+export type FeedEntry = { post: Post, profile: Profile };
+export type Feed = FeedEntry[];
+
+export type CommentEntry = { comment: Comment, profile: Profile };
+export type Comments = CommentEntry[];

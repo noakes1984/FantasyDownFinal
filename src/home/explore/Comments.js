@@ -5,70 +5,45 @@ import * as React from "react";
 import {
     StyleSheet, FlatList, KeyboardAvoidingView, TextInput, View, Platform, TouchableOpacity
 } from "react-native";
+import {observer} from "mobx-react/native";
 
 import CommentComp from "./Comment";
+import CommentsStore from "./CommentStore";
 
 import {Text, NavHeader, Theme, NavigationHelpers, Firebase} from "../../components";
 import type {ScreenParams} from "../../components/Types";
-import type {Comment, Profile} from "../../components/Model";
+import type {Comment} from "../../components/Model";
 
-type Comments = { comment: Comment, profile: Profile }[];
+@observer
+export default class CommentsComp extends React.Component<ScreenParams<{ post: string }>> {
 
-type CommentsState = {
-    profile: Profile,
-    comments: Comments,
-    text: string,
-    loading: boolean
-};
-
-export default class CommentsComp extends React.Component<ScreenParams<{ post: string }>, CommentsState> {
+    commentsStore: CommentsStore;
 
     async componentWillMount(): Promise<void> {
         const {post} = this.props.navigation.state.params;
-        this.setState({ loading: true, text: "" });
-        const {uid} = Firebase.auth.currentUser;
-        const profileDoc = await Firebase.firestore.collection("users").doc(uid).get();
-        const profile = profileDoc.data();
-        const query = await Firebase.firestore.collection("feed").doc(post).collection("comments").get();
-        const comments: Comments = [];
-        query.forEach(async commentDoc => {
-            const comment = commentDoc.data();
-            const profileDoc = await Firebase.firestore.collection("users").doc(comment.uid).get();
-            const profile = profileDoc.data();
-            comments.push({ comment, profile });
-        });
-        this.setState({ comments, loading: false, profile });
+        this.commentsStore = new CommentsStore(post);
     }
 
     @autobind
     async send(): Promise<void> {
         const {post} = this.props.navigation.state.params;
-        const {text, profile} = this.state;
-        const comments =  this.state.comments.slice();
+        const {comment} = this.commentsStore;
         const {uid} = Firebase.auth.currentUser;
-        const comment = {
-            text,
+        const newComment: Comment = {
+            text: comment,
             id: Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1),
             uid,
             timestamp: parseInt(moment().format("X"), 10)
         };
-        if (text.trim() === "") {
+        if (comment.trim() === "") {
             return;
         }
-        comments.unshift({ comment, profile });
-        this.setState({ comments, text: "" });
-        const postRef = Firebase.firestore.collection("feed").doc(post);
-        await postRef.collection("comments").add(comment);
-        await Firebase.firestore.runTransaction(async transaction => {
-            const postDoc = await transaction.get(postRef);
-            const comments = postDoc.data().comments + 1;
-            transaction.update(postRef, { comments });
-        });
+        this.commentsStore.addComment(post, newComment);
     }
 
     @autobind
     onChangeText(text: string) {
-        this.setState({ text });
+        this.commentsStore.comment = text;
     }
 
     @autobind
@@ -77,9 +52,9 @@ export default class CommentsComp extends React.Component<ScreenParams<{ post: s
     }
 
     render(): React.Node {
-        const {onChangeText, backFn} = this;
+        const {onChangeText, backFn, commentsStore} = this;
         const {navigation} = this.props;
-        const {comments, text} = this.state
+        const {comments, comment} = commentsStore;
         return (
             <View style={styles.container}>
                 <NavHeader title="Comments" back={true} {...{navigation, backFn}} />
@@ -94,7 +69,7 @@ export default class CommentsComp extends React.Component<ScreenParams<{ post: s
                         <TextInput
                             style={styles.input}
                             placeholder="Write a comment"
-                            value={text}
+                            value={comment}
                             autoFocus={true}
                             returnKeyType="send"
                             onSubmitEditing={this.send}

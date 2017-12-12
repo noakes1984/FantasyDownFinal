@@ -4,12 +4,14 @@ import * as React from "react";
 import {StyleProvider} from "native-base";
 import {StackNavigator, TabNavigator} from "react-navigation";
 import {Font, AppLoading} from "expo";
+import {useStrict} from "mobx";
+import {Provider} from "mobx-react/native";
 
 import {Images, Firebase} from "./src/components";
 import {Welcome} from "./src/welcome";
 import {Walkthrough} from "./src/walkthrough";
 import {SignUpName, SignUpEmail, SignUpPassword, Login} from "./src/sign-up";
-import {Profile, Explore, Share, SharePicture, HomeTab, Comments, Settings} from "./src/home";
+import {Profile, Explore, Share, SharePicture, HomeTab, Comments, Settings, HomeStore} from "./src/home";
 
 import getTheme from "./native-base-theme/components";
 import variables from "./native-base-theme/variables/commonColor";
@@ -19,6 +21,8 @@ interface AppState {
     authStatusReported: boolean,
     isUserAuthenticated: boolean
 }
+
+useStrict(true);
 
 export default class App extends React.Component<{}, AppState> {
 
@@ -66,7 +70,11 @@ export default class App extends React.Component<{}, AppState> {
                     (
                         isUserAuthenticated
                             ?
-                                <Home {...{onNavigationStateChange}} />
+                                (
+                                    <Provider store={new HomeStore()}>
+                                        <Home {...{onNavigationStateChange}} />
+                                    </Provider>
+                                )
                             :
                                 <AppNavigator {...{onNavigationStateChange}} />
                     )

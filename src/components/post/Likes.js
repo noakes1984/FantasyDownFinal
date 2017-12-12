@@ -16,8 +16,8 @@ type LikesProps = {
 };
 
 type LikesState = {
-    likes: string[],
-    animation: Animated.Value
+    animation: Animated.Value,
+    isLiked: boolean
 };
 
 export default class Likes extends React.Component<LikesProps, LikesState> {
@@ -26,21 +26,20 @@ export default class Likes extends React.Component<LikesProps, LikesState> {
 
     componentWillMount() {
         const {likes} = this.props;
-        this.setState({ likes });
+        const {uid} = Firebase.auth.currentUser;
+        const isLiked = likes.indexOf(uid) !== -1;
+        this.setState({ isLiked });
     }
 
     @autobind
     toggle() {
         const {post} = this.props;
+        const {isLiked} = this.state;
         const {uid} = Firebase.auth.currentUser;
-        const {likes} = this.state;
-        const idx = likes.indexOf(uid);
-        if (idx === -1) {
-            likes.push(uid);
-            this.setState({ likes });
+        if (!isLiked) {
             this.counter.increment();
             const animation = new Animated.Value(0);
-            this.setState({ animation });
+            this.setState({ animation, isLiked: !isLiked });
             Animated.timing(
                 animation,
                 {
@@ -50,15 +49,14 @@ export default class Likes extends React.Component<LikesProps, LikesState> {
                 }
             ).start();
         } else {
-            likes.splice(uid, 1);
-            this.setState({ likes });
+            this.setState({ isLiked: !isLiked });
             this.counter.decrement();
         }
         const postRef = Firebase.firestore.collection("feed").doc(post);
         Firebase.firestore.runTransaction(async transaction => {
             const postDoc = await transaction.get(postRef);
             const likes = postDoc.data().likes;
-            if (idx === -1) {
+            if (!isLiked) {
                 likes.push(uid);
             } else {
                 likes.splice(uid, 1);
@@ -68,9 +66,8 @@ export default class Likes extends React.Component<LikesProps, LikesState> {
     }
 
     render(): React.Node {
-        const {color} = this.props;
-        const {likes, animation} = this.state;
-        const {uid} = Firebase.auth.currentUser;
+        const {color, likes} = this.props;
+        const {animation, isLiked} = this.state;
         const computedStyle = [styles.icon];
         if (animation) {
             const fontSize = animation.interpolate({
@@ -79,7 +76,7 @@ export default class Likes extends React.Component<LikesProps, LikesState> {
             });
             computedStyle.push({ fontSize });
         }
-        if (likes.indexOf(uid) !== -1) {
+        if (isLiked) {
             computedStyle.push(styles.likedIcon);
         }
         return (

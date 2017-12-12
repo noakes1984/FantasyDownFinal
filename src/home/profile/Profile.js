@@ -3,48 +3,25 @@ import autobind from "autobind-decorator";
 import * as React from "react";
 import {View, StyleSheet, Dimensions, FlatList, TouchableOpacity, SafeAreaView, Image} from "react-native";
 import {Feather as Icon} from "@expo/vector-icons";
+import {inject, observer} from "mobx-react/native";
 
-import {Text, Avatar, Theme, Firebase, RefreshIndicator, Post, FirstPost, Images} from "../../components";
+import HomeStore from "../HomeStore";
+
+import {Text, Avatar, Theme, RefreshIndicator, Post, FirstPost, Images} from "../../components";
 
 import type {ScreenProps} from "../../components/Types";
-import type {Post as PostModel, Profile} from "../../components/Model";
 
-type ProfileState = {
-    loading: boolean,
-    posts: PostModel[],
-    profile: Profile
-};
-
-export default class ProfileComp extends React.Component<ScreenProps<>, ProfileState> {
-
-    async componentWillMount(): Promise<void> {
-        this.setState({
-            loading: true
-        });
-        const {uid} = Firebase.auth.currentUser;
-        const profileDoc = await Firebase.firestore.collection("users").doc(uid).get();
-        const profile = profileDoc.data();
-        const query = await Firebase.firestore.collection("feed")
-                                                .where("uid", "==", uid)
-                                                .orderBy("timestamp", "desc")
-                                                .get();
-        const posts: PostModel[] = [];
-        query.forEach(doc => posts.push(doc.data()));
-        this.setState({
-            profile,
-            posts,
-            loading: false
-        });
-    }
+@inject("store") @observer
+export default class ProfileComp extends React.Component<ScreenProps<> & { store: HomeStore }> {
 
     @autobind
     settings() {
-        const {profile} = this.state;
+        const {profile} = this.props.store;
         this.props.navigation.navigate("Settings", { profile });
     }
 
     renderHeader(): React.Node {
-        const {profile} = this.state;
+        const {profile} = this.props.store;
         return (
             <View style={styles.header}>
                 <Image style={styles.cover} source={Images.cover} />
@@ -75,14 +52,15 @@ export default class ProfileComp extends React.Component<ScreenProps<>, ProfileS
     }
 
     render(): React.Node {
-        const {navigation} = this.props;
-        const {loading, posts, profile} = this.state;
+        const {navigation, store} = this.props;
+        const {profile, userFeed} = store;
+        const loading = store.userFeed === undefined;
         return (
             <View style={styles.container}>
                 <FlatList
                     showsVerticalScrollIndicator={false}
                     style={styles.list}
-                    data={posts}
+                    data={userFeed}
                     keyExtractor={post => post.id}
                     renderItem={({ item }) => (
                         <View style={styles.post}>

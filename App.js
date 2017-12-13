@@ -1,4 +1,5 @@
 // @flow
+/* eslint-disable no-console */
 import autobind from "autobind-decorator";
 import * as React from "react";
 import {StyleProvider} from "native-base";
@@ -23,6 +24,10 @@ interface AppState {
 }
 
 useStrict(true);
+// $FlowFixMe
+console.ignoredYellowBox = [
+    "Setting a timer"
+];
 
 export default class App extends React.Component<{}, AppState> {
 
@@ -56,7 +61,6 @@ export default class App extends React.Component<{}, AppState> {
             await Images.downloadAsync();
             this.setState({ staticAssetsLoaded: true });
         } catch(error) {
-            // eslint-disable-next-line no-console
             console.error(error);
         }
     }

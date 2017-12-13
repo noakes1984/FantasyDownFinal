@@ -54,11 +54,17 @@ export default class HomeStore {
         });
 
         // Load Profile
-
         const {uid} = Firebase.auth.currentUser;
         Firebase.firestore.collection("users")
             .doc(uid)
-            .onSnapshot(snap => this.profile = snap.data());
+            .onSnapshot(async snap => {
+                if (snap.exists) {
+                    this.profile = snap.data();
+                } else {
+                    await Firebase.firestore.collection("users").doc(uid).set(DEFAULT_PROFILE);
+                    this.profile = DEFAULT_PROFILE;
+                }
+            });
 
         // Load profile Feed
         Firebase.firestore.collection("feed").where("uid", "==", uid).orderBy("timestamp", "desc")

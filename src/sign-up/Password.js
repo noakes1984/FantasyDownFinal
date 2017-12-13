@@ -36,7 +36,6 @@ export default class Password extends React.Component<NavigationProps<*>, Passwo
             }
             this.setState({ loading: true });
             const user = await Firebase.auth.createUserWithEmailAndPassword(email, password);
-            await user.updateProfile({ displayName });
             const profile: Profile = {
                 name: displayName,
                 outline: "React Native",

@@ -51,8 +51,8 @@ export default class Settings extends React.Component<ScreenParams<{ profile: Pr
                 await ImageUpload.upload(picture, name);
                 const uri = await Firebase.storage.ref(name).getDownloadURL();
                 await Firebase.firestore.collection("users").doc(uid).update({ picture: { preview, uri } });
-                NavigationHelpers.reset(navigation, "Home");
             }
+            NavigationHelpers.reset(navigation, "Home");
         } catch(e) {
             alert(e);
             this.setState({ loading: false });

@@ -2,43 +2,56 @@
 import autobind from "autobind-decorator";
 import * as React from "react";
 import moment from "moment"
-import {FlatList, StyleSheet, View, Animated, SafeAreaView, RefreshControl, Platform} from "react-native";
-import {Constants} from "expo";
+import {FlatList, StyleSheet, View, Animated, SafeAreaView} from "react-native";
 import {inject, observer} from "mobx-react/native";
 
 import HomeStore from "../HomeStore";
 
 import {Text, Theme, Avatar, RefreshIndicator, Post} from "../../components";
 import type {ScreenProps} from "../../components/Types";
+import type {FeedEntry} from "../../components/Model";
+
+type FlatListItem<T> = {
+    item: T
+};
 
 const AnimatedText = Animated.createAnimatedComponent(Text);
 const AnimatedSafeAreaView = Animated.createAnimatedComponent(SafeAreaView);
 
 type ExploreState = {
-    scrollAnimation: Animated.Value,
-    refreshing: boolean
+    scrollAnimation: Animated.Value
 };
 
 @inject("store") @observer
 export default class Explore extends React.Component<ScreenProps<> & { store: HomeStore }, ExploreState> {
 
     @autobind
-    onRefresh() {
-        this.setState({ refreshing: true });
-        setTimeout(() => this.setState({ refreshing: false }), 3000);
+    loadMore() {
+        this.props.store.loadFeed();
+    }
+
+    @autobind
+    renderItem({ item }: FlatListItem<FeedEntry>): React.Node {
+        const {navigation} = this.props;
+        return (
+            <Post post={item.post} profile={item.profile} {...{navigation}} />
+        );
+    }
+
+    @autobind
+    keyExtractor(item: FeedEntry): string {
+        return item.post.id;
     }
 
     async componentWillMount(): Promise<void> {
         this.setState({
-            scrollAnimation: new Animated.Value(0),
-            refreshing: false
+            scrollAnimation: new Animated.Value(0)
         });
     }
 
     render(): React.Node {
-        const {onRefresh} = this;
-        const {navigation, store} = this.props;
-        const {scrollAnimation, refreshing} = this.state;
+        const {store} = this.props;
+        const {scrollAnimation} = this.state;
         const {feed, profile} = store;
         const opacity = scrollAnimation.interpolate({
             inputRange: [0, 60],
@@ -66,9 +79,6 @@ export default class Explore extends React.Component<ScreenProps<> & { store: Ho
         });
         return (
             <View style={styles.container}>
-                <RefreshIndicator
-                    style={styles.RefreshIndicator} {...{refreshing}}
-                />
                 <AnimatedSafeAreaView style={[styles.header, { shadowOpacity }]}>
                     <Animated.View style={[styles.innerHeader, { height }]}>
                         <View>
@@ -92,9 +102,10 @@ export default class Explore extends React.Component<ScreenProps<> & { store: Ho
                     showsVerticalScrollIndicator={false}
                     style={styles.list}
                     data={feed}
-                    keyExtractor={item => item.post.id}
-                    renderItem={({ item }) => <Post post={item.post} profile={item.profile} {...{navigation}} />}
+                    keyExtractor={this.keyExtractor}
+                    renderItem={this.renderItem}
                     scrollEventThrottle={1}
+                    onEndReached={this.loadMore}
                     onScroll={Animated.event(
                         [{
                             nativeEvent: {
@@ -104,15 +115,7 @@ export default class Explore extends React.Component<ScreenProps<> & { store: Ho
                             }
                         }]
                     )}
-                    refreshControl={(Platform.OS === "ios" && (
-                        <RefreshControl
-                            tintColor="transparent"
-                            colors={["transparent"]}
-                            style={{ backgroundColor: "transparent" }}
-                            {...{onRefresh, refreshing}}
-                        />
-                    ) || undefined)}
-                    ListEmptyComponent={<RefreshIndicator refreshing={true} />}
+                    {...{ ListEmptyComponent }}
                 />
             </View>
         );
@@ -122,10 +125,6 @@ export default class Explore extends React.Component<ScreenProps<> & { store: Ho
 const styles = StyleSheet.create({
     container: {
         flex: 1
-    },
-    RefreshIndicator: {
-        ...StyleSheet.absoluteFillObject,
-        paddingTop: Constants.statusBarHeight + 100 + Theme.spacing.base
     },
     header: {
         backgroundColor: "white",
@@ -145,4 +144,6 @@ const styles = StyleSheet.create({
     list: {
         paddingHorizontal: Theme.spacing.small
     }
-})
+});
+
+const ListEmptyComponent = <RefreshIndicator refreshing={true} />;

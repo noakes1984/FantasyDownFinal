@@ -18,7 +18,7 @@ type PostProps = NavigationProps<> & {
     profile: Profile
 };
 
-export default class PostComp extends React.Component<PostProps> {
+export default class PostComp extends React.PureComponent<PostProps> {
 
     render(): React.Node {
         const {post, navigation, profile} = this.props;

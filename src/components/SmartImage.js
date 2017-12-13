@@ -4,6 +4,8 @@ import * as React from "react";
 import {Image, Animated, StyleSheet, View, Platform} from "react-native";
 import {BlurView, FileSystem} from "expo";
 import SHA1 from "crypto-js/sha1";
+import {observable, computed} from "mobx";
+import {observer} from "mobx-react/native";
 
 import type {BaseProps} from "./Types";
 
@@ -12,25 +14,30 @@ type SmartImageProps = BaseProps & {
     uri: string
 };
 
-type SmartImageState = {
-    uri: string,
-    intensity: Animated.Value
-};
-
 const propsToCopy = [
     "borderRadius", "borderBottomLeftRadius", "borderBottomRightRadius", "borderTopLeftRadius", "borderTopRightRadius"
 ];
 
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
-export default class SmartImage extends React.Component<SmartImageProps, SmartImageState> {
+
+@observer
+export default class SmartImage extends React.Component<SmartImageProps> {
+
+    @observable _uri: string;
+    @observable _intensity: Animated.Value = new Animated.Value(100);
+
+    @computed get uri(): string { return this._uri; }
+    set uri(uri: string) { this._uri = uri }
+
+    @computed get intensity(): Animated.Value { return this._intensity; }
+    set intensity(intensity: Animated.Value) { this._intensity = intensity; }
 
     async componentWillMount(): Promise<void> {
         const {preview, uri} = this.props;
-        this.setState({ intensity: new Animated.Value(100) });
         const entry = await getCacheEntry(uri);
         if (!entry.exists) {
             if (preview) {
-                this.setState({ uri: preview });
+                this.uri = preview;
             }
             if (uri.startsWith("file://")) {
                 await FileSystem.copyAsync({ from: uri, to: entry.path });
@@ -38,22 +45,21 @@ export default class SmartImage extends React.Component<SmartImageProps, SmartIm
                 await FileSystem.downloadAsync(uri, entry.path);
             }
         }
-        this.setState({ uri: entry.path });
+        this.uri = entry.path;
     }
 
     onLoadEnd(uri: string) {
         const {preview} = this.props;
         const isPreview = uri === preview;
         if (!isPreview && Platform.OS === "ios") {
-            const intensity = new Animated.Value(100);
-            this.setState({ intensity });
-            Animated.timing(intensity, { duration: 300, toValue: 0, useNativeDriver: true }).start();
+            this.intensity = new Animated.Value(100);
+            Animated.timing(this.intensity, { duration: 300, toValue: 0, useNativeDriver: true }).start();
         }
     }
 
     render(): React.Node {
         const {style} = this.props;
-        const {uri, intensity} = this.state;
+        const {uri, intensity} = this;
         const computedStyle = [
             StyleSheet.absoluteFill,
             _.pickBy(StyleSheet.flatten(style), (value, key) => propsToCopy.indexOf(key) !== -1)

@@ -40,7 +40,10 @@
         "transformIgnorePatterns": [
             "node_modules/(?!react-native|react-navigation|expo|native-base-shoutem-theme|@shoutem|react-clone-referenced-element|native-base|@expo|mobx-react)"
         ],
-        "testResultsProcessor": "./node_modules/jest-junit-reporter"
+        "testResultsProcessor": "./node_modules/jest-junit-reporter",
+        "setupFiles": [
+            "./setup.js"
+        ]
     },
     "dependencies": {
         "@expo/vector-icons": "6.2.0",

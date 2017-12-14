@@ -24,6 +24,18 @@ interface AppState {
 }
 
 useStrict(true);
+const originalSend = XMLHttpRequest.prototype.send;
+// https://github.com/firebase/firebase-js-sdk/issues/283
+// $FlowFixMe
+XMLHttpRequest.prototype.send = function(body: string) {
+  if (body === "") {
+    originalSend.call(this);
+  } else {
+    originalSend.call(this, body);
+  }
+};
+
+// https://github.com/firebase/firebase-js-sdk/issues/97
 // $FlowFixMe
 console.ignoredYellowBox = [
     "Setting a timer"

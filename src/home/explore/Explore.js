@@ -2,7 +2,7 @@
 import autobind from "autobind-decorator";
 import * as React from "react";
 import moment from "moment"
-import {FlatList, StyleSheet, View, Animated, SafeAreaView} from "react-native";
+import {FlatList, StyleSheet, View, Animated, SafeAreaView, TouchableWithoutFeedback} from "react-native";
 import {inject, observer} from "mobx-react/native";
 
 import HomeStore from "../HomeStore";
@@ -24,6 +24,11 @@ type ExploreState = {
 
 @inject("store") @observer
 export default class Explore extends React.Component<ScreenProps<> & { store: HomeStore }, ExploreState> {
+
+    @autobind
+    profile() {
+        this.props.navigation.navigate("Profile");
+    }
 
     @autobind
     loadMore() {
@@ -95,7 +100,13 @@ export default class Explore extends React.Component<ScreenProps<> & { store: Ho
                             {moment().format("dddd")}
                             </AnimatedText>
                         </View>
-                        { profile && <Avatar {...profile.picture} /> }
+                        { profile && (
+                            <TouchableWithoutFeedback onPress={this.profile}>
+                                <View>
+                                    <Avatar {...profile.picture} />
+                                </View>
+                            </TouchableWithoutFeedback>
+                        ) }
                     </Animated.View>
                 </AnimatedSafeAreaView>
                 <FlatList

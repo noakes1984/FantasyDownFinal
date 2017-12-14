@@ -38,7 +38,7 @@ export default class Email extends React.Component<NavigationProps<*>, EmailStat
     render(): React.Node {
         const {navigation} = this.props;
         return (
-            <SignUpContainer title="Your Email" subtitle="We won't span" next={this.next} {...{ navigation }}>
+            <SignUpContainer title="Your Email" subtitle="We won't spam" next={this.next} {...{ navigation }}>
                 <TextField
                     placeholder="Email"
                     keyboardType="email-address"

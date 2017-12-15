@@ -3,6 +3,7 @@ import autobind from "autobind-decorator";
 import * as React from "react";
 import {StyleSheet, View, TouchableWithoutFeedback, Image} from "react-native";
 import {ImagePicker} from "expo";
+import {Content} from "native-base";
 
 import {NavHeader, Firebase, Button, TextField, Theme, ImageUpload, NavigationHelpers} from "../../components";
 import type {ScreenParams} from "../../components/Types";
@@ -87,7 +88,7 @@ export default class Settings extends React.Component<ScreenParams<{ profile: Pr
         return (
             <View style={styles.container}>
                 <NavHeader title="Settings" back={true} {...{navigation}} />
-                <View style={styles.content}>
+                <Content style={styles.content}>
                     <View style={styles.avatar}>
                         <TouchableWithoutFeedback onPress={this.setPicture}>
                             <View>
@@ -106,7 +107,7 @@ export default class Settings extends React.Component<ScreenParams<{ profile: Pr
                     />
                     <Button label="Save" full={true} primary={true} onPress={this.save} {...{loading}} />
                     <Button label="Sign-Out" full={true} onPress={this.logout} />
-                </View>
+                </Content>
             </View>
         );
     }
@@ -117,9 +118,7 @@ const styles = StyleSheet.create({
         flex: 1
     },
     content: {
-        paddingHorizontal: Theme.spacing.base,
-        justifyContent: "center",
-        flex: 1
+        marginHorizontal: Theme.spacing.base
     },
     avatar: {
         marginVertical: Theme.spacing.base,

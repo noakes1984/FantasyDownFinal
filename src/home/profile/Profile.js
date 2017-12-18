@@ -25,7 +25,7 @@ export default class ProfileComp extends React.Component<ScreenProps<> & { store
         return (
             <View style={styles.header}>
                 <Image style={styles.cover} source={Images.cover} />
-                <SafeAreaView style={styles.settings}>
+                <View style={styles.settings}>
                 {
                     profile && (
                         <TouchableOpacity onPress={this.settings}>
@@ -35,7 +35,7 @@ export default class ProfileComp extends React.Component<ScreenProps<> & { store
                         </TouchableOpacity>
                     )
                 }
-                </SafeAreaView>
+                </View>
                 {
                     profile && (
                         <View style={styles.headerContent}>
@@ -56,7 +56,7 @@ export default class ProfileComp extends React.Component<ScreenProps<> & { store
         const {profile, userFeed} = store;
         const loading = store.userFeed === undefined;
         return (
-            <View style={styles.container}>
+            <SafeAreaView style={styles.container}>
                 <FlatList
                     showsVerticalScrollIndicator={false}
                     style={styles.list}
@@ -74,7 +74,7 @@ export default class ProfileComp extends React.Component<ScreenProps<> & { store
                     )}
                     ListHeaderComponent={this.renderHeader()}
                 />
-            </View>
+            </SafeAreaView>
         );
     }
 }

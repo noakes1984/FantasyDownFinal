@@ -49,6 +49,7 @@ export default class Explore extends React.Component<ScreenProps<> & { store: Ho
     }
 
     async componentWillMount(): Promise<void> {
+        this.props.store.checkForNewEntriesInFeed();
         this.setState({
             scrollAnimation: new Animated.Value(0)
         });

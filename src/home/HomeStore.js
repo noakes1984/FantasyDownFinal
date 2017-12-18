@@ -18,7 +18,10 @@ const DEFAULT_PAGE_SIZE = 10;
 
 export default class HomeStore {
 
-    cursor;
+    // eslint-disable-next-line flowtype/no-weak-types
+    cursor: any;
+    // eslint-disable-next-line flowtype/no-weak-types
+    lastKnownEntry: any;
 
     @observable _feed: Feed;
     @observable _profile: Profile;
@@ -52,44 +55,63 @@ export default class HomeStore {
         });
     }
 
-    loadFeed() {
+    async joinProfiles(posts: Post[]): Promise<FeedEntry[]> {
+        const feedPromises: Promise<FeedEntry>[] = [];
+        posts.forEach(post => {
+            feedPromises.push((async () => {
+                let profile: Profile;
+                try {
+                    const profileDoc = await Firebase.firestore.collection("users").doc(post.uid).get();
+                    profile = profileDoc.data();
+                } catch (e) {
+                    profile = DEFAULT_PROFILE;
+                }
+                return { post, profile };
+            })());
+        });
+        return await Promise.all(feedPromises);
+    }
+
+    async checkForNewEntriesInFeed(): Promise<void> {
+        if (this.lastKnownEntry) {
+            const snap = await Firebase.firestore
+                .collection("feed")
+                .orderBy("timestamp", "desc")
+                .endBefore(this.lastKnownEntry)
+                .get();
+            if (snap.docs.length === 0) {
+                return;
+            }
+            const posts: Post[] = [];
+            snap.forEach(postDoc => {
+                posts.push(postDoc.data());
+            });
+            const feed = await this.joinProfiles(posts);
+            this.feed = feed.concat(this.feed.slice());
+            this.lastKnownEntry = snap.docs[0];
+        }
+    }
+
+    async loadFeed(): Promise<void> {
         let query = Firebase.firestore.collection("feed").orderBy("timestamp", "desc");
         if (this.cursor) {
             query = query.startAfter(this.cursor);
         }
-        query.limit(DEFAULT_PAGE_SIZE).onSnapshot(async snap => {
-            if (snap.docs.length === 0) {
-                return;
-            }
-            const posts: Promise<FeedEntry>[] = [];
-            snap.forEach(postDoc => {
-                posts.push((async () => {
-                    const post = postDoc.data();
-                    let profile: Profile;
-                    try {
-                        const profileDoc = await Firebase.firestore.collection("users").doc(post.uid).get();
-                        profile = profileDoc.data();
-                    } catch (e) {
-                        profile = DEFAULT_PROFILE;
-                    }
-                    return { post, profile };
-                })());
-            });
-            const feed = await Promise.all(posts);
-            if (this.feed) {
-                const newFeed = _.orderBy(
-                    _.uniqBy(this.feed.concat(feed), entry => entry.post.id),
-                    entry => entry.post.timestamp,
-                    ["desc"]
-                );
-                if (newFeed.length !== this.feed.length) {
-                    this.feed = newFeed;
-                }
-            } else {
-                this.feed = feed;
-            }
-            this.cursor = _.last(snap.docs);
+        const snap = await query.limit(DEFAULT_PAGE_SIZE).get();
+        if (snap.docs.length === 0) {
+            return;
+        }
+        const posts: Post[] = [];
+        snap.forEach(postDoc => {
+            posts.push(postDoc.data());
         });
+        const feed = await this.joinProfiles(posts);
+        if (!this.feed) {
+            this.feed = [];
+            this.lastKnownEntry = snap.docs[0];
+        }
+        this.feed = this.feed.concat(feed);
+        this.cursor = _.last(snap.docs);
     }
 
     initUserFeed() {

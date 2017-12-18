@@ -2,9 +2,12 @@
 import * as React from "react";
 import moment from "moment";
 import {StyleSheet, View, Dimensions, Platform} from "react-native";
+import {observable, computed} from "mobx";
+import {observer} from "mobx-react/native";
 
 import LikesAndComments from "./LikesAndComments";
 
+import Firebase from "../Firebase";
 import Text from "../Text";
 import Avatar from "../Avatar";
 import {Theme} from "../Theme";
@@ -18,10 +21,25 @@ type PostProps = NavigationProps<> & {
     profile: Profile
 };
 
-export default class PostComp extends React.PureComponent<PostProps> {
+@observer
+export default class PostComp extends React.Component<PostProps> {
+
+    @observable _post: Post;
+
+    @computed get post(): Post { return this._post; }
+    set post(post: Post) { this._post = post; }
+
+    componentWillMount() {
+        const {post} = this.props;
+        this.post = post;
+        Firebase.firestore.collection("feed").where("id", "==", post.id).onSnapshot(async snap => {
+            this.post = snap.docs[0].data();
+        });
+    }
 
     render(): React.Node {
-        const {post, navigation, profile} = this.props;
+        const {navigation, profile} = this.props;
+        const {post} = this;
         const {likes, comments} = post;
         const contentStyle = [styles.content];
         const nameStyle = [styles.name];

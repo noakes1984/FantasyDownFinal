@@ -9,14 +9,14 @@ import Connect from "./Connect";
 import Chat from "./Chat";
 import Share from "./Share";
 
-import {Button, NavigationHelpers, Theme} from "../components";
+import {Button, Theme} from "../components";
 import type {ScreenProps} from "../components/Types";
 
 export default class Walkthrough extends React.Component<ScreenProps<>> {
 
     home() {
         const {navigation} = this.props;
-        NavigationHelpers.reset(navigation, "Home");
+        navigation.navigate("Home");
     }
 
     @autobind

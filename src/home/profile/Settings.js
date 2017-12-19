@@ -5,7 +5,7 @@ import {StyleSheet, View, TouchableWithoutFeedback, Image} from "react-native";
 import {ImagePicker} from "expo";
 import {Content} from "native-base";
 
-import {NavHeader, Firebase, Button, TextField, Theme, ImageUpload, NavigationHelpers} from "../../components";
+import {NavHeader, Firebase, Button, TextField, Theme, ImageUpload} from "../../components";
 import type {ScreenParams} from "../../components/Types";
 import type {Profile} from "../../components/Model";
 import type {Picture} from "../../components/ImageUpload";
@@ -53,7 +53,7 @@ export default class Settings extends React.Component<ScreenParams<{ profile: Pr
                 const uri = await Firebase.storage.ref(name).getDownloadURL();
                 await Firebase.firestore.collection("users").doc(uid).update({ picture: { preview, uri } });
             }
-            NavigationHelpers.reset(navigation, "Home");
+            navigation.goBack();
         } catch(e) {
             alert(e);
             this.setState({ loading: false });

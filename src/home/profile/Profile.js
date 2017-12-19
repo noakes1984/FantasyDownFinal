@@ -9,7 +9,7 @@ import ProfileStore from "../ProfileStore";
 import FeedStore from "../FeedStore";
 
 import {Text, Avatar, Theme, RefreshIndicator, Post, FirstPost, Images} from "../../components";
-
+import type {FeedEntry} from "../../components/Model";
 import type {ScreenProps} from "../../components/Types";
 
 type InjectedProps = {
@@ -20,10 +20,24 @@ type InjectedProps = {
 @inject("profileStore", "userFeedStore") @observer
 export default class ProfileComp extends React.Component<ScreenProps<> & InjectedProps> {
 
+    componentWillMount() {
+        this.props.userFeedStore.checkForNewEntriesInFeed();
+    }
+
     @autobind
     settings() {
         const {profile} = this.props.profileStore;
         this.props.navigation.navigate("Settings", { profile });
+    }
+
+    @autobind
+    loadMore() {
+        this.props.userFeedStore.loadFeed();
+    }
+
+    @autobind
+    keyExtractor(item: FeedEntry): string {
+        return item.post.id;
     }
 
     renderHeader(): React.Node {
@@ -68,6 +82,8 @@ export default class ProfileComp extends React.Component<ScreenProps<> & Injecte
                     style={styles.list}
                     data={feed}
                     keyExtractor={item => item.post.id}
+                    scrollEventThrottle={1}
+                    onEndReached={this.loadMore}
                     renderItem={({ item }) => (
                         <View style={styles.post}>
                             <Post

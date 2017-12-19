@@ -60,6 +60,9 @@ export default class FeedStore {
         if (this.lastKnownEntry) {
             const snap = await this.query.endBefore(this.lastKnownEntry).get();
             if (snap.docs.length === 0) {
+                if (!this.feed) {
+                    this.feed = [];
+                }
                 return;
             }
             const posts: Post[] = [];
@@ -67,7 +70,7 @@ export default class FeedStore {
                 posts.push(postDoc.data());
             });
             const feed = await this.joinProfiles(posts);
-            this.feed = feed.concat(this.feed.slice());
+            this.feed = _.uniqBy(feed.concat(this.feed.slice()), entry => entry.post.id);
             this.lastKnownEntry = snap.docs[0];
         }
     }
@@ -90,7 +93,7 @@ export default class FeedStore {
             this.feed = [];
             this.lastKnownEntry = snap.docs[0];
         }
-        this.feed = this.feed.concat(feed);
+        this.feed = _.uniqBy(this.feed.concat(feed), entry => entry.post.id);
         this.cursor = _.last(snap.docs);
     }
 

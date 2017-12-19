@@ -137,7 +137,8 @@ const ExploreNavigator = StackNavigator({
 
 const ProfileNavigator =  StackNavigator({
     Profile: { screen: Profile },
-    Settings: { screen: Settings }
+    Settings: { screen: Settings },
+    Comments: { screen: Comments }
 }, StackNavigatorOptions);
 
 const ShareNavigator = StackNavigator({

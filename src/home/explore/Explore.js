@@ -5,7 +5,8 @@ import moment from "moment"
 import {FlatList, StyleSheet, View, Animated, SafeAreaView, TouchableWithoutFeedback} from "react-native";
 import {inject, observer} from "mobx-react/native";
 
-import HomeStore from "../HomeStore";
+import FeedStore from "../FeedStore";
+import ProfileStore from "../ProfileStore";
 
 import {Text, Theme, Avatar, RefreshIndicator, Post} from "../../components";
 import type {ScreenProps} from "../../components/Types";
@@ -22,8 +23,13 @@ type ExploreState = {
     scrollAnimation: Animated.Value
 };
 
-@inject("store") @observer
-export default class Explore extends React.Component<ScreenProps<> & { store: HomeStore }, ExploreState> {
+type InjectedProps = {
+    feedStore: FeedStore,
+    profileStore: ProfileStore
+};
+
+@inject("feedStore", "profileStore") @observer
+export default class Explore extends React.Component<ScreenProps<> & InjectedProps, ExploreState> {
 
     @autobind
     profile() {
@@ -32,14 +38,15 @@ export default class Explore extends React.Component<ScreenProps<> & { store: Ho
 
     @autobind
     loadMore() {
-        this.props.store.loadFeed();
+        this.props.feedStore.loadFeed();
     }
 
     @autobind
     renderItem({ item }: FlatListItem<FeedEntry>): React.Node {
-        const {navigation} = this.props;
+        const {navigation, feedStore} = this.props;
+        const {post, profile} = item;
         return (
-            <Post post={item.post} profile={item.profile} {...{navigation}} />
+            <Post onUpdate={post => feedStore.updateFeed(post)} {...{navigation, post, profile}} />
         );
     }
 
@@ -49,16 +56,17 @@ export default class Explore extends React.Component<ScreenProps<> & { store: Ho
     }
 
     async componentWillMount(): Promise<void> {
-        this.props.store.checkForNewEntriesInFeed();
+        this.props.feedStore.checkForNewEntriesInFeed();
         this.setState({
             scrollAnimation: new Animated.Value(0)
         });
     }
 
     render(): React.Node {
-        const {store} = this.props;
+        const {feedStore, profileStore} = this.props;
         const {scrollAnimation} = this.state;
-        const {feed, profile} = store;
+        const {feed} = feedStore;
+        const {profile} = profileStore;
         const opacity = scrollAnimation.interpolate({
             inputRange: [0, 60],
             outputRange: [1, 0]

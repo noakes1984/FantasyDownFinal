@@ -2,8 +2,6 @@
 import * as React from "react";
 import moment from "moment";
 import {StyleSheet, View, Dimensions, Platform} from "react-native";
-import {observable, computed} from "mobx";
-import {observer} from "mobx-react/native";
 
 import LikesAndComments from "./LikesAndComments";
 
@@ -18,28 +16,35 @@ import type {NavigationProps} from "../Types";
 
 type PostProps = NavigationProps<> & {
     post: Post,
-    profile: Profile
+    profile: Profile,
+    onUpdate: Post => void
 };
 
-@observer
-export default class PostComp extends React.Component<PostProps> {
+type PostState = {
+    post: Post
+};
 
-    @observable _post: Post;
+export default class PostComp extends React.Component<PostProps, PostState> {
 
-    @computed get post(): Post { return this._post; }
-    set post(post: Post) { this._post = post; }
+    unsubscribe: () => void;
 
     componentWillMount() {
-        const {post} = this.props;
-        this.post = post;
-        Firebase.firestore.collection("feed").where("id", "==", post.id).onSnapshot(async snap => {
-            this.post = snap.docs[0].data();
+        const {post, onUpdate} = this.props;
+        this.setState({ post });
+        this.unsubscribe = Firebase.firestore.collection("feed").where("id", "==", post.id).onSnapshot(async snap => {
+            const newPost = snap.docs[0].data();
+            this.setState({ post: newPost });
+            onUpdate(newPost);
         });
+    }
+
+    componentWillUnmount() {
+        this.unsubscribe();
     }
 
     render(): React.Node {
         const {navigation, profile} = this.props;
-        const {post} = this;
+        const {post} = this.state;
         const {likes, comments} = post;
         const contentStyle = [styles.content];
         const nameStyle = [styles.name];

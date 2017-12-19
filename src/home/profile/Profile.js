@@ -5,23 +5,29 @@ import {View, StyleSheet, Dimensions, FlatList, TouchableOpacity, SafeAreaView, 
 import {Feather as Icon} from "@expo/vector-icons";
 import {inject, observer} from "mobx-react/native";
 
-import HomeStore from "../HomeStore";
+import ProfileStore from "../ProfileStore";
+import FeedStore from "../FeedStore";
 
 import {Text, Avatar, Theme, RefreshIndicator, Post, FirstPost, Images} from "../../components";
 
 import type {ScreenProps} from "../../components/Types";
 
-@inject("store") @observer
-export default class ProfileComp extends React.Component<ScreenProps<> & { store: HomeStore }> {
+type InjectedProps = {
+    profileStore: ProfileStore,
+    userFeedStore: FeedStore
+};
+
+@inject("profileStore", "userFeedStore") @observer
+export default class ProfileComp extends React.Component<ScreenProps<> & InjectedProps> {
 
     @autobind
     settings() {
-        const {profile} = this.props.store;
+        const {profile} = this.props.profileStore;
         this.props.navigation.navigate("Settings", { profile });
     }
 
     renderHeader(): React.Node {
-        const {profile} = this.props.store;
+        const {profile} = this.props.profileStore;
         return (
             <View style={styles.header}>
                 <Image style={styles.cover} source={Images.cover} />
@@ -52,19 +58,23 @@ export default class ProfileComp extends React.Component<ScreenProps<> & { store
     }
 
     render(): React.Node {
-        const {navigation, store} = this.props;
-        const {profile, userFeed} = store;
-        const loading = store.userFeed === undefined;
+        const {navigation, userFeedStore} = this.props;
+        const {feed} = userFeedStore;
+        const loading = feed === undefined;
         return (
             <SafeAreaView style={styles.container}>
                 <FlatList
                     showsVerticalScrollIndicator={false}
                     style={styles.list}
-                    data={userFeed}
-                    keyExtractor={post => post.id}
+                    data={feed}
+                    keyExtractor={item => item.post.id}
                     renderItem={({ item }) => (
                         <View style={styles.post}>
-                            <Post post={item} {...{navigation, profile}} />
+                            <Post
+                                post={item.post}
+                                profile={item.profile}
+                                onUpdate={post => userFeedStore.updateFeed(post)} {...{navigation}}
+                            />
                         </View>
                     )}
                     ListEmptyComponent={(

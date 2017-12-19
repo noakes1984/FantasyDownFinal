@@ -22,10 +22,15 @@ type LikesState = {
 
 export default class Likes extends React.Component<LikesProps, LikesState> {
 
-    counter: Odometer;
-
     componentWillMount() {
         const {likes} = this.props;
+        const {uid} = Firebase.auth.currentUser;
+        const isLiked = likes.indexOf(uid) !== -1;
+        this.setState({ isLiked });
+    }
+
+    componentWillReceiveProps(nextProps: LikesProps) {
+        const {likes} = nextProps;
         const {uid} = Firebase.auth.currentUser;
         const isLiked = likes.indexOf(uid) !== -1;
         this.setState({ isLiked });
@@ -37,7 +42,6 @@ export default class Likes extends React.Component<LikesProps, LikesState> {
         const {isLiked} = this.state;
         const {uid} = Firebase.auth.currentUser;
         if (!isLiked) {
-            this.counter.increment();
             const animation = new Animated.Value(0);
             this.setState({ animation, isLiked: !isLiked });
             Animated.timing(
@@ -50,16 +54,16 @@ export default class Likes extends React.Component<LikesProps, LikesState> {
             ).start();
         } else {
             this.setState({ isLiked: !isLiked });
-            this.counter.decrement();
         }
         const postRef = Firebase.firestore.collection("feed").doc(post);
         Firebase.firestore.runTransaction(async transaction => {
             const postDoc = await transaction.get(postRef);
             const likes = postDoc.data().likes;
-            if (!isLiked) {
+            const idx = likes.indexOf(uid);
+            if (idx === -1) {
                 likes.push(uid);
             } else {
-                likes.splice(uid, 1);
+                likes.splice(idx, 1);
             }
             transaction.update(postRef, { likes });
         });
@@ -85,7 +89,7 @@ export default class Likes extends React.Component<LikesProps, LikesState> {
                     <View style={styles.iconContainer}>
                         <AnimatedIcon name="thumbs-up" color={color} style={computedStyle} />
                     </View>
-                    <Odometer ref={ref => ref ? this.counter = ref : undefined} count={likes.length} {...{ color }} />
+                    <Odometer count={likes.length} {...{ color }} />
                 </View>
             </TouchableWithoutFeedback>
         );

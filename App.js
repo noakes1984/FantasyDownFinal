@@ -12,7 +12,9 @@ import {Images, Firebase} from "./src/components";
 import {Welcome} from "./src/welcome";
 import {Walkthrough} from "./src/walkthrough";
 import {SignUpName, SignUpEmail, SignUpPassword, Login} from "./src/sign-up";
-import {Profile, Explore, Share, SharePicture, HomeTab, Comments, Settings, HomeStore} from "./src/home";
+import {
+    Profile, Explore, Share, SharePicture, HomeTab, Comments, Settings, FeedStore, ProfileStore
+} from "./src/home";
 
 import getTheme from "./native-base-theme/components";
 import variables from "./native-base-theme/variables/commonColor";
@@ -24,6 +26,7 @@ interface AppState {
 }
 
 useStrict(true);
+
 const originalSend = XMLHttpRequest.prototype.send;
 // https://github.com/firebase/firebase-js-sdk/issues/283
 // $FlowFixMe
@@ -80,6 +83,20 @@ export default class App extends React.Component<{}, AppState> {
     render(): React.Node {
         const {onNavigationStateChange} = this;
         const {staticAssetsLoaded, authStatusReported, isUserAuthenticated} = this.state;
+        let feedStore, profileStore, userFeedStore;
+        if (isUserAuthenticated) {
+            const {uid} = Firebase.auth.currentUser;
+            const feedQuery = Firebase.firestore
+                .collection("feed")
+                .orderBy("timestamp", "desc");
+            const userFeedQuery = Firebase.firestore
+                .collection("feed")
+                .where("uid", "==", uid)
+                .orderBy("timestamp", "desc");
+            profileStore = new ProfileStore();
+            feedStore = new FeedStore(feedQuery);
+            userFeedStore = new FeedStore(userFeedQuery);
+        }
         return <StyleProvider style={getTheme(variables)}>
             {
                 (staticAssetsLoaded && authStatusReported) ?
@@ -87,7 +104,7 @@ export default class App extends React.Component<{}, AppState> {
                         isUserAuthenticated
                             ?
                                 (
-                                    <Provider store={new HomeStore()}>
+                                    <Provider {...{feedStore, profileStore, userFeedStore}} >
                                         <Home {...{onNavigationStateChange}} />
                                     </Provider>
                                 )

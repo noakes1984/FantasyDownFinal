@@ -5,6 +5,8 @@ import {observable, computed} from "mobx";
 import {Firebase} from "../components";
 import type {Feed, FeedEntry, Profile, Post} from "../components/Model";
 
+const DEFAULT_PAGE_SIZE = 10;
+
 const DEFAULT_PROFILE: Profile = {
     name: "John Doe",
     outline: "React Native",
@@ -14,71 +16,49 @@ const DEFAULT_PROFILE: Profile = {
         "preview": "data:image/gif;base64,R0lGODlhAQABAPAAAKyhmP///yH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=="
     }
 };
-const DEFAULT_PAGE_SIZE = 10;
 
-export default class HomeStore {
+export default class FeedStore {
 
     // eslint-disable-next-line flowtype/no-weak-types
     cursor: any;
     // eslint-disable-next-line flowtype/no-weak-types
     lastKnownEntry: any;
+    // eslint-disable-next-line flowtype/no-weak-types
+    query: any;
+
+    profiles: { [uid: string]: Profile } = {};
 
     @observable _feed: Feed;
-    @observable _profile: Profile;
-    @observable _userFeed: Post[];
 
     @computed get feed(): Feed { return this._feed; }
     set feed(feed: Feed) { this._feed = feed; }
 
-    @computed get profile(): Profile { return this._profile; }
-    set profile(profile: Profile) { this._profile = profile; }
-
-    @computed get userFeed(): Post[] { return this._userFeed; }
-    set userFeed(feed: Post[]) { this._userFeed = feed; }
-
-    constructor() {
+    // eslint-disable-next-line flowtype/no-weak-types
+    constructor(query: any) {
+        this.query = query;
         this.loadFeed();
-        this.initProfile();
-        this.initUserFeed();
-    }
-
-    async initProfile(): Promise<void> {
-        // Load Profile
-        const {uid} = Firebase.auth.currentUser;
-        Firebase.firestore.collection("users").doc(uid).onSnapshot(async snap => {
-            if (snap.exists) {
-                this.profile = snap.data();
-            } else {
-                await Firebase.firestore.collection("users").doc(uid).set(DEFAULT_PROFILE);
-                this.profile = DEFAULT_PROFILE;
-            }
-        });
     }
 
     async joinProfiles(posts: Post[]): Promise<FeedEntry[]> {
-        const feedPromises: Promise<FeedEntry>[] = [];
-        posts.forEach(post => {
-            feedPromises.push((async () => {
-                let profile: Profile;
-                try {
-                    const profileDoc = await Firebase.firestore.collection("users").doc(post.uid).get();
-                    profile = profileDoc.data();
-                } catch (e) {
-                    profile = DEFAULT_PROFILE;
-                }
-                return { post, profile };
-            })());
+        const uids = posts.map(post => post.uid).filter(uid => this.profiles[uid] === undefined);
+        const profilePromises = _.uniq(uids).map(uid => (async () => {
+            try {
+                const profileDoc = await Firebase.firestore.collection("users").doc(uid).get();
+                this.profiles[uid] =  profileDoc.data();
+            } catch (e) {
+                this.profiles[uid] = DEFAULT_PROFILE;
+            }
+        })());
+        await Promise.all(profilePromises);
+        return posts.map(post => {
+            const profile = this.profiles[post.uid];
+            return { profile, post };
         });
-        return await Promise.all(feedPromises);
     }
 
     async checkForNewEntriesInFeed(): Promise<void> {
         if (this.lastKnownEntry) {
-            const snap = await Firebase.firestore
-                .collection("feed")
-                .orderBy("timestamp", "desc")
-                .endBefore(this.lastKnownEntry)
-                .get();
+            const snap = await this.query.endBefore(this.lastKnownEntry).get();
             if (snap.docs.length === 0) {
                 return;
             }
@@ -93,7 +73,7 @@ export default class HomeStore {
     }
 
     async loadFeed(): Promise<void> {
-        let query = Firebase.firestore.collection("feed").orderBy("timestamp", "desc");
+        let query = this.query;
         if (this.cursor) {
             query = query.startAfter(this.cursor);
         }
@@ -114,16 +94,11 @@ export default class HomeStore {
         this.cursor = _.last(snap.docs);
     }
 
-    initUserFeed() {
-        const {uid} = Firebase.auth.currentUser;
-        Firebase.firestore
-        .collection("feed").where("uid", "==", uid).orderBy("timestamp", "desc")
-            .onSnapshot(async snap => {
-                const posts: Post[] = [];
-                snap.forEach(postDoc => {
-                    posts.push(postDoc.data());
-                });
-                this.userFeed = posts;
-            });
+    updateFeed(post: Post) {
+        this.feed.forEach((entry, index) => {
+            if (entry.post.id === post.id) {
+                this.feed[index].post = post;
+            }
+        });
     }
 }

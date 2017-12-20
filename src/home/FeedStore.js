@@ -19,6 +19,8 @@ const DEFAULT_PROFILE: Profile = {
 
 export default class FeedStore {
 
+    loading: boolean = false;
+
     // eslint-disable-next-line flowtype/no-weak-types
     cursor: any;
     // eslint-disable-next-line flowtype/no-weak-types
@@ -57,7 +59,11 @@ export default class FeedStore {
     }
 
     async checkForNewEntriesInFeed(): Promise<void> {
+        if (this.loading === true) {
+            return;
+        }
         if (this.lastKnownEntry) {
+            this.loading = true;
             const snap = await this.query.endBefore(this.lastKnownEntry).get();
             if (snap.docs.length === 0) {
                 if (!this.feed) {
@@ -70,12 +76,17 @@ export default class FeedStore {
                 posts.push(postDoc.data());
             });
             const feed = await this.joinProfiles(posts);
-            this.feed = _.uniqBy(feed.concat(this.feed.slice()), entry => entry.post.id);
+            this.feed = feed.concat(this.feed.slice());
             this.lastKnownEntry = snap.docs[0];
+            this.loading = false;
         }
     }
 
     async loadFeed(): Promise<void> {
+        if (this.loading === true) {
+            return;
+        }
+        this.loading = true;
         let query = this.query;
         if (this.cursor) {
             query = query.startAfter(this.cursor);
@@ -93,8 +104,9 @@ export default class FeedStore {
             this.feed = [];
             this.lastKnownEntry = snap.docs[0];
         }
-        this.feed = _.uniqBy(this.feed.concat(feed), entry => entry.post.id);
+        this.feed = this.feed.concat(feed); // _.uniqBy(this.feed.concat(feed), entry => entry.post.id);
         this.cursor = _.last(snap.docs);
+        this.loading = false;
     }
 
     updateFeed(post: Post) {

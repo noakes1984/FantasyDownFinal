@@ -1,14 +1,16 @@
 // @flow
 import autobind from "autobind-decorator";
 import * as React from "react";
-import {View, StyleSheet, Dimensions, FlatList, TouchableOpacity, SafeAreaView, Image} from "react-native";
+import {View, StyleSheet, Dimensions, TouchableOpacity, Image, Animated} from "react-native";
 import {Feather as Icon} from "@expo/vector-icons";
 import {inject, observer} from "mobx-react/native";
+import {Constants} from "expo";
 
 import ProfileStore from "../ProfileStore";
+import Feed from "../Feed";
 import FeedStore from "../FeedStore";
 
-import {Text, Avatar, Theme, RefreshIndicator, Post, FirstPost, Images} from "../../components";
+import {Text, Avatar, Theme, Images} from "../../components";
 import type {FeedEntry} from "../../components/Model";
 import type {ScreenProps} from "../../components/Types";
 
@@ -17,11 +19,18 @@ type InjectedProps = {
     userFeedStore: FeedStore
 };
 
+type ProfileState = {
+    scrollAnimation: Animated.Value
+};
+
 @inject("profileStore", "userFeedStore") @observer
-export default class ProfileComp extends React.Component<ScreenProps<> & InjectedProps> {
+export default class ProfileComp extends React.Component<ScreenProps<> & InjectedProps, ProfileState> {
 
     componentWillMount() {
         this.props.userFeedStore.checkForNewEntriesInFeed();
+        this.setState({
+            scrollAnimation: new Animated.Value(0)
+        });
     }
 
     @autobind
@@ -40,113 +49,87 @@ export default class ProfileComp extends React.Component<ScreenProps<> & Injecte
         return item.post.id;
     }
 
-    renderHeader(): React.Node {
-        const {profile} = this.props.profileStore;
-        return (
-            <View style={styles.header}>
-                <Image style={styles.cover} source={Images.cover} />
-                <View style={styles.settings}>
-                {
-                    profile && (
-                        <TouchableOpacity onPress={this.settings}>
-                            <View>
-                                <Icon name="settings" size={25} color="white" />
-                            </View>
-                        </TouchableOpacity>
-                    )
-                }
-                </View>
-                {
-                    profile && (
-                        <View style={styles.headerContent}>
-                            <View style={styles.title}>
-                                <Text type="large" style={styles.outline}>{profile.outline}</Text>
-                                <Text type="header2" style={styles.name}>{profile.name}</Text>
-                            </View>
-                            <Avatar size={avatarSize} style={styles.avatar} {...profile.picture} />
-                        </View>
-                    )
-                }
-            </View>
-        );
-    }
-
     render(): React.Node {
-        const {navigation, userFeedStore} = this.props;
-        const {feed} = userFeedStore;
-        const loading = feed === undefined;
+        const {navigation, userFeedStore, profileStore} = this.props;
+        const {profile} = profileStore;
+        const {scrollAnimation} = this.state;
+        const height = scrollAnimation.interpolate({
+            inputRange: [0, 0, 100, 100],
+            outputRange: [width, width, statusBarHeight + 100, statusBarHeight + 100]
+        });
+        const opacity = scrollAnimation.interpolate({
+            inputRange: [0, 0, 100, 100],
+            outputRange: [1, 1, 0, 0]
+        });
         return (
-            <SafeAreaView style={styles.container}>
-                <FlatList
-                    showsVerticalScrollIndicator={false}
-                    style={styles.list}
-                    data={feed}
-                    keyExtractor={item => item.post.id}
-                    scrollEventThrottle={1}
-                    onEndReached={this.loadMore}
-                    renderItem={({ item }) => (
-                        <View style={styles.post}>
-                            <Post
-                                post={item.post}
-                                profile={item.profile}
-                                onUpdate={post => userFeedStore.updateFeed(post)} {...{navigation}}
-                            />
+            <View style={styles.container}>
+                <Animated.View style={[styles.header, { height } ]}>
+                    <AnimatedImage style={[styles.cover, { height }]} source={Images.cover} />
+                    <TouchableOpacity onPress={this.settings} style={styles.settings}>
+                        <View>
+                            <Icon name="settings" size={25} color="white" />
                         </View>
+                    </TouchableOpacity>
+                    <Animated.View style={[styles.title, { opacity }]}>
+                        <Text type="large" style={styles.outline}>{profile.outline}</Text>
+                        <Text type="header2" style={styles.name}>{profile.name}</Text>
+                    </Animated.View>
+                    <Avatar size={avatarSize} style={styles.avatar} {...profile.picture} />
+                </Animated.View>
+                <Feed
+                    store={userFeedStore}
+                    onScroll={Animated.event(
+                        [{
+                            nativeEvent: {
+                                contentOffset: {
+                                    y: scrollAnimation
+                                }
+                            }
+                        }]
                     )}
-                    ListEmptyComponent={(
-                        <View style={styles.post}>
-                            {loading ? <RefreshIndicator refreshing={true} /> : <FirstPost {...{navigation}} />}
-                        </View>
-                    )}
-                    ListHeaderComponent={this.renderHeader()}
+                    {...{navigation}}
                 />
-            </SafeAreaView>
+            </View>
         );
     }
 }
 
 const avatarSize = 100;
 const {width} = Dimensions.get("window");
+const {statusBarHeight} = Constants;
+const AnimatedImage = Animated.createAnimatedComponent(Image);
 const styles = StyleSheet.create({
     container: {
         flex: 1
     },
     header: {
-        marginBottom: 50
-    },
-    headerContent: {
-        ...StyleSheet.absoluteFillObject
+        marginBottom: avatarSize * 0.5 + Theme.spacing.small
     },
     cover: {
-        height: width
+        ...StyleSheet.absoluteFillObject,
+        width
     },
     avatar: {
         position: "absolute",
         right: Theme.spacing.small,
-        bottom: -50
+        bottom: - avatarSize * 0.5
+    },
+    settings: {
+        position: "absolute",
+        top: statusBarHeight + Theme.spacing.small,
+        right: Theme.spacing.base,
+        backgroundColor: "transparent",
+        zIndex: 10000
     },
     title: {
         position: "absolute",
         left: Theme.spacing.small,
         bottom: 50 + Theme.spacing.small
     },
-    settings: {
-        position: "absolute",
-        top: Theme.spacing.small,
-        right: Theme.spacing.base,
-        backgroundColor: "transparent",
-        zIndex: 10000
-    },
     outline: {
         color: "rgba(255, 255, 255, 0.8)"
     },
     name: {
         color: "white"
-    },
-    list: {
-        paddingBottom: 57 + Theme.spacing.small
-    },
-    post: {
-        paddingHorizontal: Theme.spacing.small
     }
 });

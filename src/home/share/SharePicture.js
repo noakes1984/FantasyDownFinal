@@ -7,7 +7,7 @@ import {
 } from "react-native";
 
 import {
-    Container, NavHeader, Button, Theme, RefreshIndicator, Firebase, NavigationHelpers, ImageUpload
+    Container, NavHeader, Button, Theme, RefreshIndicator, Firebase, NavigationHelpers, ImageUpload, serializeException
 } from "../../components";
 
 import type {ScreenParams} from "../../components/Types";
@@ -53,7 +53,9 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
             await Firebase.firestore.collection("feed").doc(id).set(post);
             NavigationHelpers.reset(navigation, "Home");
         } catch(e) {
-            alert(e);
+            const message = serializeException(e);
+            alert(message);
+            this.setState({ loading: false });
         }
     }
 

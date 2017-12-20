@@ -18,4 +18,15 @@ export {default as RefreshIndicator} from "./RefreshIndicator";
 export {default as NavHeader} from "./NavHeader";
 export {default as Firebase} from "./Firebase";
 export {default as FirstPost} from "./FirstPost";
-export {default as ImageUpload} from "./ImageUpload"
+export {default as ImageUpload} from "./ImageUpload";
+
+export const serializeException = (e: string | {}): string => {
+    if (typeof e === "string") {
+        return e;
+    } else if (e.message) {
+        // $FlowFixMe
+        return e.message;
+    } else {
+        return JSON.stringify(e);
+    }
+}

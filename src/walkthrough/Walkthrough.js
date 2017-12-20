@@ -35,7 +35,8 @@ export default class Walkthrough extends React.Component<ScreenProps<>> {
 
     @autobind
     onIndexChanged(index: number) {
-        slides[index].makeVisible();
+        slides.filter((slide, i) => index !== i).forEach(slide => slide.hide());
+        slides[index].show();
     }
 
     render(): React.Node {
@@ -56,6 +57,7 @@ export default class Walkthrough extends React.Component<ScreenProps<>> {
 
 /*
 */
+let connect: Connect;
 let chat: Chat;
 let share: Share;
 
@@ -63,20 +65,23 @@ const slides = [
     {
         title: "Connect",
         description: "Bring your friends closer by building a network of the people you love.",
-        icon: <Connect />,
-        makeVisible: () => true
+        icon: <Connect ref={ref => ref ? connect = ref : undefined} />,
+        show: () => connect.show(),
+        hide: () => connect.hide()
     },
     {
         title: "Chat",
         description: "Send messages and stay up to date with friends whenever you need to.",
         icon: <Chat ref={ref => ref ? chat = ref : undefined} />,
-        makeVisible: () => chat.makeVisible()
+        show: () => chat.show(),
+        hide: () => chat.hide()
     },
     {
         title: "Share",
         description: "Send your best selfies and show friends what you’re up to.",
         icon: <Share ref={ref => ref ? share = ref : undefined} />,
-        makeVisible: () => share.makeVisible()
+        show: () => share.show(),
+        hide: () => share.hide()
     }
 ];
 const styles = StyleSheet.create({

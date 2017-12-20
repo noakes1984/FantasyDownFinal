@@ -5,7 +5,7 @@ import {StyleSheet, View, TouchableWithoutFeedback, Image} from "react-native";
 import {ImagePicker} from "expo";
 import {Content} from "native-base";
 
-import {NavHeader, Firebase, Button, TextField, Theme, ImageUpload} from "../../components";
+import {NavHeader, Firebase, Button, TextField, Theme, ImageUpload, serializeException} from "../../components";
 import type {ScreenParams} from "../../components/Types";
 import type {Profile} from "../../components/Model";
 import type {Picture} from "../../components/ImageUpload";
@@ -55,7 +55,8 @@ export default class Settings extends React.Component<ScreenParams<{ profile: Pr
             }
             navigation.goBack();
         } catch(e) {
-            alert(e);
+            const message = serializeException(e);
+            alert(message);
             this.setState({ loading: false });
         }
     }

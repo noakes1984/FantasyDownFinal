@@ -2,19 +2,15 @@
 import autobind from "autobind-decorator";
 import * as React from "react";
 import moment from "moment"
-import {FlatList, StyleSheet, View, Animated, SafeAreaView, TouchableWithoutFeedback} from "react-native";
+import {StyleSheet, View, Animated, SafeAreaView, TouchableWithoutFeedback} from "react-native";
 import {inject, observer} from "mobx-react/native";
 
+import Feed from "../Feed";
 import FeedStore from "../FeedStore";
 import ProfileStore from "../ProfileStore";
 
-import {Text, Theme, Avatar, RefreshIndicator, Post} from "../../components";
+import {Text, Theme, Avatar} from "../../components";
 import type {ScreenProps} from "../../components/Types";
-import type {FeedEntry} from "../../components/Model";
-
-type FlatListItem<T> = {
-    item: T
-};
 
 const AnimatedText = Animated.createAnimatedComponent(Text);
 const AnimatedSafeAreaView = Animated.createAnimatedComponent(SafeAreaView);
@@ -36,25 +32,6 @@ export default class Explore extends React.Component<ScreenProps<> & InjectedPro
         this.props.navigation.navigate("Profile");
     }
 
-    @autobind
-    loadMore() {
-        this.props.feedStore.loadFeed();
-    }
-
-    @autobind
-    renderItem({ item }: FlatListItem<FeedEntry>): React.Node {
-        const {navigation, feedStore} = this.props;
-        const {post, profile} = item;
-        return (
-            <Post onUpdate={post => feedStore.updateFeed(post)} {...{navigation, post, profile}} />
-        );
-    }
-
-    @autobind
-    keyExtractor(item: FeedEntry): string {
-        return item.post.id;
-    }
-
     async componentWillMount(): Promise<void> {
         this.props.feedStore.checkForNewEntriesInFeed();
         this.setState({
@@ -63,9 +40,8 @@ export default class Explore extends React.Component<ScreenProps<> & InjectedPro
     }
 
     render(): React.Node {
-        const {feedStore, profileStore} = this.props;
+        const {feedStore, profileStore, navigation} = this.props;
         const {scrollAnimation} = this.state;
-        const {feed} = feedStore;
         const {profile} = profileStore;
         const opacity = scrollAnimation.interpolate({
             inputRange: [0, 60],
@@ -118,14 +94,8 @@ export default class Explore extends React.Component<ScreenProps<> & InjectedPro
                         ) }
                     </Animated.View>
                 </AnimatedSafeAreaView>
-                <FlatList
-                    showsVerticalScrollIndicator={false}
-                    style={styles.list}
-                    data={feed}
-                    keyExtractor={this.keyExtractor}
-                    renderItem={this.renderItem}
-                    scrollEventThrottle={1}
-                    onEndReached={this.loadMore}
+                <Feed
+                    store={feedStore}
                     onScroll={Animated.event(
                         [{
                             nativeEvent: {
@@ -135,7 +105,7 @@ export default class Explore extends React.Component<ScreenProps<> & InjectedPro
                             }
                         }]
                     )}
-                    {...{ ListEmptyComponent }}
+                    {...{navigation}}
                 />
             </View>
         );
@@ -160,10 +130,5 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-    },
-    list: {
-        paddingHorizontal: Theme.spacing.small
     }
 });
-
-const ListEmptyComponent = <RefreshIndicator refreshing={true} />;

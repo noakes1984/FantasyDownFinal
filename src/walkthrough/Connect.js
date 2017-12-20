@@ -7,6 +7,9 @@ import {AnimatedView} from "../components";
 import type {BaseProps} from "../components/Types";
 
 type NoProps = {};
+type VisibleState = {
+    visible: boolean
+};
 
 class Phone extends React.Component<BaseProps> {
     render(): React.Node {
@@ -28,9 +31,25 @@ class Mac extends React.Component<BaseProps> {
     }
 }
 
-export default class Connect extends React.Component<NoProps> {
+export default class Connect extends React.Component<NoProps, VisibleState> {
+
+    show() {
+        this.setState({ visible: true });
+    }
+
+    hide() {
+        this.setState({ visible: false });
+    }
+
+    componentWillMount() {
+        this.setState({ visible: true });
+    }
 
     render(): React.Node {
+        const {visible} = this.state;
+        if (!visible) {
+            return <View />;
+        }
         return (
             <View style={styles.container}>
                 <Phone />

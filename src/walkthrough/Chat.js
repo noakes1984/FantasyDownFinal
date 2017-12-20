@@ -34,7 +34,11 @@ type VisibleState = {
 
 export default class Chat extends React.Component<NoProps, VisibleState> {
 
-    makeVisible() {
+    hide() {
+        this.setState({ visible: false });
+    }
+
+    show() {
         this.setState({ visible: true });
     }
 

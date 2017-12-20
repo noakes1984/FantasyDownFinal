@@ -12,7 +12,11 @@ type ShareState = {
 
 export default class Share extends React.Component<NoProps, ShareState> {
 
-    makeVisible() {
+    hide() {
+        this.setState({ visible: false });
+    }
+
+    show() {
         this.setState({ visible: true });
     }
 

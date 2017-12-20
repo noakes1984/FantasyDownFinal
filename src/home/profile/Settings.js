@@ -4,6 +4,7 @@ import * as React from "react";
 import {StyleSheet, View, TouchableWithoutFeedback, Image} from "react-native";
 import {ImagePicker} from "expo";
 import {Content} from "native-base";
+import { Feather as Icon } from "@expo/vector-icons";
 
 import {NavHeader, Firebase, Button, TextField, Theme, ImageUpload, serializeException} from "../../components";
 import type {ScreenParams} from "../../components/Types";
@@ -90,10 +91,11 @@ export default class Settings extends React.Component<ScreenParams<{ profile: Pr
             <View style={styles.container}>
                 <NavHeader title="Settings" back={true} {...{navigation}} />
                 <Content style={styles.content}>
-                    <View style={styles.avatar}>
+                    <View style={styles.avatarContainer}>
                         <TouchableWithoutFeedback onPress={this.setPicture}>
-                            <View>
+                            <View style={styles.avatar}>
                                 <Image style={styles.profilePic} source={{ uri: picture.uri }} />
+                                <Icon name="camera" size={25} color="white" style={styles.editIcon} />
                             </View>
                         </TouchableWithoutFeedback>
                     </View>
@@ -121,14 +123,27 @@ const styles = StyleSheet.create({
     content: {
         marginHorizontal: Theme.spacing.base
     },
-    avatar: {
-        marginVertical: Theme.spacing.base,
+    avatarContainer: {
         alignItems: "center"
     },
+    avatar: {
+        marginVertical: Theme.spacing.base,
+        alignItems: "center",
+        height: 100,
+        width: 100
+    },
     profilePic: {
+        position: "absolute",
+        top: 0,
+        left: 0,
         height: 100,
         width: 100,
         resizeMode: "cover",
         borderRadius: 50
+    },
+    editIcon: {
+        position: "absolute",
+        top: 50 - 12.5,
+        left: 50 - 12.5
     }
 });

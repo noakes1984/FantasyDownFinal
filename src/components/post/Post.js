@@ -5,7 +5,7 @@ import {StyleSheet, View, Dimensions, Platform} from "react-native";
 
 import LikesAndComments from "./LikesAndComments";
 
-import Firebase from "../Firebase";
+import FeedStore from "../FeedStore";
 import Text from "../Text";
 import Avatar from "../Avatar";
 import {Theme} from "../Theme";
@@ -17,34 +17,34 @@ import type {NavigationProps} from "../Types";
 type PostProps = NavigationProps<> & {
     post: Post,
     profile: Profile,
-    onUpdate: Post => void
+    store: FeedStore
 };
 
 type PostState = {
-    post: Post
+    post: Post,
+    profile: Profile
 };
 
 export default class PostComp extends React.Component<PostProps, PostState> {
 
-    unsubscribe: () => void;
+    unsubscribeToPost: () => void;
+    unsubscribeToProfile: () => void;
 
     componentWillMount() {
-        const {post, onUpdate} = this.props;
-        this.setState({ post });
-        this.unsubscribe = Firebase.firestore.collection("feed").where("id", "==", post.id).onSnapshot(async snap => {
-            const newPost = snap.docs[0].data();
-            this.setState({ post: newPost });
-            onUpdate(newPost);
-        });
+        const {post, profile, store} = this.props;
+        this.setState({ post, profile });
+        this.unsubscribeToPost = store.subscribeToPost(post.id, post => this.setState({ post }));
+        this.unsubscribeToProfile = store.subscribeToProfile(post.uid, profile => this.setState({ profile }));
     }
 
     componentWillUnmount() {
-        this.unsubscribe();
+        this.unsubscribeToPost();
+        this.unsubscribeToProfile();
     }
 
     render(): React.Node {
-        const {navigation, profile} = this.props;
-        const {post} = this.state;
+        const {navigation} = this.props;
+        const {post, profile} = this.state;
         const {likes, comments} = post;
         const contentStyle = [styles.content];
         const nameStyle = [styles.name];

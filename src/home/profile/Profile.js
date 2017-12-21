@@ -7,10 +7,8 @@ import {inject, observer} from "mobx-react/native";
 import {Constants} from "expo";
 
 import ProfileStore from "../ProfileStore";
-import Feed from "../Feed";
-import FeedStore from "../FeedStore";
 
-import {Text, Avatar, Theme, Images} from "../../components";
+import {Text, Avatar, Theme, Images, Feed, FeedStore} from "../../components";
 import type {FeedEntry} from "../../components/Model";
 import type {ScreenProps} from "../../components/Types";
 

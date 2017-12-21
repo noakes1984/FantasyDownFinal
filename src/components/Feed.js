@@ -39,7 +39,7 @@ export default class Feed extends React.Component<FeedProps> {
         const {navigation, store} = this.props;
         const {post, profile} = item;
         return (
-            <Post onUpdate={post => store.updateFeed(post)} {...{navigation, post, profile}} />
+            <Post {...{navigation, post, store, profile}} />
         );
     }
 

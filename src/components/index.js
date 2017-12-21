@@ -19,6 +19,8 @@ export {default as NavHeader} from "./NavHeader";
 export {default as Firebase} from "./Firebase";
 export {default as FirstPost} from "./FirstPost";
 export {default as ImageUpload} from "./ImageUpload";
+export {default as Feed} from "./Feed";
+export {default as FeedStore} from "./FeedStore";
 
 export const serializeException = (e: string | {}): string => {
     if (typeof e === "string") {

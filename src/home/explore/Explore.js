@@ -5,11 +5,9 @@ import moment from "moment"
 import {StyleSheet, View, Animated, SafeAreaView, TouchableWithoutFeedback} from "react-native";
 import {inject, observer} from "mobx-react/native";
 
-import Feed from "../Feed";
-import FeedStore from "../FeedStore";
 import ProfileStore from "../ProfileStore";
 
-import {Text, Theme, Avatar} from "../../components";
+import {Text, Theme, Avatar, Feed, FeedStore} from "../../components";
 import type {ScreenProps} from "../../components/Types";
 
 const AnimatedText = Animated.createAnimatedComponent(Text);

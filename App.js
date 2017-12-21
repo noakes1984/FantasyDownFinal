@@ -9,12 +9,12 @@ import {useStrict} from "mobx";
 import {Provider} from "mobx-react/native";
 import {Feather} from "@expo/vector-icons";
 
-import {Images, Firebase} from "./src/components";
+import {Images, Firebase, FeedStore} from "./src/components";
 import {Welcome} from "./src/welcome";
 import {Walkthrough} from "./src/walkthrough";
 import {SignUpName, SignUpEmail, SignUpPassword, Login} from "./src/sign-up";
 import {
-    Profile, Explore, Share, SharePicture, HomeTab, Comments, Settings, FeedStore, ProfileStore
+    Profile, Explore, Share, SharePicture, HomeTab, Comments, Settings, ProfileStore
 } from "./src/home";
 
 import getTheme from "./native-base-theme/components";

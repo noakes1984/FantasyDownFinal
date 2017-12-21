@@ -68,7 +68,8 @@ const styles = StyleSheet.create({
     },
     row: {
         flexDirection: "row",
-        alignItems: "center"
+        alignItems: "center",
+        marginVertical: Theme.spacing.tiny
     },
     header: {
         color: "white"

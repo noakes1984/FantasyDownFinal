@@ -7,6 +7,7 @@ import {StackNavigator, TabNavigator} from "react-navigation";
 import {Font, AppLoading} from "expo";
 import {useStrict} from "mobx";
 import {Provider} from "mobx-react/native";
+import {Feather} from "@expo/vector-icons";
 
 import {Images, Firebase} from "./src/components";
 import {Welcome} from "./src/welcome";
@@ -65,7 +66,8 @@ export default class App extends React.Component<{}, AppState> {
 
     async loadStaticResources(): Promise<void> {
         try {
-            await Font.loadAsync({
+            const images = Images.downloadAsync();
+            const fonts = Font.loadAsync({
                 "SFProText-Medium": require("./fonts/SF-Pro-Text-Medium.otf"),
                 "SFProText-Heavy": require("./fonts/SF-Pro-Text-Heavy.otf"),
                 "SFProText-Bold": require("./fonts/SF-Pro-Text-Bold.otf"),
@@ -73,7 +75,8 @@ export default class App extends React.Component<{}, AppState> {
                 "SFProText-Regular": require("./fonts/SF-Pro-Text-Regular.otf"),
                 "SFProText-Light": require("./fonts/SF-Pro-Text-Light.otf")
             });
-            await Images.downloadAsync();
+            const icons = Font.loadAsync(Feather.font);
+            await Promise.all([...images, fonts, icons]);
             this.setState({ staticAssetsLoaded: true });
         } catch(error) {
             console.error(error);

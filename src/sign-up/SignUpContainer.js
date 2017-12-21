@@ -30,8 +30,8 @@ export default class SignUpContainer extends React.Component<SignUpContainerProp
     render(): React.Node {
         const {title, subtitle, next, children, nextLabel, loading} = this.props;
         return (
-            <Container gutter={2}>
-                <Content>
+            <Container gutter={1}>
+                <Content style={styles.content}>
                     <View style={styles.innerContainer}>
                         <View>
                             <Text type="large">{subtitle}</Text>
@@ -51,8 +51,11 @@ export default class SignUpContainer extends React.Component<SignUpContainerProp
 
 const {height} = Dimensions.get("window");
 const styles = StyleSheet.create({
+    content: {
+        padding: Theme.spacing.base
+    },
     innerContainer: {
-        height: height - Theme.spacing.base * 2 * 2,
+        height: height - Theme.spacing.base * 2,
         justifyContent: "center"
     }
 });

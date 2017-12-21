@@ -54,11 +54,11 @@ export default class ProfileComp extends React.Component<ScreenProps<> & Injecte
         const {profile} = profileStore;
         const {scrollAnimation} = this.state;
         const height = scrollAnimation.interpolate({
-            inputRange: [0, 0, 100, 100],
+            inputRange: [0, 0, width, width],
             outputRange: [width, width, statusBarHeight + 100, statusBarHeight + 100]
         });
         const opacity = scrollAnimation.interpolate({
-            inputRange: [0, 0, 100, 100],
+            inputRange: [width - 100, width - 100, width, width],
             outputRange: [1, 1, 0, 0]
         });
         return (

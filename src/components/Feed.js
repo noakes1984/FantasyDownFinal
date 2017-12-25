@@ -1,7 +1,7 @@
 // @flow
 import autobind from "autobind-decorator";
 import * as React from "react";
-import {StyleSheet, FlatList} from "react-native";
+import {StyleSheet, View, FlatList, SafeAreaView} from "react-native";
 import {observer} from "mobx-react/native";
 
 import FeedStore from "./FeedStore";
@@ -18,7 +18,9 @@ type FlatListItem<T> = {
 
 type FeedProps = NavigationProps<> & {
     store: FeedStore,
-    onScroll: ?AnimatedEvent | ?() => void
+    onScroll?: AnimatedEvent | () => void,
+    bounce?: boolean,
+    ListHeaderComponent?: React.Node
 };
 
 @observer
@@ -39,33 +41,42 @@ export default class Feed extends React.Component<FeedProps> {
         const {navigation, store} = this.props;
         const {post, profile} = item;
         return (
-            <Post {...{navigation, post, store, profile}} />
+            <View style={styles.post}>
+                <Post {...{navigation, post, store, profile}} />
+            </View>
         );
     }
 
     render(): React.Node {
-        const {onScroll, store, navigation} = this.props;
+        const {onScroll, store, navigation, bounce, ListHeaderComponent} = this.props;
         const {feed} = store;
         const loading = feed === undefined;
         return (
+            <SafeAreaView style={styles.list}>
             <FlatList
                 showsVerticalScrollIndicator={false}
-                style={styles.list}
                 data={feed}
                 keyExtractor={this.keyExtractor}
                 renderItem={this.renderItem}
                 onEndReachedThreshold={0.5}
                 onEndReached={this.loadMore}
-                ListEmptyComponent={loading ? <RefreshIndicator /> : <FirstPost {...{navigation}} />}
-                {...{ onScroll }}
+                ListEmptyComponent={(
+                    <View style={styles.post}>
+                    {loading ? <RefreshIndicator /> : <FirstPost {...{navigation}} />}
+                    </View>
+                )}
+                {...{ onScroll, bounce, ListHeaderComponent }}
             />
+            </SafeAreaView>
         );
     }
 }
 
 const styles = StyleSheet.create({
     list: {
-        flex: 1,
+        flex: 1
+    },
+    post: {
         paddingHorizontal: Theme.spacing.small
     }
 });

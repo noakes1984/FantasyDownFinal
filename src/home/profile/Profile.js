@@ -17,18 +17,11 @@ type InjectedProps = {
     userFeedStore: FeedStore
 };
 
-type ProfileState = {
-    scrollAnimation: Animated.Value
-};
-
 @inject("profileStore", "userFeedStore") @observer
-export default class ProfileComp extends React.Component<ScreenProps<> & InjectedProps, ProfileState> {
+export default class ProfileComp extends React.Component<ScreenProps<> & InjectedProps> {
 
     componentWillMount() {
         this.props.userFeedStore.checkForNewEntriesInFeed();
-        this.setState({
-            scrollAnimation: new Animated.Value(0)
-        });
     }
 
     @autobind
@@ -50,44 +43,27 @@ export default class ProfileComp extends React.Component<ScreenProps<> & Injecte
     render(): React.Node {
         const {navigation, userFeedStore, profileStore} = this.props;
         const {profile} = profileStore;
-        const {scrollAnimation} = this.state;
-        const height = scrollAnimation.interpolate({
-            inputRange: [0, 0, width, width],
-            outputRange: [width, width, statusBarHeight + 100, statusBarHeight + 100]
-        });
-        const opacity = scrollAnimation.interpolate({
-            inputRange: [width - 100, width - 100, width, width],
-            outputRange: [1, 1, 0, 0]
-        });
         return (
-            <View style={styles.container}>
-                <Animated.View style={[styles.header, { height } ]}>
-                    <AnimatedImage style={[styles.cover, { height }]} source={Images.cover} />
-                    <TouchableOpacity onPress={this.settings} style={styles.settings}>
-                        <View>
-                            <Icon name="settings" size={25} color="white" />
+            <Feed
+                bounce={false}
+                ListHeaderComponent={(
+                    <View style={styles.header}>
+                        <AnimatedImage style={styles.cover} source={Images.cover} />
+                        <TouchableOpacity onPress={this.settings} style={styles.settings}>
+                            <View>
+                                <Icon name="settings" size={25} color="white" />
+                            </View>
+                        </TouchableOpacity>
+                        <View style={styles.title}>
+                            <Text type="large" style={styles.outline}>{profile.outline}</Text>
+                            <Text type="header2" style={styles.name}>{profile.name}</Text>
                         </View>
-                    </TouchableOpacity>
-                    <Animated.View style={[styles.title, { opacity }]}>
-                        <Text type="large" style={styles.outline}>{profile.outline}</Text>
-                        <Text type="header2" style={styles.name}>{profile.name}</Text>
-                    </Animated.View>
-                    <Avatar size={avatarSize} style={styles.avatar} {...profile.picture} />
-                </Animated.View>
-                <Feed
-                    store={userFeedStore}
-                    onScroll={Animated.event(
-                        [{
-                            nativeEvent: {
-                                contentOffset: {
-                                    y: scrollAnimation
-                                }
-                            }
-                        }]
-                    )}
-                    {...{navigation}}
-                />
-            </View>
+                        <Avatar size={avatarSize} style={styles.avatar} {...profile.picture} />
+                    </View>
+                )}
+                store={userFeedStore}
+                {...{navigation}}
+            />
         );
     }
 }
@@ -97,15 +73,12 @@ const {width} = Dimensions.get("window");
 const {statusBarHeight} = Constants;
 const AnimatedImage = Animated.createAnimatedComponent(Image);
 const styles = StyleSheet.create({
-    container: {
-        flex: 1
-    },
     header: {
         marginBottom: avatarSize * 0.5 + Theme.spacing.small
     },
     cover: {
-        ...StyleSheet.absoluteFillObject,
-        width
+        width,
+        height: width
     },
     avatar: {
         position: "absolute",

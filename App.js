@@ -2,6 +2,7 @@
 /* eslint-disable no-console */
 import autobind from "autobind-decorator";
 import * as React from "react";
+import {StatusBar, Platform} from "react-native";
 import {StyleProvider} from "native-base";
 import {StackNavigator, TabNavigator} from "react-navigation";
 import {Font, AppLoading} from "expo";
@@ -54,6 +55,10 @@ export default class App extends React.Component<{}, AppState> {
     };
 
     componentWillMount() {
+        StatusBar.setBarStyle("dark-content");
+        if (Platform.OS === "android") {
+            StatusBar.setBackgroundColor("white");
+        }
         this.loadStaticResources();
         Firebase.init();
         Firebase.auth.onAuthStateChanged(user => {

@@ -1,7 +1,7 @@
 // @flow
 import autobind from "autobind-decorator";
 import * as React from "react";
-import {View, StyleSheet, SafeAreaView} from "react-native";
+import {View, StyleSheet, SafeAreaView, StatusBar, Platform} from "react-native";
 import Swiper from "react-native-swiper";
 
 import Slide from "./Slide";
@@ -14,8 +14,19 @@ import type {ScreenProps} from "../components/Types";
 
 export default class Walkthrough extends React.Component<ScreenProps<>> {
 
+    componentWillMount() {
+        StatusBar.setBarStyle("light-content");
+        if (Platform.OS === "android") {
+            StatusBar.setBackgroundColor("#0059FF");
+        }
+    }
+
     home() {
         const {navigation} = this.props;
+        StatusBar.setBarStyle("dark-content");
+        if (Platform.OS === "android") {
+            StatusBar.setBackgroundColor("white");
+        }
         navigation.navigate("Home");
     }
 

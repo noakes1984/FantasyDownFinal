@@ -83,13 +83,15 @@ export default class Explore extends React.Component<ScreenProps<> & InjectedPro
                             {moment().format("dddd")}
                             </AnimatedText>
                         </View>
-                        { profile && (
-                            <TouchableWithoutFeedback onPress={this.profile}>
-                                <View>
-                                    <Avatar {...profile.picture} />
-                                </View>
-                            </TouchableWithoutFeedback>
-                        ) }
+                        {
+                            profile && (
+                                <TouchableWithoutFeedback onPress={this.profile}>
+                                    <View>
+                                        <Avatar {...profile.picture} />
+                                    </View>
+                                </TouchableWithoutFeedback>
+                            )
+                        }
                     </Animated.View>
                 </AnimatedSafeAreaView>
                 <Feed
@@ -127,6 +129,6 @@ const styles = StyleSheet.create({
         marginVertical: Theme.spacing.tiny,
         flexDirection: "row",
         justifyContent: "space-between",
-        alignItems: "center",
+        alignItems: "center"
     }
 });

@@ -34,18 +34,22 @@ export default class SmartImage extends React.Component<SmartImageProps> {
 
     async componentWillMount(): Promise<void> {
         const {preview, uri} = this.props;
-        const entry = await getCacheEntry(uri);
-        if (!entry.exists) {
-            if (preview) {
-                this.uri = preview;
+        try {
+            const entry = await getCacheEntry(uri);
+            if (!entry.exists) {
+                if (preview && Platform.OS === "ios") {
+                    this.uri = preview;
+                }
+                if (uri.startsWith("file://")) {
+                    await FileSystem.copyAsync({ from: uri, to: entry.path });
+                } else {
+                    await FileSystem.downloadAsync(uri, entry.path);
+                }
             }
-            if (uri.startsWith("file://")) {
-                await FileSystem.copyAsync({ from: uri, to: entry.path });
-            } else {
-                await FileSystem.downloadAsync(uri, entry.path);
-            }
+            this.uri = entry.path;
+        } catch(e) {
+            this.uri = uri;
         }
-        this.uri = entry.path;
     }
 
     onLoadEnd(uri: string) {

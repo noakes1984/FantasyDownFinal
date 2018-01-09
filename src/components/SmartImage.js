@@ -23,6 +23,8 @@ const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
 @observer
 export default class SmartImage extends React.Component<SmartImageProps> {
 
+    static downloads: { [uri: string]: boolean } = {};
+
     @observable _uri: string;
     @observable _intensity: Animated.Value = new Animated.Value(100);
 
@@ -41,12 +43,20 @@ export default class SmartImage extends React.Component<SmartImageProps> {
                     this.uri = preview;
                 }
                 if (uri.startsWith("file://")) {
+                    SmartImage.downloads[entry.path] = true;
                     await FileSystem.copyAsync({ from: uri, to: entry.path });
+                    SmartImage.downloads[entry.path] = false;
                 } else {
+                    SmartImage.downloads[entry.path] = true;
                     await FileSystem.downloadAsync(uri, entry.path);
+                    SmartImage.downloads[entry.path] = false;
                 }
+                this.uri = entry.path;
+            } else if (SmartImage.downloads[entry.path] === true) {
+                this.uri = uri;
+            } else {
+                this.uri = entry.path;
             }
-            this.uri = entry.path;
         } catch(e) {
             this.uri = uri;
         }

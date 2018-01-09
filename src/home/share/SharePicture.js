@@ -7,7 +7,8 @@ import {
 } from "react-native";
 
 import {
-    Container, NavHeader, Button, Theme, RefreshIndicator, Firebase, NavigationHelpers, ImageUpload, serializeException
+    Container, NavHeader, Button, Theme, RefreshIndicator, Firebase, NavigationHelpers, ImageUpload, serializeException,
+    Text
 } from "../../components";
 
 import type {ScreenParams} from "../../components/Types";
@@ -15,6 +16,7 @@ import type {Post} from "../../components/Model";
 import type {Picture} from "../../components/ImageUpload";
 
 type SharePictureState = {
+    loadingLabel: string,
     loading: boolean,
     caption: string
 };
@@ -22,7 +24,7 @@ type SharePictureState = {
 export default class SharePicture extends React.Component<ScreenParams<Picture>, SharePictureState> {
 
     componentWillMount() {
-        this.setState({ loading: false, caption: "" });
+        this.setState({ loading: false, loadingLabel: "", caption: "" });
     }
 
     @autobind
@@ -34,9 +36,13 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
         const id = ImageUpload.uid();
         const name = `${id}.jpg`;
         try {
+            this.setState({ loadingLabel: "Building preview..." });
             const preview = await ImageUpload.preview(picture);
+            this.setState({ loadingLabel: "Uploading picture..." });
             await ImageUpload.upload(picture, name);
+            this.setState({ loadingLabel: "Fetching metadata..." });
             const url = await Firebase.storage.ref(name).getDownloadURL();
+            this.setState({ loadingLabel: "Saving Post..." });
             const {uid} = Firebase.auth.currentUser;
             const post: Post = {
                 id,
@@ -67,12 +73,13 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
     render(): React.Node {
         const {onPress, onChangeText} = this;
         const {navigation} = this.props;
-        const {loading} = this.state;
+        const {loading, loadingLabel} = this.state;
         const source = navigation.state.params;
         if (loading) {
             return (
                 <View style={styles.loading}>
                     <RefreshIndicator />
+                    <Text>{loadingLabel}</Text>
                 </View>
             )
         }
@@ -101,7 +108,8 @@ const {width} = Dimensions.get("window");
 const styles = StyleSheet.create({
     loading: {
         flexGrow: 1,
-        justifyContent: "center"
+        justifyContent: "center",
+        alignItems: "center"
     },
     container: {
         flexGrow: 1

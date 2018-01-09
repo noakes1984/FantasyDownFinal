@@ -5,7 +5,7 @@ import {observable, computed} from "mobx";
 import {Firebase} from "../components";
 import type {Feed, FeedEntry, Profile, Post} from "../components/Model";
 
-const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = 5;
 
 const DEFAULT_PROFILE: Profile = {
     name: "John Doe",

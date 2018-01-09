@@ -1,5 +1,5 @@
 // @flow
-import {ImageEditor, ImageStore} from "react-native";
+import {ImageManipulator} from "expo";
 
 import Firebase from "./Firebase";
 
@@ -9,22 +9,7 @@ export type Picture = {
     height: number
 };
 
-const previewParams = (width: number, height: number) => ({
-    offset: {
-        x: 0,
-        y: 0
-    },
-    size: {
-        width,
-        height
-    },
-    displaySize: {
-        width: 20,
-        height: 20
-    },
-    resizeMode: "cover"
-});
-
+const {manipulate} = ImageManipulator;
 const id = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
 
 export default class ImageUpload {
@@ -33,17 +18,10 @@ export default class ImageUpload {
         return id() + id() + "-" + id() + "-" + id() + "-" + id() + "-" + id() + id() + id();
     }
 
-    static preview({ uri, width, height }: Picture): Promise<string> {
-        return new Promise((resolve, reject) =>
-            ImageEditor.cropImage(
-                uri,
-                previewParams(width, height),
-                uri => ImageStore.getBase64ForTag(
-                    uri, data => resolve(`data:image/jpeg;base64,${data}`), err => reject(err)
-                ),
-                err => reject(err)
-            )
-        );
+    static async preview({ uri }: Picture): Promise<string> {
+        const result = await manipulate(uri, [{ resize: { width: 10, height: 10 }}], { base64: true });
+        // $FlowFixMe
+        return result.base64;
     }
 
     static async upload(picture: Picture, name: string): Promise<void> {
@@ -55,7 +33,7 @@ export default class ImageUpload {
                 name,
                 type: "image/jpg"
             });
-            await fetch(`${Firebase.endpoint}/picture`, {
+            const res = await fetch(`${Firebase.endpoint}/picture`, {
                 method: "POST",
                 body,
                 headers: {
@@ -63,6 +41,11 @@ export default class ImageUpload {
                     "Content-Type": "multipart/form-data"
                 }
             });
+            if (res.status !== 200) {
+                // eslint-disable-next-line no-console
+                console.error(res);
+                throw new Error("An error happened when uploading the picture. Please try again.");
+            }
         } catch(e) {
             alert(e);
         }

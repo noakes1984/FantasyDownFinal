@@ -2,7 +2,7 @@
 import autobind from "autobind-decorator";
 import * as React from "react";
 import moment from "moment"
-import {StyleSheet, View, Animated, SafeAreaView, TouchableWithoutFeedback} from "react-native";
+import {StyleSheet, View, Animated, SafeAreaView, TouchableWithoutFeedback, Platform} from "react-native";
 import {inject, observer} from "mobx-react/native";
 
 import ProfileStore from "../ProfileStore";
@@ -43,27 +43,33 @@ export default class Explore extends React.Component<ScreenProps<> & InjectedPro
         const {profile} = profileStore;
         const opacity = scrollAnimation.interpolate({
             inputRange: [0, 60],
-            outputRange: [1, 0]
+            outputRange: [1, 0],
+            extrapolate: "clamp"
         });
         const translateY = scrollAnimation.interpolate({
-            inputRange: [0, 0, 60],
-            outputRange: [0, 0, -60]
+            inputRange: [0, 60],
+            outputRange: [0, -60],
+            extrapolate: "clamp"
         });
         const fontSize = scrollAnimation.interpolate({
-            inputRange: [0, 0, 60, 60],
-            outputRange: [36, 36, 24, 24]
+            inputRange: [0, 60],
+            outputRange: [36, 24],
+            extrapolate: "clamp"
         });
         const height = scrollAnimation.interpolate({
-            inputRange: [0, 0, 60, 60],
-            outputRange: [100, 100, 60, 60]
+            inputRange: [0, 60],
+            outputRange: Platform.OS === "android" ? [70, 70] : [100,  60],
+            extrapolate: "clamp"
         });
         const marginTop = scrollAnimation.interpolate({
-            inputRange: [0, 0, 60, 60],
-            outputRange: [24, 24, 0, 0]
+            inputRange: [0, 60],
+            outputRange: [24, 0],
+            extrapolate: "clamp"
         });
         const shadowOpacity = scrollAnimation.interpolate({
-            inputRange: [0, 0, 60, 60],
-            outputRange: [0, 0, 0.25, 0.25]
+            inputRange: [0, 60],
+            outputRange: [0, 0.25],
+            extrapolate: "clamp"
         });
         return (
             <View style={styles.container}>

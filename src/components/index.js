@@ -21,6 +21,7 @@ export {default as FirstPost} from "./FirstPost";
 export {default as ImageUpload} from "./ImageUpload";
 export {default as Feed} from "./Feed";
 export {default as FeedStore} from "./FeedStore";
+export {default as SpinningIndicator} from "./SpinningIndicator";
 
 export const serializeException = (e: string | {}): string => {
     if (typeof e === "string") {

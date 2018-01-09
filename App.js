@@ -161,7 +161,8 @@ const HomeTabs = TabNavigator({
 }, {
     animationEnabled: false,
     tabBarComponent: HomeTab,
-    tabBarPosition: "bottom"
+    tabBarPosition: "bottom",
+    swipeEnabled: false
 });
 
 const Home = StackNavigator({

@@ -2,9 +2,8 @@
 import moment from "moment";
 import autobind from "autobind-decorator";
 import * as React from "react";
-import {
-    StyleSheet, TextInput, Image, Dimensions, KeyboardAvoidingView, ScrollView, View
-} from "react-native";
+import {StyleSheet, TextInput, Image, Dimensions, View} from "react-native";
+import {Content} from "native-base";
 
 import {
     Container, NavHeader, Button, Theme, RefreshIndicator, Firebase, NavigationHelpers, ImageUpload, serializeException,
@@ -85,20 +84,18 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
         }
         return (
             <Container>
-                <ScrollView>
-                    <KeyboardAvoidingView behavior="position">
-                        <NavHeader back={true} title="Share" {...{navigation}} />
-                        <Image {...{ source }} style={styles.picture} />
-                        <TextInput
-                            style={styles.textInput}
-                            placeholder="Write Caption"
-                            underlineColorAndroid="transparent"
-                            onSubmitEditing={onPress}
-                            {...{ onChangeText }}
-                        />
-                        <Button primary={true} full={true} label="Share Picture" {...{onPress}} style={styles.btn} />
-                    </KeyboardAvoidingView>
-                </ScrollView>
+                <NavHeader back={true} title="Share" {...{navigation}} />
+                <Content>
+                    <Image {...{ source }} style={styles.picture} />
+                    <TextInput
+                        style={styles.textInput}
+                        placeholder="Write Caption"
+                        underlineColorAndroid="transparent"
+                        onSubmitEditing={onPress}
+                        {...{ onChangeText }}
+                    />
+                    <Button primary={true} full={true} label="Share Picture" {...{onPress}} style={styles.btn} />
+                </Content>
             </Container>
         );
     }

@@ -60,6 +60,7 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
             this.setState({ loading: false });
             navigation.navigate("SharePicture", picture);
         } catch (e) {
+            this.setState({ loading: false });
             alert(serializeException(e));
         }
     }

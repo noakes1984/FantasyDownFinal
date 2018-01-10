@@ -9,6 +9,32 @@ import {observer} from "mobx-react/native";
 
 import type {BaseProps} from "./Types";
 
+type Listener = () => mixed;
+
+class DownloadManager {
+
+    listeners: { [path: string]: Listener[] } = {};
+
+    async download(uri: string, path: string, listener: Listener): Promise<void> {
+        if (!this.listeners[path]) {
+            this.listeners[path] = [listener];
+            await FileSystem.downloadAsync(uri, path);
+            this.listeners[path].forEach(listener => listener());
+            delete this.listeners[path];
+        } else {
+            this.listeners[path].push(listener);
+        }
+    }
+
+    listen(path: string, listener: Listener) {
+        if (!this.listeners[path]) {
+            listener();
+        } else {
+            this.listeners[path].push(listener);
+        }
+    }
+}
+
 type SmartImageProps = BaseProps & {
     preview?: string,
     uri: string
@@ -23,7 +49,7 @@ const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
 @observer
 export default class SmartImage extends React.Component<SmartImageProps> {
 
-    static downloads: { [uri: string]: boolean } = {};
+    static downloadManager: DownloadManager = new DownloadManager();
 
     @observable _uri: string;
     @observable _intensity: Animated.Value = new Animated.Value(100);
@@ -36,29 +62,19 @@ export default class SmartImage extends React.Component<SmartImageProps> {
 
     async componentWillMount(): Promise<void> {
         const {preview, uri} = this.props;
-        try {
-            const entry = await getCacheEntry(uri);
-            if (!entry.exists) {
-                if (preview && Platform.OS === "ios") {
-                    this.uri = preview;
-                }
-                if (uri.startsWith("file://")) {
-                    SmartImage.downloads[entry.path] = true;
-                    await FileSystem.copyAsync({ from: uri, to: entry.path });
-                    SmartImage.downloads[entry.path] = false;
-                } else {
-                    SmartImage.downloads[entry.path] = true;
-                    await FileSystem.downloadAsync(uri, entry.path);
-                    SmartImage.downloads[entry.path] = false;
-                }
-                this.uri = entry.path;
-            } else if (SmartImage.downloads[entry.path] === true) {
-                this.uri = uri;
-            } else {
-                this.uri = entry.path;
+        const entry = await getCacheEntry(uri);
+        if (!entry.exists) {
+            if (preview && Platform.OS === "ios") {
+                this.uri = preview;
             }
-        } catch(e) {
-            this.uri = uri;
+            if (uri.startsWith("file://")) {
+                await FileSystem.copyAsync({ from: uri, to: entry.path });
+                this.uri = entry.path;
+            } else {
+                SmartImage.downloadManager.download(uri, entry.path, () => this.uri = entry.path);
+            }
+        } else {
+            SmartImage.downloadManager.listen(entry.path, () => this.uri = entry.path);
         }
     }
 

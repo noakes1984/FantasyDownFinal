@@ -1,7 +1,7 @@
 // @flow
 import * as _ from "lodash";
 import * as React from "react";
-import {Image, Animated, StyleSheet, View, Platform} from "react-native";
+import {Image, Animated, StyleSheet, View, Platform, ActivityIndicator} from "react-native";
 import {BlurView, FileSystem} from "expo";
 import SHA1 from "crypto-js/sha1";
 import {observable, computed} from "mobx";
@@ -37,7 +37,8 @@ class DownloadManager {
 
 type SmartImageProps = BaseProps & {
     preview?: string,
-    uri: string
+    uri: string,
+    showSpinner?: boolean
 };
 
 const propsToCopy = [
@@ -48,6 +49,10 @@ const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
 
 @observer
 export default class SmartImage extends React.Component<SmartImageProps> {
+
+    static defaultProps = {
+        showSpinner: true
+    };
 
     static downloadManager: DownloadManager = new DownloadManager();
 
@@ -62,11 +67,11 @@ export default class SmartImage extends React.Component<SmartImageProps> {
 
     async componentWillMount(): Promise<void> {
         const {preview, uri} = this.props;
+        if (preview && Platform.OS === "ios") {
+            this.uri = preview;
+        }
         const entry = await getCacheEntry(uri);
         if (!entry.exists) {
-            if (preview && Platform.OS === "ios") {
-                this.uri = preview;
-            }
             if (uri.startsWith("file://")) {
                 await FileSystem.copyAsync({ from: uri, to: entry.path });
                 this.uri = entry.path;
@@ -88,12 +93,13 @@ export default class SmartImage extends React.Component<SmartImageProps> {
     }
 
     render(): React.Node {
-        const {style} = this.props;
+        const {style, showSpinner} = this.props;
         const {uri, intensity} = this;
         const computedStyle = [
             StyleSheet.absoluteFill,
             _.pickBy(StyleSheet.flatten(style), (value, key) => propsToCopy.indexOf(key) !== -1)
         ];
+        const spinnerStyle = { justifyContent: "center", alignItems: "center", backgroundColor: "#BFBFBF" };
         return (
             <View {...{style}}>
                 {
@@ -104,6 +110,13 @@ export default class SmartImage extends React.Component<SmartImageProps> {
                             style={computedStyle}
                             onLoadEnd={() => this.onLoadEnd(uri)}
                         />
+                    )
+                }
+                {
+                    (Platform.OS !== "ios" && !uri && showSpinner) && (
+                        <View style={[computedStyle, spinnerStyle]}>
+                            <ActivityIndicator size="large" color="white" />
+                        </View>
                     )
                 }
                 {

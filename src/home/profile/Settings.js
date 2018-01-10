@@ -6,7 +6,9 @@ import {ImagePicker} from "expo";
 import {Content} from "native-base";
 import { Feather as Icon } from "@expo/vector-icons";
 
-import {NavHeader, Firebase, Button, TextField, Theme, ImageUpload, serializeException} from "../../components";
+import {
+    NavHeader, Firebase, Button, TextField, Theme, ImageUpload, serializeException, NavigationHelpers
+} from "../../components";
 import type {ScreenParams} from "../../components/Types";
 import type {Profile} from "../../components/Model";
 import type {Picture} from "../../components/ImageUpload";
@@ -54,7 +56,7 @@ export default class Settings extends React.Component<ScreenParams<{ profile: Pr
                 const uri = await Firebase.storage.ref(name).getDownloadURL();
                 await Firebase.firestore.collection("users").doc(uid).update({ picture: { preview, uri } });
             }
-            navigation.goBack();
+            NavigationHelpers.reset(navigation, "Home");
         } catch(e) {
             const message = serializeException(e);
             alert(message);

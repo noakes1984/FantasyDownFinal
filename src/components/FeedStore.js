@@ -71,7 +71,7 @@ export default class FeedStore {
                 posts.push(postDoc.data());
             });
             const feed = await this.joinProfiles(posts);
-            this.feed = feed.concat(this.feed.slice());
+            this.addToFeed(feed);
             this.lastKnownEntry = snap.docs[0];
         }
     }
@@ -97,8 +97,13 @@ export default class FeedStore {
             this.feed = [];
             this.lastKnownEntry = snap.docs[0];
         }
-        this.feed = this.feed.concat(feed);
+        this.addToFeed(feed);
         this.cursor = _.last(snap.docs);
+    }
+
+    addToFeed(entries: FeedEntry[]) {
+        const feed = _.uniqBy([...this.feed.slice(), ...entries], entry => entry.post.id);
+        this.feed = _.orderBy(feed, entry => entry.post.timestamp, ["desc"]);
     }
 
     subscribeToPost(id: string, callback: Post => void): Subscription {

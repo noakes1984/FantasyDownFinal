@@ -2,13 +2,16 @@
 import autobind from "autobind-decorator";
 import * as React from "react";
 import {StyleSheet, View, TouchableWithoutFeedback, Image} from "react-native";
-import {ImagePicker} from "expo";
+import {ImagePicker, Permissions} from "expo";
 import {Content} from "native-base";
-import { Feather as Icon } from "@expo/vector-icons";
+import {Feather as Icon} from "@expo/vector-icons";
 
 import {
-    NavHeader, Firebase, Button, TextField, Theme, ImageUpload, serializeException, NavigationHelpers
+    NavHeader, Firebase, Button, TextField, Theme, ImageUpload, serializeException, NavigationHelpers, RefreshIndicator
 } from "../../components";
+
+import EnableCameraRollPermission from "./EnableCameraRollPermission";
+
 import type {ScreenParams} from "../../components/Types";
 import type {Profile} from "../../components/Model";
 import type {Picture} from "../../components/ImageUpload";
@@ -16,20 +19,23 @@ import type {Picture} from "../../components/ImageUpload";
 type SettingsState = {
     name: string,
     picture: Picture,
-    loading: boolean
+    loading: boolean,
+    hasCameraRollPermission: boolean | null
 };
 
 export default class Settings extends React.Component<ScreenParams<{ profile: Profile }>, SettingsState> {
 
-    componentWillMount() {
+    async componentWillMount(): Promise<void> {
         const {navigation} = this.props;
         const {profile} = navigation.state.params;
         const picture = {
             uri: profile.picture.uri,
             height: 0,
             width: 0
-        }
-        this.setState({ name: profile.name, picture, loading: false });
+        };
+        this.setState({ name: profile.name, picture, loading: false, hasCameraRollPermission: null });
+        const {status} = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+        this.setState({ hasCameraRollPermission: status === "granted" });
     }
 
     @autobind
@@ -88,7 +94,16 @@ export default class Settings extends React.Component<ScreenParams<{ profile: Pr
 
     render(): React.Node {
         const {navigation} = this.props;
-        const {name, picture, loading} = this.state;
+        const {name, picture, loading, hasCameraRollPermission} = this.state;
+        if (hasCameraRollPermission === null) {
+            return (
+                <View style={styles.refreshContainer}>
+                    <RefreshIndicator refreshing={true} />
+                </View>
+            );
+        } else if (hasCameraRollPermission === false) {
+            return <EnableCameraRollPermission />;
+        }
         return (
             <View style={styles.container}>
                 <NavHeader title="Settings" back={true} {...{navigation}} />

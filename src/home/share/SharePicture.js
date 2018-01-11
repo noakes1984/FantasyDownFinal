@@ -6,8 +6,7 @@ import {StyleSheet, TextInput, Image, Dimensions, View} from "react-native";
 import {Content} from "native-base";
 
 import {
-    Container, NavHeader, Button, Theme, RefreshIndicator, Firebase, NavigationHelpers, ImageUpload, serializeException,
-    Text
+    NavHeader, Button, Theme, RefreshIndicator, Firebase, NavigationHelpers, ImageUpload, serializeException, Text
 } from "../../components";
 
 import type {ScreenParams} from "../../components/Types";
@@ -17,45 +16,53 @@ import type {Picture} from "../../components/ImageUpload";
 type SharePictureState = {
     loadingLabel: string,
     loading: boolean,
-    caption: string
+    caption: string,
+    uploadDone: boolean
 };
 
 export default class SharePicture extends React.Component<ScreenParams<Picture>, SharePictureState> {
 
-    componentWillMount() {
-        this.setState({ loading: false, loadingLabel: "", caption: "" });
+    id: string;
+    name: string;
+    preview: string;
+    url: string;
+
+    async componentWillMount(): Promise<void> {
+        const {navigation} = this.props;
+        const picture = navigation.state.params;
+        this.setState({ loading: false, loadingLabel: "", caption: "", uploadDone: false });
+        this.id = ImageUpload.uid();
+        this.name = `${this.id}.jpg`;
+        this.preview = await ImageUpload.preview(picture);
+        await ImageUpload.upload(picture, this.name);
+        this.url = await Firebase.storage.ref(this.name).getDownloadURL();
+        this.setState({ uploadDone: true });
     }
 
     @autobind
     async onPress(): Promise<void> {
         const {navigation} = this.props;
-        const {caption} = this.state;
-        const picture = navigation.state.params;
+        const {caption, uploadDone} = this.state;
+        if (!uploadDone) {
+            return;
+        }
         this.setState({ loading: true });
-        const id = ImageUpload.uid();
-        const name = `${id}.jpg`;
         try {
-            this.setState({ loadingLabel: "Building preview..." });
-            const preview = await ImageUpload.preview(picture);
-            this.setState({ loadingLabel: "Uploading picture..." });
-            await ImageUpload.upload(picture, name);
-            this.setState({ loadingLabel: "Fetching metadata..." });
-            const url = await Firebase.storage.ref(name).getDownloadURL();
             this.setState({ loadingLabel: "Saving Post..." });
             const {uid} = Firebase.auth.currentUser;
             const post: Post = {
-                id,
+                id: this.id,
                 uid,
                 comments: 0,
                 likes: [],
                 timestamp: parseInt(moment().format("X"), 10),
                 text: caption,
                 picture: {
-                    uri: url,
-                    preview
+                    uri: this.url,
+                    preview: this.preview
                 }
             };
-            await Firebase.firestore.collection("feed").doc(id).set(post);
+            await Firebase.firestore.collection("feed").doc(this.id).set(post);
             NavigationHelpers.reset(navigation, "Home");
         } catch(e) {
             const message = serializeException(e);
@@ -72,7 +79,7 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
     render(): React.Node {
         const {onPress, onChangeText} = this;
         const {navigation} = this.props;
-        const {loading, loadingLabel} = this.state;
+        const {loading, loadingLabel, uploadDone} = this.state;
         const source = navigation.state.params;
         if (loading) {
             return (
@@ -83,7 +90,7 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
             )
         }
         return (
-            <Container>
+            <View style={styles.container}>
                 <NavHeader back={true} title="Share" {...{navigation}} />
                 <Content>
                     <Image {...{ source }} style={styles.picture} />
@@ -94,9 +101,15 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
                         onSubmitEditing={onPress}
                         {...{ onChangeText }}
                     />
-                    <Button primary={true} full={true} label="Share Picture" {...{onPress}} style={styles.btn} />
+                    <Button
+                        primary={true}
+                        full={true}
+                        label={!uploadDone ? "Processing Picture..." : "Share Picture"}
+                        style={styles.btn}
+                        {...{onPress}}
+                     />
                 </Content>
-            </Container>
+            </View>
         );
     }
 }

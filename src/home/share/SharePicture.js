@@ -17,7 +17,8 @@ type SharePictureState = {
     loadingLabel: string,
     loading: boolean,
     caption: string,
-    uploadDone: boolean
+    uploadDone: boolean,
+    retry: boolean
 };
 
 export default class SharePicture extends React.Component<ScreenParams<Picture>, SharePictureState> {
@@ -27,16 +28,30 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
     preview: string;
     url: string;
 
+    @autobind
+    async upload(): Promise<void> {
+        const {navigation} = this.props;
+        const picture = navigation.state.params;
+        try {
+            this.setState({ retry: false });
+            await ImageUpload.upload(picture, this.name);
+            this.url = await Firebase.storage.ref(this.name).getDownloadURL();
+            this.setState({ uploadDone: true });
+        } catch (e) {
+            const message = serializeException(e);
+            alert(message);
+            this.setState({ retry: true });
+        }
+    }
+
     async componentWillMount(): Promise<void> {
         const {navigation} = this.props;
         const picture = navigation.state.params;
-        this.setState({ loading: false, loadingLabel: "", caption: "", uploadDone: false });
+        this.setState({ loading: false, loadingLabel: "", caption: "", uploadDone: false, retry: false });
         this.id = ImageUpload.uid();
         this.name = `${this.id}.jpg`;
         this.preview = await ImageUpload.preview(picture);
-        await ImageUpload.upload(picture, this.name);
-        this.url = await Firebase.storage.ref(this.name).getDownloadURL();
-        this.setState({ uploadDone: true });
+        await this.upload();
     }
 
     @autobind
@@ -79,7 +94,7 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
     render(): React.Node {
         const {onPress, onChangeText} = this;
         const {navigation} = this.props;
-        const {loading, loadingLabel, uploadDone} = this.state;
+        const {loading, loadingLabel, uploadDone, retry} = this.state;
         const source = navigation.state.params;
         if (loading) {
             return (
@@ -99,15 +114,31 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
                         placeholder="Write Caption"
                         underlineColorAndroid="transparent"
                         onSubmitEditing={onPress}
-                        {...{ onChangeText }}
+                        {...{onChangeText}}
                     />
-                    <Button
-                        primary={true}
-                        full={true}
-                        label={!uploadDone ? "Processing Picture..." : "Share Picture"}
-                        style={styles.btn}
-                        {...{onPress}}
-                     />
+                    {
+                        retry && (
+                            <Button
+                                primary={true}
+                                full={true}
+                                label="Retry processing"
+                                style={styles.btn}
+                                onPress={this.upload}
+                            />
+                        )
+                    }
+                    {
+                        !retry && (
+                            <Button
+                                primary={true}
+                                full={true}
+                                label={!uploadDone ? "Processing Picture..." : "Share Picture"}
+                                style={styles.btn}
+                                {...{onPress}}
+                            />
+
+                        )
+                    }
                 </Content>
             </View>
         );

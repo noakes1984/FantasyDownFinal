@@ -118,7 +118,8 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
     }
 }
 
-const {width} = Dimensions.get("window");
+const {width, height} = Dimensions.get("window");
+const ratio = width / height;
 const styles = StyleSheet.create({
     container: {
         flex: 1
@@ -150,10 +151,10 @@ const styles = StyleSheet.create({
         alignItems: "center"
     },
     btn: {
-        height: 100,
-        width: 100,
-        borderRadius: 50,
-        borderWidth: 20,
+        height: ratio < 0.75 ? 100 : 60,
+        width: ratio <  0.75 ? 100 : 60,
+        borderRadius: ratio < 0.75 ? 50 : 30,
+        borderWidth: ratio < 0.75 ? 20 : 10,
         borderColor: Theme.palette.lightGray
     },
     modal: {

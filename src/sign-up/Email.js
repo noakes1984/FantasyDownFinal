@@ -38,7 +38,7 @@ export default class Email extends React.Component<NavigationProps<*>, EmailStat
     render(): React.Node {
         const {navigation} = this.props;
         return (
-            <SignUpContainer title="Your Email" subtitle="We won't span" next={this.next} {...{ navigation }}>
+            <SignUpContainer title="Your Email" subtitle="We won't spam" next={this.next} {...{ navigation }}>
                 <TextField
                     placeholder="Email"
                     keyboardType="email-address"
@@ -64,12 +64,12 @@ const styles = StyleSheet.create({
     text: {
         flexWrap: "wrap",
         marginLeft: Theme.spacing.small,
-        textAlign: "right",
-        flexGrow: 1
+        flex: 1
     },
     row: {
         flexDirection: "row",
-        alignItems: "center"
+        alignItems: "center",
+        marginVertical: Theme.spacing.tiny
     },
     header: {
         color: "white"

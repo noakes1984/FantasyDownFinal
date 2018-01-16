@@ -2,73 +2,77 @@
 import autobind from "autobind-decorator";
 import * as React from "react";
 import moment from "moment"
-import {FlatList, StyleSheet, View, Animated, SafeAreaView, RefreshControl, Platform} from "react-native";
-import {Constants} from "expo";
+import {StyleSheet, View, Animated, SafeAreaView, TouchableWithoutFeedback, Platform} from "react-native";
 import {inject, observer} from "mobx-react/native";
 
-import HomeStore from "../HomeStore";
+import ProfileStore from "../ProfileStore";
 
-import {Text, Theme, Avatar, RefreshIndicator, Post} from "../../components";
+import {Text, Theme, Avatar, Feed, FeedStore} from "../../components";
 import type {ScreenProps} from "../../components/Types";
 
 const AnimatedText = Animated.createAnimatedComponent(Text);
 const AnimatedSafeAreaView = Animated.createAnimatedComponent(SafeAreaView);
 
 type ExploreState = {
-    scrollAnimation: Animated.Value,
-    refreshing: boolean
+    scrollAnimation: Animated.Value
 };
 
-@inject("store") @observer
-export default class Explore extends React.Component<ScreenProps<> & { store: HomeStore }, ExploreState> {
+type InjectedProps = {
+    feedStore: FeedStore,
+    profileStore: ProfileStore
+};
+
+@inject("feedStore", "profileStore") @observer
+export default class Explore extends React.Component<ScreenProps<> & InjectedProps, ExploreState> {
 
     @autobind
-    onRefresh() {
-        this.setState({ refreshing: true });
-        setTimeout(() => this.setState({ refreshing: false }), 3000);
+    profile() {
+        this.props.navigation.navigate("Profile");
     }
 
     async componentWillMount(): Promise<void> {
+        this.props.feedStore.checkForNewEntriesInFeed();
         this.setState({
-            scrollAnimation: new Animated.Value(0),
-            refreshing: false
+            scrollAnimation: new Animated.Value(0)
         });
     }
 
     render(): React.Node {
-        const {onRefresh} = this;
-        const {navigation, store} = this.props;
-        const {scrollAnimation, refreshing} = this.state;
-        const {feed, profile} = store;
+        const {feedStore, profileStore, navigation} = this.props;
+        const {scrollAnimation} = this.state;
+        const {profile} = profileStore;
         const opacity = scrollAnimation.interpolate({
             inputRange: [0, 60],
-            outputRange: [1, 0]
+            outputRange: [1, 0],
+            extrapolate: "clamp"
         });
         const translateY = scrollAnimation.interpolate({
-            inputRange: [0, 0, 60],
-            outputRange: [0, 0, -60]
+            inputRange: [0, 60],
+            outputRange: [0, -60],
+            extrapolate: "clamp"
         });
         const fontSize = scrollAnimation.interpolate({
-            inputRange: [0, 0, 60, 60],
-            outputRange: [36, 36, 24, 24]
+            inputRange: [0, 60],
+            outputRange: [36, 24],
+            extrapolate: "clamp"
         });
         const height = scrollAnimation.interpolate({
-            inputRange: [0, 0, 60, 60],
-            outputRange: [100, 100, 60, 60]
+            inputRange: [0, 60],
+            outputRange: Platform.OS === "android" ? [70, 70] : [100,  60],
+            extrapolate: "clamp"
         });
         const marginTop = scrollAnimation.interpolate({
-            inputRange: [0, 0, 60, 60],
-            outputRange: [24, 24, 0, 0]
+            inputRange: [0, 60],
+            outputRange: [24, 0],
+            extrapolate: "clamp"
         });
         const shadowOpacity = scrollAnimation.interpolate({
-            inputRange: [0, 0, 60, 60],
-            outputRange: [0, 0, 0.25, 0.25]
+            inputRange: [0, 60],
+            outputRange: [0, 0.25],
+            extrapolate: "clamp"
         });
         return (
             <View style={styles.container}>
-                <RefreshIndicator
-                    style={styles.RefreshIndicator} {...{refreshing}}
-                />
                 <AnimatedSafeAreaView style={[styles.header, { shadowOpacity }]}>
                     <Animated.View style={[styles.innerHeader, { height }]}>
                         <View>
@@ -85,16 +89,19 @@ export default class Explore extends React.Component<ScreenProps<> & { store: Ho
                             {moment().format("dddd")}
                             </AnimatedText>
                         </View>
-                        { profile && <Avatar {...profile.picture} /> }
+                        {
+                            profile && (
+                                <TouchableWithoutFeedback onPress={this.profile}>
+                                    <View>
+                                        <Avatar {...profile.picture} />
+                                    </View>
+                                </TouchableWithoutFeedback>
+                            )
+                        }
                     </Animated.View>
                 </AnimatedSafeAreaView>
-                <FlatList
-                    showsVerticalScrollIndicator={false}
-                    style={styles.list}
-                    data={feed}
-                    keyExtractor={item => item.post.id}
-                    renderItem={({ item }) => <Post post={item.post} profile={item.profile} {...{navigation}} />}
-                    scrollEventThrottle={1}
+                <Feed
+                    store={feedStore}
                     onScroll={Animated.event(
                         [{
                             nativeEvent: {
@@ -104,15 +111,7 @@ export default class Explore extends React.Component<ScreenProps<> & { store: Ho
                             }
                         }]
                     )}
-                    refreshControl={(Platform.OS === "ios" && (
-                        <RefreshControl
-                            tintColor="transparent"
-                            colors={["transparent"]}
-                            style={{ backgroundColor: "transparent" }}
-                            {...{onRefresh, refreshing}}
-                        />
-                    ) || undefined)}
-                    ListEmptyComponent={<RefreshIndicator refreshing={true} />}
+                    {...{navigation}}
                 />
             </View>
         );
@@ -122,10 +121,6 @@ export default class Explore extends React.Component<ScreenProps<> & { store: Ho
 const styles = StyleSheet.create({
     container: {
         flex: 1
-    },
-    RefreshIndicator: {
-        ...StyleSheet.absoluteFillObject,
-        paddingTop: Constants.statusBarHeight + 100 + Theme.spacing.base
     },
     header: {
         backgroundColor: "white",
@@ -140,9 +135,6 @@ const styles = StyleSheet.create({
         marginVertical: Theme.spacing.tiny,
         flexDirection: "row",
         justifyContent: "space-between",
-        alignItems: "center",
-    },
-    list: {
-        paddingHorizontal: Theme.spacing.small
+        alignItems: "center"
     }
-})
+});

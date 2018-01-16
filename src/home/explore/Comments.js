@@ -10,7 +10,7 @@ import {observer} from "mobx-react/native";
 import CommentComp from "./Comment";
 import CommentsStore from "./CommentStore";
 
-import {Text, NavHeader, Theme, NavigationHelpers, Firebase} from "../../components";
+import {Text, NavHeader, Theme, Firebase} from "../../components";
 import type {ScreenParams} from "../../components/Types";
 import type {Comment} from "../../components/Model";
 
@@ -48,7 +48,7 @@ export default class CommentsComp extends React.Component<ScreenParams<{ post: s
 
     @autobind
     backFn() {
-        NavigationHelpers.reset(this.props.navigation, "Home");
+        this.props.navigation.goBack();
     }
 
     render(): React.Node {

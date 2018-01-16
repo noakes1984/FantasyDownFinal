@@ -2,9 +2,16 @@
 import autobind from "autobind-decorator";
 import * as React from "react";
 import {StyleSheet, View, TouchableWithoutFeedback, Image} from "react-native";
-import {ImagePicker} from "expo";
+import {ImagePicker, Permissions} from "expo";
+import {Content} from "native-base";
+import {Feather as Icon} from "@expo/vector-icons";
 
-import {NavHeader, Firebase, Button, TextField, Theme, ImageUpload, NavigationHelpers} from "../../components";
+import {
+    NavHeader, Firebase, Button, TextField, Theme, ImageUpload, serializeException, NavigationHelpers, RefreshIndicator
+} from "../../components";
+
+import EnableCameraRollPermission from "./EnableCameraRollPermission";
+
 import type {ScreenParams} from "../../components/Types";
 import type {Profile} from "../../components/Model";
 import type {Picture} from "../../components/ImageUpload";
@@ -12,20 +19,23 @@ import type {Picture} from "../../components/ImageUpload";
 type SettingsState = {
     name: string,
     picture: Picture,
-    loading: boolean
+    loading: boolean,
+    hasCameraRollPermission: boolean | null
 };
 
 export default class Settings extends React.Component<ScreenParams<{ profile: Profile }>, SettingsState> {
 
-    componentWillMount() {
+    async componentWillMount(): Promise<void> {
         const {navigation} = this.props;
         const {profile} = navigation.state.params;
         const picture = {
             uri: profile.picture.uri,
             height: 0,
             width: 0
-        }
-        this.setState({ name: profile.name, picture, loading: false });
+        };
+        this.setState({ name: profile.name, picture, loading: false, hasCameraRollPermission: null });
+        const {status} = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+        this.setState({ hasCameraRollPermission: status === "granted" });
     }
 
     @autobind
@@ -51,10 +61,11 @@ export default class Settings extends React.Component<ScreenParams<{ profile: Pr
                 await ImageUpload.upload(picture, name);
                 const uri = await Firebase.storage.ref(name).getDownloadURL();
                 await Firebase.firestore.collection("users").doc(uid).update({ picture: { preview, uri } });
-                NavigationHelpers.reset(navigation, "Home");
             }
+            NavigationHelpers.reset(navigation, "Home");
         } catch(e) {
-            alert(e);
+            const message = serializeException(e);
+            alert(message);
             this.setState({ loading: false });
         }
     }
@@ -83,15 +94,25 @@ export default class Settings extends React.Component<ScreenParams<{ profile: Pr
 
     render(): React.Node {
         const {navigation} = this.props;
-        const {name, picture, loading} = this.state;
+        const {name, picture, loading, hasCameraRollPermission} = this.state;
+        if (hasCameraRollPermission === null) {
+            return (
+                <View style={styles.refreshContainer}>
+                    <RefreshIndicator refreshing={true} />
+                </View>
+            );
+        } else if (hasCameraRollPermission === false) {
+            return <EnableCameraRollPermission />;
+        }
         return (
             <View style={styles.container}>
                 <NavHeader title="Settings" back={true} {...{navigation}} />
-                <View style={styles.content}>
-                    <View style={styles.avatar}>
+                <Content style={styles.content}>
+                    <View style={styles.avatarContainer}>
                         <TouchableWithoutFeedback onPress={this.setPicture}>
-                            <View>
+                            <View style={styles.avatar}>
                                 <Image style={styles.profilePic} source={{ uri: picture.uri }} />
+                                <Icon name="camera" size={25} color="white" style={styles.editIcon} />
                             </View>
                         </TouchableWithoutFeedback>
                     </View>
@@ -106,7 +127,7 @@ export default class Settings extends React.Component<ScreenParams<{ profile: Pr
                     />
                     <Button label="Save" full={true} primary={true} onPress={this.save} {...{loading}} />
                     <Button label="Sign-Out" full={true} onPress={this.logout} />
-                </View>
+                </Content>
             </View>
         );
     }
@@ -117,18 +138,29 @@ const styles = StyleSheet.create({
         flex: 1
     },
     content: {
-        paddingHorizontal: Theme.spacing.base,
-        justifyContent: "center",
-        flex: 1
+        marginHorizontal: Theme.spacing.base
+    },
+    avatarContainer: {
+        alignItems: "center"
     },
     avatar: {
         marginVertical: Theme.spacing.base,
-        alignItems: "center"
+        alignItems: "center",
+        height: 100,
+        width: 100
     },
     profilePic: {
+        position: "absolute",
+        top: 0,
+        left: 0,
         height: 100,
         width: 100,
         resizeMode: "cover",
         borderRadius: 50
+    },
+    editIcon: {
+        position: "absolute",
+        top: 50 - 12.5,
+        left: 50 - 12.5
     }
 });

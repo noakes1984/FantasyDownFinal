@@ -1,17 +1,22 @@
 // @flow
+/* eslint-disable no-console */
 import autobind from "autobind-decorator";
 import * as React from "react";
+import {StatusBar, Platform} from "react-native";
 import {StyleProvider} from "native-base";
 import {StackNavigator, TabNavigator} from "react-navigation";
 import {Font, AppLoading} from "expo";
 import {useStrict} from "mobx";
 import {Provider} from "mobx-react/native";
+import {Feather} from "@expo/vector-icons";
 
-import {Images, Firebase} from "./src/components";
+import {Images, Firebase, FeedStore} from "./src/components";
 import {Welcome} from "./src/welcome";
 import {Walkthrough} from "./src/walkthrough";
 import {SignUpName, SignUpEmail, SignUpPassword, Login} from "./src/sign-up";
-import {Profile, Explore, Share, SharePicture, HomeTab, Comments, Settings, HomeStore} from "./src/home";
+import {
+    Profile, Explore, Share, SharePicture, HomeTab, Comments, Settings, ProfileStore
+} from "./src/home";
 
 import getTheme from "./native-base-theme/components";
 import variables from "./native-base-theme/variables/commonColor";
@@ -24,6 +29,23 @@ interface AppState {
 
 useStrict(true);
 
+const originalSend = XMLHttpRequest.prototype.send;
+// https://github.com/firebase/firebase-js-sdk/issues/283
+// $FlowFixMe
+XMLHttpRequest.prototype.send = function(body: string) {
+  if (body === "") {
+    originalSend.call(this);
+  } else {
+    originalSend.call(this, body);
+  }
+};
+
+// https://github.com/firebase/firebase-js-sdk/issues/97
+// $FlowFixMe
+console.ignoredYellowBox = [
+    "Setting a timer"
+];
+
 export default class App extends React.Component<{}, AppState> {
 
     state: AppState = {
@@ -33,6 +55,10 @@ export default class App extends React.Component<{}, AppState> {
     };
 
     componentWillMount() {
+        StatusBar.setBarStyle("dark-content");
+        if (Platform.OS === "android") {
+            StatusBar.setBackgroundColor("white");
+        }
         this.loadStaticResources();
         Firebase.init();
         Firebase.auth.onAuthStateChanged(user => {
@@ -45,7 +71,8 @@ export default class App extends React.Component<{}, AppState> {
 
     async loadStaticResources(): Promise<void> {
         try {
-            await Font.loadAsync({
+            const images = Images.downloadAsync();
+            const fonts = Font.loadAsync({
                 "SFProText-Medium": require("./fonts/SF-Pro-Text-Medium.otf"),
                 "SFProText-Heavy": require("./fonts/SF-Pro-Text-Heavy.otf"),
                 "SFProText-Bold": require("./fonts/SF-Pro-Text-Bold.otf"),
@@ -53,10 +80,10 @@ export default class App extends React.Component<{}, AppState> {
                 "SFProText-Regular": require("./fonts/SF-Pro-Text-Regular.otf"),
                 "SFProText-Light": require("./fonts/SF-Pro-Text-Light.otf")
             });
-            await Images.downloadAsync();
+            const icons = Font.loadAsync(Feather.font);
+            await Promise.all([...images, fonts, icons]);
             this.setState({ staticAssetsLoaded: true });
         } catch(error) {
-            // eslint-disable-next-line no-console
             console.error(error);
         }
     }
@@ -64,6 +91,20 @@ export default class App extends React.Component<{}, AppState> {
     render(): React.Node {
         const {onNavigationStateChange} = this;
         const {staticAssetsLoaded, authStatusReported, isUserAuthenticated} = this.state;
+        let feedStore, profileStore, userFeedStore;
+        if (isUserAuthenticated) {
+            const {uid} = Firebase.auth.currentUser;
+            const feedQuery = Firebase.firestore
+                .collection("feed")
+                .orderBy("timestamp", "desc");
+            const userFeedQuery = Firebase.firestore
+                .collection("feed")
+                .where("uid", "==", uid)
+                .orderBy("timestamp", "desc");
+            profileStore = new ProfileStore();
+            feedStore = new FeedStore(feedQuery);
+            userFeedStore = new FeedStore(userFeedQuery);
+        }
         return <StyleProvider style={getTheme(variables)}>
             {
                 (staticAssetsLoaded && authStatusReported) ?
@@ -71,7 +112,7 @@ export default class App extends React.Component<{}, AppState> {
                         isUserAuthenticated
                             ?
                                 (
-                                    <Provider store={new HomeStore()}>
+                                    <Provider {...{feedStore, profileStore, userFeedStore}} >
                                         <Home {...{onNavigationStateChange}} />
                                     </Provider>
                                 )
@@ -104,7 +145,8 @@ const ExploreNavigator = StackNavigator({
 
 const ProfileNavigator =  StackNavigator({
     Profile: { screen: Profile },
-    Settings: { screen: Settings }
+    Settings: { screen: Settings },
+    Comments: { screen: Comments }
 }, StackNavigatorOptions);
 
 const ShareNavigator = StackNavigator({
@@ -119,7 +161,8 @@ const HomeTabs = TabNavigator({
 }, {
     animationEnabled: false,
     tabBarComponent: HomeTab,
-    tabBarPosition: "bottom"
+    tabBarPosition: "bottom",
+    swipeEnabled: false
 });
 
 const Home = StackNavigator({

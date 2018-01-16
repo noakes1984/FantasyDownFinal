@@ -1,7 +1,7 @@
 // @flow
 import * as React from "react";
 import {StyleSheet, Dimensions, View} from "react-native";
-import { LinearGradient, Constants } from "expo";
+import {LinearGradient, Constants} from "expo";
 
 import {Text, Theme} from "../components";
 
@@ -17,7 +17,7 @@ export default class Slide extends React.Component<SlideProps> {
         const {title, description, icon} = this.props;
         return (
             <View>
-                <LinearGradient colors={["#0059FF", "#00AAFF"]} style={{ height: height * 0.62 }}>
+                <LinearGradient colors={["#0059FF", "#00AAFF"]} style={styles.gradient}>
                     <View style={styles.slide}>
                         <Text type="header2" style={styles.title}>{title}</Text>
                         <View style={styles.iconContainer}>{icon}</View>
@@ -43,9 +43,20 @@ const styles = StyleSheet.create({
         color: "white"
     },
     description: {
-        height: height * 0.38,
+        position: "absolute",
+        top: height * 0.62,
+        left: 0,
+        right: 0,
+        height: height - (height * 0.62) - 45,
         paddingHorizontal: Theme.spacing.base * 2,
         justifyContent: "center"
+    },
+    gradient: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: height * 0.62
     },
     iconContainer: {
         flexGrow: 1,

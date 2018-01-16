@@ -22,6 +22,6 @@ export default class Avatar extends React.Component<AvatarProps> {
             width: size,
             borderRadius: size / 2
         };
-        return <SmartImage style={[style, computedStyle]} {...{ uri }} />;
+        return <SmartImage style={[style, computedStyle]} showSpinner={false} {...{ uri }} />;
     }
 }

@@ -1,20 +1,21 @@
 // @flow
 import autobind from "autobind-decorator";
 import * as React from "react";
-import {StyleSheet, View, Dimensions, TouchableWithoutFeedback} from "react-native";
+import {StyleSheet, View, Dimensions, TouchableWithoutFeedback, TouchableOpacity, Modal, Platform} from "react-native";
 import {Camera, Permissions} from "expo";
 import { Feather as Icon } from "@expo/vector-icons";
 
 import EnableCameraPermission from "./EnableCameraPermission";
 import FlashIcon from "./FlashIcon";
 
-import {RefreshIndicator, Theme, NavHeader} from "../../components";
+import {RefreshIndicator, Theme, NavHeader, SpinningIndicator, serializeException} from "../../components";
 import type {ScreenProps} from "../../components/Types";
 
 type ShareState = {
     hasCameraPermission: boolean | null,
     type: number,
-    flashMode: number
+    flashMode: number,
+    loading: boolean
 };
 
 export default class Share extends React.Component<ScreenProps<>, ShareState> {
@@ -22,13 +23,18 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
     camera: Camera;
 
     async componentWillMount(): Promise<void> {
-        this.setState({ hasCameraPermission: null });
+        this.setState({ hasCameraPermission: null, loading: false });
         const {status} = await Permissions.askAsync(Permissions.CAMERA);
         this.setState({
             hasCameraPermission: status === "granted",
             type: Camera.Constants.Type.back,
             flashMode: Camera.Constants.FlashMode.off
         });
+    }
+
+    @autobind
+    toggle() {
+        this.setState({ loading: false });
     }
 
     @autobind
@@ -48,9 +54,15 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
     @autobind
     async snap(): Promise<void> {
         const {navigation} = this.props;
-        // use base64 option
-        const picture = await this.camera.takePictureAsync();
-        navigation.navigate("SharePicture", picture);
+        try {
+            this.setState({ loading: true });
+            const picture = await this.camera.takePictureAsync({ base64: false });
+            this.setState({ loading: false });
+            navigation.navigate("SharePicture", picture);
+        } catch (e) {
+            this.setState({ loading: false });
+            alert(serializeException(e));
+        }
     }
 
     @autobind
@@ -62,7 +74,8 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
 
     render(): React.Node {
         const {navigation} = this.props;
-        const {hasCameraPermission, type, flashMode} = this.state;
+        const {hasCameraPermission, type, flashMode, loading} = this.state;
+        const isAndroid = Platform.OS === "android";
         if (hasCameraPermission === null) {
             return (
                 <View style={styles.refreshContainer}>
@@ -90,17 +103,23 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
                         </View>
                     </Camera>
                     <View style={styles.footer}>
-                        <TouchableWithoutFeedback onPress={this.snap}>
+                        <TouchableOpacity onPress={this.snap}>
                             <View style={styles.btn} />
-                        </TouchableWithoutFeedback>
+                        </TouchableOpacity>
                     </View>
+                    <Modal transparent={true} visible={loading && isAndroid} onRequestClose={this.toggle}>
+                        <View style={styles.modal}>
+                            <SpinningIndicator />
+                        </View>
+                    </Modal>
                 </View>
             );
         }
     }
 }
 
-const {width} = Dimensions.get("window");
+const {width, height} = Dimensions.get("window");
+const ratio = width / height;
 const styles = StyleSheet.create({
     container: {
         flex: 1
@@ -132,10 +151,16 @@ const styles = StyleSheet.create({
         alignItems: "center"
     },
     btn: {
-        height: 100,
-        width: 100,
-        borderRadius: 50,
-        borderWidth: 20,
+        height: ratio < 0.75 ? 100 : 60,
+        width: ratio <  0.75 ? 100 : 60,
+        borderRadius: ratio < 0.75 ? 50 : 30,
+        borderWidth: ratio < 0.75 ? 20 : 10,
         borderColor: Theme.palette.lightGray
+    },
+    modal: {
+        flex: 1,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        justifyContent: "center",
+        alignItems: "center"
     }
 });

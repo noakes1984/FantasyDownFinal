@@ -22,13 +22,8 @@ export default class Odometer extends React.Component<OdometerProps, OdometerSta
         this.setState({ count });
     }
 
-    increment() {
-        const count = this.state.count + 1;
-        this.setState({ count });
-    }
-
-    decrement() {
-        const count = this.state.count - 1;
+    componentWillReceiveProps(nextProps: OdometerProps) {
+        const {count} = nextProps;
         this.setState({ count });
     }
 

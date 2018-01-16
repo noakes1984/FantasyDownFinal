@@ -17,29 +17,34 @@ type LikesProps = {
 
 type LikesState = {
     animation: Animated.Value,
-    isLiked: boolean
+    isLiked: boolean,
+    count: number
 };
 
 export default class Likes extends React.Component<LikesProps, LikesState> {
-
-    counter: Odometer;
 
     componentWillMount() {
         const {likes} = this.props;
         const {uid} = Firebase.auth.currentUser;
         const isLiked = likes.indexOf(uid) !== -1;
-        this.setState({ isLiked });
+        this.setState({ isLiked, count: likes.length });
+    }
+
+    componentWillReceiveProps(nextProps: LikesProps) {
+        const {likes} = nextProps;
+        const {uid} = Firebase.auth.currentUser;
+        const isLiked = likes.indexOf(uid) !== -1;
+        this.setState({ isLiked, count: likes.length });
     }
 
     @autobind
     toggle() {
         const {post} = this.props;
-        const {isLiked} = this.state;
+        const {isLiked, count} = this.state;
         const {uid} = Firebase.auth.currentUser;
         if (!isLiked) {
-            this.counter.increment();
             const animation = new Animated.Value(0);
-            this.setState({ animation, isLiked: !isLiked });
+            this.setState({ animation, isLiked: !isLiked, count: count + 1 });
             Animated.timing(
                 animation,
                 {
@@ -49,25 +54,25 @@ export default class Likes extends React.Component<LikesProps, LikesState> {
                 }
             ).start();
         } else {
-            this.setState({ isLiked: !isLiked });
-            this.counter.decrement();
+            this.setState({ isLiked: !isLiked, count: count - 1 });
         }
         const postRef = Firebase.firestore.collection("feed").doc(post);
         Firebase.firestore.runTransaction(async transaction => {
             const postDoc = await transaction.get(postRef);
             const likes = postDoc.data().likes;
-            if (!isLiked) {
+            const idx = likes.indexOf(uid);
+            if (idx === -1) {
                 likes.push(uid);
             } else {
-                likes.splice(uid, 1);
+                likes.splice(idx, 1);
             }
             transaction.update(postRef, { likes });
         });
     }
 
     render(): React.Node {
-        const {color, likes} = this.props;
-        const {animation, isLiked} = this.state;
+        const {color} = this.props;
+        const {animation, isLiked, count} = this.state;
         const computedStyle = [styles.icon];
         if (animation) {
             const fontSize = animation.interpolate({
@@ -85,7 +90,7 @@ export default class Likes extends React.Component<LikesProps, LikesState> {
                     <View style={styles.iconContainer}>
                         <AnimatedIcon name="thumbs-up" color={color} style={computedStyle} />
                     </View>
-                    <Odometer ref={ref => ref ? this.counter = ref : undefined} count={likes.length} {...{ color }} />
+                    <Odometer count={count} {...{ color }} />
                 </View>
             </TouchableWithoutFeedback>
         );

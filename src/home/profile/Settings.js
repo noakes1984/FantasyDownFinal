@@ -140,6 +140,11 @@ const styles = StyleSheet.create({
     content: {
         marginHorizontal: Theme.spacing.base
     },
+    refreshContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center"
+    },
     avatarContainer: {
         alignItems: "center"
     },

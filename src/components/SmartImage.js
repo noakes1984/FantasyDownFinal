@@ -20,14 +20,10 @@ type ImageProps = {
 export default class Image extends React.Component<ImageProps> {
 
     style: StyleObj;
+    mounted = false;
 
     @observable intensity = new Animated.Value(100);
     @observable uri: string;
-
-    @autobind @action
-    setURI(uri: string) {
-        this.uri = uri;
-    }
 
     load(props: ImageProps) {
         const {uri, style} = props;
@@ -39,6 +35,7 @@ export default class Image extends React.Component<ImageProps> {
     }
 
     componentWillMount() {
+        this.mounted = true;
         this.load(this.props);
     }
 
@@ -46,11 +43,24 @@ export default class Image extends React.Component<ImageProps> {
         this.load(props);
     }
 
+    componentWillUnmount() {
+        this.mounted = false;
+    }
+
     @autobind
     onLoadEnd() {
-        const {preview} = this.props;
-        if (preview) {
-            Animated.timing(this.intensity, { duration: 300, toValue: 0, useNativeDriver: true }).start();
+        if (this.mounted) {
+            const {preview} = this.props;
+            if (preview) {
+                Animated.timing(this.intensity, { duration: 300, toValue: 0, useNativeDriver: true }).start();
+            }
+        }
+    }
+
+    @autobind @action
+    setURI(uri: string) {
+        if (this.mounted) {
+            this.uri = uri;
         }
     }
 

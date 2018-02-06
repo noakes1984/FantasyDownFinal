@@ -4,8 +4,6 @@ import * as _ from "lodash";
 import * as React from "react";
 import {Image as RNImage, Animated, StyleSheet, View, Platform} from "react-native";
 import {BlurView} from "expo";
-import {observable, action}  from "mobx";
-import {observer} from "mobx-react/native";
 import {type StyleObj} from "react-native/Libraries/StyleSheet/StyleSheetTypes";
 
 import CacheManager from "./CacheManager";
@@ -16,14 +14,15 @@ type ImageProps = {
     uri: string
 };
 
-@observer
-export default class Image extends React.Component<ImageProps> {
+type ImageState = {
+    uri: string,
+    intensity: Animated.Value
+};
+
+export default class Image extends React.Component<ImageProps, ImageState> {
 
     style: StyleObj;
-    mounted = false;
-
-    @observable intensity = new Animated.Value(100);
-    @observable uri: string;
+    subscribedToCache = true;
 
     load(props: ImageProps) {
         const {uri, style} = props;
@@ -35,7 +34,8 @@ export default class Image extends React.Component<ImageProps> {
     }
 
     componentWillMount() {
-        this.mounted = true;
+        const intensity = new Animated.Value(100);
+        this.setState({ intensity });
         this.load(this.props);
     }
 
@@ -43,35 +43,33 @@ export default class Image extends React.Component<ImageProps> {
         this.load(props);
     }
 
-    componentWillUnmount() {
-        this.mounted = false;
-    }
-
     @autobind
-    onLoadEnd() {
-        if (this.mounted) {
-            const {preview} = this.props;
-            if (preview) {
-                Animated.timing(this.intensity, { duration: 300, toValue: 0, useNativeDriver: true }).start();
-            }
+    setURI(uri: string) {
+        if (this.subscribedToCache) {
+            this.setState({ uri });
         }
     }
 
-    @autobind @action
-    setURI(uri: string) {
-        if (this.mounted) {
-            this.uri = uri;
+    componentDidUpdate(prevProps: ImageProps, prevState: ImageState) {
+        const {preview} = this.props;
+        const {uri, intensity} = this.state;
+        if (uri && preview && uri !== preview && prevState.uri === undefined) {
+            Animated.timing(intensity, { duration: 300, toValue: 0, useNativeDriver: true }).start();
         }
+    }
+
+    componentWillUnmount() {
+        this.subscribedToCache = false;
     }
 
     render(): React.Node {
         const {style: computedStyle} = this;
         const {preview, style} = this.props;
-        const {uri, intensity} = this;
+        const {uri, intensity} = this.state;
         const hasPreview = !!preview;
         const opacity = intensity.interpolate({
             inputRange: [0, 100],
-            outputRange: [0, 1]
+            outputRange: [0, 0.5]
         });
         return (
             <View {...{style}}>
@@ -90,7 +88,6 @@ export default class Image extends React.Component<ImageProps> {
                             source={{ uri }}
                             resizeMode="cover"
                             style={computedStyle}
-                            onLoadEnd={this.onLoadEnd}
                         />
                     )
                 }
@@ -101,7 +98,7 @@ export default class Image extends React.Component<ImageProps> {
                 }
                 {
                     hasPreview && Platform.OS === "android" && (
-                        <Animated.View style={[computedStyle, { backgroundColor: "rgba(0, 0, 0, 0.5)", opacity }]} />
+                        <Animated.View style={[computedStyle, { backgroundColor: "black", opacity }]} />
                     )
                 }
             </View>

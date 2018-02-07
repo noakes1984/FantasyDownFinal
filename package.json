@@ -1,6 +1,6 @@
 {
     "name": "react-native-fiber-firebase",
-    "version": "1.0.15-firebase",
+    "version": "1.0.16-firebase",
     "private": true,
     "devDependencies": {
         "autobind-decorator": "^1.4.0",

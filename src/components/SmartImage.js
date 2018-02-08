@@ -1,136 +1,113 @@
 // @flow
+import autobind from "autobind-decorator";
 import * as _ from "lodash";
 import * as React from "react";
-import {Image, Animated, StyleSheet, View, Platform, ActivityIndicator} from "react-native";
-import {BlurView, FileSystem} from "expo";
-import SHA1 from "crypto-js/sha1";
-import {observable, computed} from "mobx";
-import {observer} from "mobx-react/native";
+import {Image as RNImage, Animated, StyleSheet, View, Platform} from "react-native";
+import {BlurView} from "expo";
+import {type StyleObj} from "react-native/Libraries/StyleSheet/StyleSheetTypes";
 
-import type {BaseProps} from "./Types";
+import CacheManager from "./CacheManager";
 
-type Listener = () => mixed;
-
-class DownloadManager {
-
-    listeners: { [path: string]: Listener[] } = {};
-
-    async download(uri: string, path: string, listener: Listener): Promise<void> {
-        if (!this.listeners[path]) {
-            this.listeners[path] = [listener];
-            await FileSystem.downloadAsync(uri, path);
-            this.listeners[path].forEach(listener => listener());
-            delete this.listeners[path];
-        } else {
-            this.listeners[path].push(listener);
-        }
-    }
-
-    listen(path: string, listener: Listener) {
-        if (!this.listeners[path]) {
-            listener();
-        } else {
-            this.listeners[path].push(listener);
-        }
-    }
-}
-
-type SmartImageProps = BaseProps & {
+type ImageProps = {
+    style?: StyleObj,
     preview?: string,
-    uri: string,
-    showSpinner?: boolean
+    uri: string
 };
 
-const propsToCopy = [
-    "borderRadius", "borderBottomLeftRadius", "borderBottomRightRadius", "borderTopLeftRadius", "borderTopRightRadius"
-];
+type ImageState = {
+    uri: string,
+    intensity: Animated.Value
+};
 
-const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
+export default class Image extends React.Component<ImageProps, ImageState> {
 
-@observer
-export default class SmartImage extends React.Component<SmartImageProps> {
+    style: StyleObj;
+    subscribedToCache = true;
 
-    static defaultProps = {
-        showSpinner: true
-    };
-
-    static downloadManager: DownloadManager = new DownloadManager();
-
-    @observable _uri: string;
-    @observable _intensity: Animated.Value = new Animated.Value(100);
-
-    @computed get uri(): string { return this._uri; }
-    set uri(uri: string) { this._uri = uri }
-
-    @computed get intensity(): Animated.Value { return this._intensity; }
-    set intensity(intensity: Animated.Value) { this._intensity = intensity; }
-
-    async componentWillMount(): Promise<void> {
-        const {preview, uri} = this.props;
-        if (preview && Platform.OS === "ios") {
-            this.uri = preview;
-        }
-        const entry = await getCacheEntry(uri);
-        if (!entry.exists) {
-            if (uri.startsWith("file://")) {
-                await FileSystem.copyAsync({ from: uri, to: entry.path });
-                this.uri = entry.path;
-            } else {
-                SmartImage.downloadManager.download(uri, entry.path, () => this.uri = entry.path);
-            }
-        } else {
-            SmartImage.downloadManager.listen(entry.path, () => this.uri = entry.path);
-        }
-    }
-
-    onLoadEnd(uri: string) {
-        const {preview} = this.props;
-        const isPreview = uri === preview;
-        if (!isPreview && Platform.OS === "ios") {
-            this.intensity = new Animated.Value(100);
-            Animated.timing(this.intensity, { duration: 300, toValue: 0, useNativeDriver: true }).start();
-        }
-    }
-
-    render(): React.Node {
-        const {style, showSpinner} = this.props;
-        const {uri, intensity} = this;
-        const computedStyle = [
+    load(props: ImageProps) {
+        const {uri, style} = props;
+        this.style = [
             StyleSheet.absoluteFill,
             _.pickBy(StyleSheet.flatten(style), (value, key) => propsToCopy.indexOf(key) !== -1)
         ];
-        const spinnerStyle = { justifyContent: "center", alignItems: "center", backgroundColor: "#BFBFBF" };
+        CacheManager.cache(uri, this.setURI);
+    }
+
+    componentWillMount() {
+        const intensity = new Animated.Value(100);
+        this.setState({ intensity });
+        this.load(this.props);
+    }
+
+    componentWillReceiveProps(props: ImageProps) {
+        this.load(props);
+    }
+
+    @autobind
+    setURI(uri: string) {
+        if (this.subscribedToCache) {
+            this.setState({ uri });
+        }
+    }
+
+    componentDidUpdate(prevProps: ImageProps, prevState: ImageState) {
+        const {preview} = this.props;
+        const {uri, intensity} = this.state;
+        if (uri && preview && uri !== preview && prevState.uri === undefined) {
+            Animated.timing(intensity, { duration: 300, toValue: 0, useNativeDriver: true }).start();
+        }
+    }
+
+    componentWillUnmount() {
+        this.subscribedToCache = false;
+    }
+
+    render(): React.Node {
+        const {style: computedStyle} = this;
+        const {preview, style} = this.props;
+        const {uri, intensity} = this.state;
+        const hasPreview = !!preview;
+        const opacity = intensity.interpolate({
+            inputRange: [0, 100],
+            outputRange: [0, 0.5]
+        });
         return (
             <View {...{style}}>
                 {
-                    uri && (
-                        <Image
-                            source={{ uri }}
+                    hasPreview && (
+                        <RNImage
+                            source={{ uri: preview }}
                             resizeMode="cover"
                             style={computedStyle}
-                            onLoadEnd={() => this.onLoadEnd(uri)}
                         />
                     )
                 }
                 {
-                    (Platform.OS !== "ios" && !uri && showSpinner) && (
-                        <View style={[computedStyle, spinnerStyle]}>
-                            <ActivityIndicator size="large" color="white" />
-                        </View>
+                    (uri && uri !== preview) && (
+                        <RNImage
+                            source={{ uri }}
+                            resizeMode="cover"
+                            style={computedStyle}
+                        />
                     )
                 }
                 {
-                    Platform.OS === "ios" && <AnimatedBlurView tint="default" style={computedStyle} {...{intensity}} />
+                    hasPreview && Platform.OS === "ios" && (
+                        <AnimatedBlurView tint="dark" style={computedStyle} {...{intensity}} />
+                    )
+                }
+                {
+                    hasPreview && Platform.OS === "android" && (
+                        <Animated.View style={[computedStyle, { backgroundColor: "black", opacity }]} />
+                    )
                 }
             </View>
         );
     }
 }
 
-const getCacheEntry = async(uri): Promise<{ exists: boolean, path: string }> => {
-    const ext = uri.substring(uri.lastIndexOf("."), uri.indexOf("?") === -1 ? undefined : uri.indexOf("?"));
-    const path = FileSystem.cacheDirectory + SHA1(uri) + ext;
-    const info = await FileSystem.getInfoAsync(path);
-    const {exists} = info;
-    return { exists, path };
-}
+const propsToCopy = [
+    "borderRadius", "borderBottomLeftRadius", "borderBottomRightRadius", "borderTopLeftRadius", "borderTopRightRadius"
+];
+
+const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);

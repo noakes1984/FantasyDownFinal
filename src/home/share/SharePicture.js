@@ -132,7 +132,7 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
                             <Button
                                 primary={true}
                                 full={true}
-                                label={!uploadDone ? "Processing Picture..." : "Share Picture"}
+                                label={!uploadDone ? "Uploading Picture..." : "Share Picture"}
                                 style={styles.btn}
                                 {...{onPress}}
                             />

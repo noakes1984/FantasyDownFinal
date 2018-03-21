@@ -1,8 +1,7 @@
 // @flow
 import * as _ from "lodash";
 import * as React from "react";
-import {TextInput} from "react-native";
-import {StyleSheet} from "react-native";
+import {TextInput, StyleSheet} from "react-native";
 
 import { Theme } from "./Theme";
 
@@ -18,14 +17,14 @@ export class TextField extends React.Component<TextFieldProps> {
         const keysToFilter = ["contrast", "label", "textInputRef"];
         const props = _.pickBy(this.props, (value, key) => keysToFilter.indexOf(key) === -1);
         return (
-                <TextInput
-                    secureTextEntry={secureTextEntry}
-                    ref={textInputRef}
-                    style={styles.textInput}
-                    placeholderTextColor={Theme.typography.color}
-                    {...props}
-                    underlineColorAndroid="transparent"
-                />
+            <TextInput
+                secureTextEntry={secureTextEntry}
+                ref={textInputRef}
+                style={styles.textInput}
+                placeholderTextColor={Theme.typography.color}
+                {...props}
+                underlineColorAndroid="transparent"
+            />
         );
     }
 }

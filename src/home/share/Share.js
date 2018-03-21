@@ -41,7 +41,7 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
     toggleFlash() {
         const {flashMode} = this.state;
         const {on, off} = Camera.Constants.FlashMode;
-        this.setState({ flashMode: flashMode ===  on ? off : on });
+        this.setState({ flashMode: flashMode === on ? off : on });
     }
 
     @autobind
@@ -61,6 +61,7 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
             navigation.navigate("SharePicture", picture);
         } catch (e) {
             this.setState({ loading: false });
+            // eslint-disable-next-line no-alert
             alert(serializeException(e));
         }
     }
@@ -79,42 +80,41 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
         if (hasCameraPermission === null) {
             return (
                 <View style={styles.refreshContainer}>
-                    <RefreshIndicator refreshing={true} />
+                    <RefreshIndicator refreshing />
                 </View>
             );
         } else if (hasCameraPermission === false) {
             return <EnableCameraPermission />;
-        } else {
-            return (
-                <View style={styles.container}>
-                    <NavHeader title="Share" {...{navigation}} />
-                    <Camera ref={this.setCamera} style={styles.camera} {...{type, flashMode}}>
-                        <View style={styles.cameraBtns}>
-                            <TouchableWithoutFeedback onPress={this.toggleCamera}>
-                                <View>
-                                    <Icon name="rotate-ccw" style={styles.rotate} size={25} />
-                                </View>
-                            </TouchableWithoutFeedback>
-                            <TouchableWithoutFeedback onPress={this.toggleFlash}>
-                                <View>
-                                    <FlashIcon on={flashMode === Camera.Constants.FlashMode.on} />
-                                </View>
-                            </TouchableWithoutFeedback>
-                        </View>
-                    </Camera>
-                    <View style={styles.footer}>
-                        <TouchableOpacity onPress={this.snap}>
-                            <View style={styles.btn} />
-                        </TouchableOpacity>
-                    </View>
-                    <Modal transparent={true} visible={loading && isAndroid} onRequestClose={this.toggle}>
-                        <View style={styles.modal}>
-                            <SpinningIndicator />
-                        </View>
-                    </Modal>
-                </View>
-            );
         }
+        return (
+            <View style={styles.container}>
+                <NavHeader title="Share" {...{navigation}} />
+                <Camera ref={this.setCamera} style={styles.camera} {...{type, flashMode}}>
+                    <View style={styles.cameraBtns}>
+                        <TouchableWithoutFeedback onPress={this.toggleCamera}>
+                            <View>
+                                <Icon name="rotate-ccw" style={styles.rotate} size={25} />
+                            </View>
+                        </TouchableWithoutFeedback>
+                        <TouchableWithoutFeedback onPress={this.toggleFlash}>
+                            <View>
+                                <FlashIcon on={flashMode === Camera.Constants.FlashMode.on} />
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </View>
+                </Camera>
+                <View style={styles.footer}>
+                    <TouchableOpacity onPress={this.snap}>
+                        <View style={styles.btn} />
+                    </TouchableOpacity>
+                </View>
+                <Modal transparent visible={loading && isAndroid} onRequestClose={this.toggle}>
+                    <View style={styles.modal}>
+                        <SpinningIndicator />
+                    </View>
+                </Modal>
+            </View>
+        );
     }
 }
 
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     },
     btn: {
         height: ratio < 0.75 ? 100 : 60,
-        width: ratio <  0.75 ? 100 : 60,
+        width: ratio < 0.75 ? 100 : 60,
         borderRadius: ratio < 0.75 ? 50 : 30,
         borderWidth: ratio < 0.75 ? 20 : 10,
         borderColor: Theme.palette.lightGray

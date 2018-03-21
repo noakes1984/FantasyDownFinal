@@ -39,11 +39,6 @@ export default class Settings extends React.Component<ScreenParams<{ profile: Pr
     }
 
     @autobind
-    logout() {
-        Firebase.auth.signOut();
-    }
-
-    @autobind
     async save(): Promise<void> {
         const {navigation} = this.props;
         const originalProfile = navigation.state.params.profile;
@@ -56,15 +51,16 @@ export default class Settings extends React.Component<ScreenParams<{ profile: Pr
             }
             if (picture.uri !== originalProfile.picture.uri) {
                 const id = ImageUpload.uid();
-                const name = `${id}.jpg`;
+                const imgName = `${id}.jpg`;
                 const preview = await ImageUpload.preview(picture);
-                await ImageUpload.upload(picture, name);
-                const uri = await Firebase.storage.ref(name).getDownloadURL();
+                await ImageUpload.upload(picture, imgName);
+                const uri = await Firebase.storage.ref(imgName).getDownloadURL();
                 await Firebase.firestore.collection("users").doc(uid).update({ picture: { preview, uri } });
             }
             NavigationHelpers.reset(navigation, "Home");
-        } catch(e) {
+        } catch (e) {
             const message = serializeException(e);
+            // eslint-disable-next-line no-alert
             alert(message);
             this.setState({ loading: false });
         }
@@ -74,7 +70,7 @@ export default class Settings extends React.Component<ScreenParams<{ profile: Pr
     async setPicture(): Promise<void> {
         const result = await ImagePicker.launchImageLibraryAsync({
             allowsEditing: true,
-            aspect: [4, 3],
+            aspect: [4, 3]
         });
         if (result.cancelled === false) {
             const {uri, width, height} = result;
@@ -98,7 +94,7 @@ export default class Settings extends React.Component<ScreenParams<{ profile: Pr
         if (hasCameraRollPermission === null) {
             return (
                 <View style={styles.refreshContainer}>
-                    <RefreshIndicator refreshing={true} />
+                    <RefreshIndicator refreshing />
                 </View>
             );
         } else if (hasCameraRollPermission === false) {
@@ -106,7 +102,7 @@ export default class Settings extends React.Component<ScreenParams<{ profile: Pr
         }
         return (
             <View style={styles.container}>
-                <NavHeader title="Settings" back={true} {...{navigation}} />
+                <NavHeader title="Settings" back {...{navigation}} />
                 <Content style={styles.content}>
                     <View style={styles.avatarContainer}>
                         <TouchableWithoutFeedback onPress={this.setPicture}>
@@ -125,14 +121,15 @@ export default class Settings extends React.Component<ScreenParams<{ profile: Pr
                         onSubmitEditing={this.save}
                         onChangeText={this.setName}
                     />
-                    <Button label="Save" full={true} primary={true} onPress={this.save} {...{loading}} />
-                    <Button label="Sign-Out" full={true} onPress={this.logout} />
+                    <Button label="Save" full primary onPress={this.save} {...{loading}} />
+                    <Button label="Sign-Out" full onPress={logout} />
                 </Content>
             </View>
         );
     }
 }
 
+const logout = () => Firebase.auth.signOut();
 const styles = StyleSheet.create({
     container: {
         flex: 1

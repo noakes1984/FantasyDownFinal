@@ -13,7 +13,7 @@ type TypographyProps = BaseProps & {
     children: string
 };
 
-export default class Text extends React.Component<TypographyProps> {
+export default class Text extends React.PureComponent<TypographyProps> {
 
     static defaultProps = {
         type: "regular"
@@ -24,7 +24,9 @@ export default class Text extends React.Component<TypographyProps> {
         const defaultStyle = [Theme.typography[type], { backgroundColor: "transparent" }];
         const isHeader = type.startsWith("header");
         defaultStyle.push({
+            // eslint-disable-next-line no-nested-ternary
             color: isHeader ? "black" : (type === "large" ? Theme.palette.lightGray : Theme.typography.color),
+            // eslint-disable-next-line no-nested-ternary
             marginBottom: gutterBottom ? (isHeader ? Theme.spacing.base : Theme.spacing.small) : 0
         });
         defaultStyle.push(style);

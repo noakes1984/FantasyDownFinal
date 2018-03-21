@@ -6,7 +6,8 @@ import {AnimatedView, simpleInterpolation, directInterpolation} from "../compone
 
 type LogoProps = {};
 
-export default class Logo extends React.Component<LogoProps> {
+// eslint-disable-next-line react/prefer-stateless-function
+export default class Logo extends React.PureComponent<LogoProps> {
 
     render(): React.Node {
         const animations = {
@@ -15,7 +16,7 @@ export default class Logo extends React.Component<LogoProps> {
         };
         return (
             <View style={styles.container}>
-                <AnimatedView duration={400} style={[styles.square, styles.a]} {...{ animations }}  />
+                <AnimatedView duration={400} style={[styles.square, styles.a]} {...{ animations }} />
                 <AnimatedView delay={200} duration={500} style={[styles.square, styles.b]} {...{ animations }} />
                 <AnimatedView duration={600} delay={400} style={[styles.square, styles.c]} {...{ animations }} />
             </View>
@@ -25,7 +26,7 @@ export default class Logo extends React.Component<LogoProps> {
 
 const n = 75;
 const d = n * Math.sqrt(2);
-const translation = (d-n) * 0.5 + n * 0.5;
+const translation = ((d - n) * 0.5) + (n * 0.5);
 const styles = StyleSheet.create({
     container: {
         justifyContent: "center",
@@ -42,7 +43,7 @@ const styles = StyleSheet.create({
     },
     a: {
         backgroundColor: "#004DFF",
-        transform: [{ translateY: translation  }, { rotate: "45deg" }]
+        transform: [{ translateY: translation }, { rotate: "45deg" }]
     },
     b: {
         backgroundColor: "#00AAFF",
@@ -50,6 +51,6 @@ const styles = StyleSheet.create({
     },
     c: {
         backgroundColor: "#A0EEFF",
-        transform: [{ translateY: - translation }, { rotate: "45deg" }]
+        transform: [{ translateY: -translation }, { rotate: "45deg" }]
     }
 });

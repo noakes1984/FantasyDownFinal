@@ -59,7 +59,7 @@ export default class Likes extends React.Component<LikesProps, LikesState> {
         const postRef = Firebase.firestore.collection("feed").doc(post);
         Firebase.firestore.runTransaction(async transaction => {
             const postDoc = await transaction.get(postRef);
-            const likes = postDoc.data().likes;
+            const {likes} = postDoc.data();
             const idx = likes.indexOf(uid);
             if (idx === -1) {
                 likes.push(uid);

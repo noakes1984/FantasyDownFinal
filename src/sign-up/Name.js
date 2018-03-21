@@ -46,11 +46,13 @@ export default class Name extends React.Component<NavigationProps<*>, NameState>
     next() {
         const {firstName, lastName} = this.state;
         if (firstName === "") {
+            // eslint-disable-next-line no-alert
             alert("Please provide a first name.");
         } else if (lastName === "") {
+            // eslint-disable-next-line no-alert
             alert("Please provide a last name.");
         } else {
-            SignUpStore.displayName = firstName + " " + lastName;
+            SignUpStore.displayName = `${firstName} ${lastName}`;
             this.props.navigation.navigate("SignUpEmail");
         }
 
@@ -59,25 +61,25 @@ export default class Name extends React.Component<NavigationProps<*>, NameState>
     render(): React.Node {
         const {navigation} = this.props;
         return (
-                <SignUpContainer title="Your Name" subtitle="Who are you" next={this.next} {...{navigation}}>
-                    <TextField
-                        placeholder="First Name"
-                        autoCapitalize="none"
-                        autoCorrect={false}
-                        returnKeyType="next"
-                        onSubmitEditing={this.goToLastName}
-                        onChangeText={this.setFirstName}
-                    />
-                    <TextField
-                        placeholder="Last Name"
-                        autoCapitalize="none"
-                        autoCorrect={false}
-                        returnKeyType="go"
-                        textInputRef={this.setLastNameRef}
-                        onSubmitEditing={this.next}
-                        onChangeText={this.setLastName}
-                    />
-                </SignUpContainer>
+            <SignUpContainer title="Your Name" subtitle="Who are you" next={this.next} {...{navigation}}>
+                <TextField
+                    placeholder="First Name"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    returnKeyType="next"
+                    onSubmitEditing={this.goToLastName}
+                    onChangeText={this.setFirstName}
+                />
+                <TextField
+                    placeholder="Last Name"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    returnKeyType="go"
+                    textInputRef={this.setLastNameRef}
+                    onSubmitEditing={this.next}
+                    onChangeText={this.setLastName}
+                />
+            </SignUpContainer>
         );
     }
 }

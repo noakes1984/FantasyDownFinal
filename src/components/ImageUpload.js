@@ -15,7 +15,7 @@ const id = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substrin
 export default class ImageUpload {
 
     static uid(): string {
-        return id() + id() + "-" + id() + "-" + id() + "-" + id() + "-" + id() + id() + id();
+        return `${id()}${id()}-${id()}-${id()}-${id()}-${id()}${id()}${id()}`;
     }
 
     static async preview({ uri }: Picture): Promise<string> {
@@ -45,7 +45,8 @@ export default class ImageUpload {
                 console.error(res);
                 throw new Error("An error happened when uploading the picture. Please try again.");
             }
-        } catch(e) {
+        } catch (e) {
+            // eslint-disable-next-line no-alert
             alert(e);
         }
     }

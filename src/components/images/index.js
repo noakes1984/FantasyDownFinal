@@ -1,13 +1,15 @@
 // @flow
 import {Asset} from "expo";
 
+const cover = require("./cover.jpg");
+
 export default class Images {
 
-    static cover = require("./cover.jpg");
+    static cover = cover;
 
     static downloadAsync(): Promise<*>[] {
         return [
-            Asset.loadAsync(Images.cover)
+            Asset.loadAsync(cover)
         ];
     }
 }

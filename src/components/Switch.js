@@ -30,7 +30,7 @@ export default class Switch extends React.Component<SwitchProps, SwitchState> {
     toggle() {
         const {onToggle} = this.props;
         const {value} = this.state;
-        this.setState({ value: !value })
+        this.setState({ value: !value });
         if (onToggle) {
             onToggle(!value);
         }

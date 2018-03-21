@@ -13,7 +13,7 @@ export default class CommentsStore {
     set comments(comments: Comments) { this._comments = comments; }
 
     @computed get comment(): string { return this._comment; }
-    set comment(comment: string){ this._comment = comment; }
+    set comment(comment: string) { this._comment = comment; }
 
     constructor(postId: string) {
         this.init(postId);

@@ -6,7 +6,7 @@ import {Spinner} from "native-base";
 import {Theme} from "./Theme";
 import type {BaseProps} from "./Types";
 
-export default class LoadingIndicator extends React.Component<BaseProps> {
+export default class LoadingIndicator extends React.PureComponent<BaseProps> {
 
     render(): React.Node {
         const {style} = this.props;
@@ -24,4 +24,4 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center"
     }
-})
+});

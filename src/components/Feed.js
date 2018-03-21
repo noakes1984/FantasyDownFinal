@@ -3,6 +3,7 @@ import autobind from "autobind-decorator";
 import * as React from "react";
 import {StyleSheet, View, FlatList, SafeAreaView} from "react-native";
 import {observer} from "mobx-react/native";
+import {type AnimatedEvent} from "react-native/Libraries/Animated/src/AnimatedEvent";
 
 import FeedStore from "./FeedStore";
 
@@ -10,7 +11,6 @@ import {RefreshIndicator, Post, Theme, FirstPost} from "../components";
 
 import type {FeedEntry} from "../components/Model";
 import type {NavigationProps} from "../components/Types";
-import type { AnimatedEvent } from "react-native/Libraries/Animated/src/AnimatedEvent";
 
 type FlatListItem<T> = {
     item: T
@@ -27,6 +27,7 @@ type FeedProps = NavigationProps<> & {
 export default class Feed extends React.Component<FeedProps> {
 
     @autobind
+    // eslint-disable-next-line class-methods-use-this
     keyExtractor(item: FeedEntry): string {
         return item.post.id;
     }
@@ -53,20 +54,20 @@ export default class Feed extends React.Component<FeedProps> {
         const loading = feed === undefined;
         return (
             <SafeAreaView style={styles.list}>
-            <FlatList
-                showsVerticalScrollIndicator={false}
-                data={feed}
-                keyExtractor={this.keyExtractor}
-                renderItem={this.renderItem}
-                onEndReachedThreshold={0.5}
-                onEndReached={this.loadMore}
-                ListEmptyComponent={(
-                    <View style={styles.post}>
-                    {loading ? <RefreshIndicator /> : <FirstPost {...{navigation}} />}
-                    </View>
-                )}
-                {...{ onScroll, bounce, ListHeaderComponent }}
-            />
+                <FlatList
+                    showsVerticalScrollIndicator
+                    data={feed}
+                    keyExtractor={this.keyExtractor}
+                    renderItem={this.renderItem}
+                    onEndReachedThreshold={0.5}
+                    onEndReached={this.loadMore}
+                    ListEmptyComponent={(
+                        <View style={styles.post}>
+                            {loading ? <RefreshIndicator /> : <FirstPost {...{navigation}} />}
+                        </View>
+                    )}
+                    {...{ onScroll, bounce, ListHeaderComponent }}
+                />
             </SafeAreaView>
         );
     }

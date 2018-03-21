@@ -10,7 +10,7 @@ type CommentProps = {
     profile: Profile
 };
 
-export default class CommentComp extends React.Component<CommentProps> {
+export default class CommentComp extends React.PureComponent<CommentProps> {
 
     render(): React.Node {
         const {text} = this.props.comment;

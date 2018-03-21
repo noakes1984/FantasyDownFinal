@@ -1,5 +1,5 @@
 // @flow
-import { NavigationActions } from "react-navigation"
+import {NavigationActions} from "react-navigation";
 import type {NavigationScreenProp} from "react-navigation/src/TypeDefinition";
 
 export default class NavigationHelpers {

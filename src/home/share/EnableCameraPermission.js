@@ -1,6 +1,4 @@
 // @flow
-import autobind from "autobind-decorator";
-
 import * as React from "react";
 import {StyleSheet, View, Linking} from "react-native";
 
@@ -19,45 +17,39 @@ export default class EnableCameraPermission extends React.Component<Props, State
         this.setState({ canOpen });
     }
 
-    @autobind
-    async onPress(): Promise<void> {
-        Linking.openURL("app-settings:");
-    }
-
     render(): React.Node {
-        const {onPress} = this;
         const {canOpen} = this.state;
         if (canOpen === null) {
             return (
                 <View style={styles.container}>
-                    <RefreshIndicator refreshing={true} />
+                    <RefreshIndicator refreshing />
                 </View>
-            )
-        } else {
-            return (
-                <View style={styles.container}>
-                    <Text type="header3" gutterBottom={true} style={styles.text}>Take Pictures with Fiber</Text>
-                    <Text gutterBottom={true} style={styles.text}>
-                    Allow access to your camera to start taking photos with Fiber.
-                    </Text>
-                    {
-                        canOpen === true && (
-                            <Button label="Enable Camera Access" primary={true} full={true} {...{onPress}} />
-                        )
-                    }
-                    {
-                        canOpen === false && (
-                            <Text gutterBottom={true} style={styles.text}>
-                            Allow access to your camera in the app settings.
-                            </Text>
-                        )
-                    }
-                </View>
-            )
+            );
         }
+        return (
+            <View style={styles.container}>
+                <Text type="header3" gutterBottom style={styles.text}>Take Pictures with Fiber</Text>
+                <Text gutterBottom style={styles.text}>
+                    Allow access to your camera to start taking photos with Fiber.
+                </Text>
+                {
+                    canOpen === true && (
+                        <Button label="Enable Camera Access" primary full {...{onPress}} />
+                    )
+                }
+                {
+                    canOpen === false && (
+                        <Text gutterBottom style={styles.text}>
+                        Allow access to your camera in the app settings.
+                        </Text>
+                    )
+                }
+            </View>
+        );
     }
 }
 
+const onPress = async (): Promise<void> => Linking.openURL("app-settings:");
 const styles = StyleSheet.create({
     container: {
         flexGrow: 1,

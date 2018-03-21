@@ -12,8 +12,8 @@ const DEFAULT_PROFILE: Profile = {
     outline: "React Native",
     picture: {
         // eslint-disable-next-line max-len
-        "uri": "https://firebasestorage.googleapis.com/v0/b/react-native-ting.appspot.com/o/fiber%2Fprofile%2FJ0k2SZiI9V9KoYZK7Enru5e8CbqFxdzjkHCmzd2yZ1dyR22Vcjc0PXDPslhgH1JSEOKMMOnDcubGv8s4ZxA.jpg?alt=media&token=6d5a2309-cf94-4b8e-a405-65f8c5c6c87c",
-        "preview": "data:image/gif;base64,R0lGODlhAQABAPAAAKyhmP///yH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=="
+        uri: "https://firebasestorage.googleapis.com/v0/b/react-native-ting.appspot.com/o/fiber%2Fprofile%2FJ0k2SZiI9V9KoYZK7Enru5e8CbqFxdzjkHCmzd2yZ1dyR22Vcjc0PXDPslhgH1JSEOKMMOnDcubGv8s4ZxA.jpg?alt=media&token=6d5a2309-cf94-4b8e-a405-65f8c5c6c87c",
+        preview: "data:image/gif;base64,R0lGODlhAQABAPAAAKyhmP///yH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=="
     }
 };
 
@@ -45,7 +45,7 @@ export default class FeedStore {
         const profilePromises = _.uniq(uids).map(uid => (async () => {
             try {
                 const profileDoc = await Firebase.firestore.collection("users").doc(uid).get();
-                this.profiles[uid] =  profileDoc.data();
+                this.profiles[uid] = profileDoc.data();
             } catch (e) {
                 this.profiles[uid] = DEFAULT_PROFILE;
             }
@@ -72,11 +72,13 @@ export default class FeedStore {
             });
             const feed = await this.joinProfiles(posts);
             this.addToFeed(feed);
+            // eslint-disable-next-line prefer-destructuring
             this.lastKnownEntry = snap.docs[0];
         }
     }
 
     async loadFeed(): Promise<void> {
+        // eslint-disable-next-line prefer-destructuring
         let query = this.query;
         if (this.cursor) {
             query = query.startAfter(this.cursor);
@@ -95,6 +97,7 @@ export default class FeedStore {
         const feed = await this.joinProfiles(posts);
         if (!this.feed) {
             this.feed = [];
+            // eslint-disable-next-line prefer-destructuring
             this.lastKnownEntry = snap.docs[0];
         }
         this.addToFeed(feed);

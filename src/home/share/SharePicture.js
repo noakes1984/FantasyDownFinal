@@ -39,6 +39,7 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
             this.setState({ uploadDone: true });
         } catch (e) {
             const message = serializeException(e);
+            // eslint-disable-next-line no-alert
             alert(message);
             this.setState({ retry: true });
         }
@@ -79,8 +80,9 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
             };
             await Firebase.firestore.collection("feed").doc(this.id).set(post);
             NavigationHelpers.reset(navigation, "Home");
-        } catch(e) {
+        } catch (e) {
             const message = serializeException(e);
+            // eslint-disable-next-line no-alert
             alert(message);
             this.setState({ loading: false });
         }
@@ -102,11 +104,11 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
                     <RefreshIndicator />
                     <Text>{loadingLabel}</Text>
                 </View>
-            )
+            );
         }
         return (
             <View style={styles.container}>
-                <NavHeader back={true} title="Share" {...{navigation}} />
+                <NavHeader back title="Share" {...{navigation}} />
                 <Content>
                     <Image {...{ source }} style={styles.picture} />
                     <TextInput
@@ -119,8 +121,8 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
                     {
                         retry && (
                             <Button
-                                primary={true}
-                                full={true}
+                                primary
+                                full
                                 label="Retry processing"
                                 style={styles.btn}
                                 onPress={this.upload}
@@ -130,8 +132,8 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
                     {
                         !retry && (
                             <Button
-                                primary={true}
-                                full={true}
+                                primary
+                                full
                                 label={!uploadDone ? "Uploading Picture..." : "Share Picture"}
                                 style={styles.btn}
                                 {...{onPress}}

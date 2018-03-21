@@ -40,7 +40,7 @@ export class AnimatedView extends React.Component<AnimatedViewProps, AnimatedVie
     static defaultProps = {
         animations: {
             opacity: { inputRange: [0, 1], outputRange: [0, 1] },
-            transform: [ { translateY: { inputRange: [0, 1], outputRange: [20, 0] } } ]
+            transform: [{ translateY: { inputRange: [0, 1], outputRange: [20, 0] } }]
         },
         delay: 0,
         duration: 300,
@@ -65,8 +65,7 @@ export class AnimatedView extends React.Component<AnimatedViewProps, AnimatedVie
                 easing,
                 useNativeDriver: Platform.OS === "ios"
             }
-        )
-        .start();
+        ).start();
     }
 
     render(): React.Node {
@@ -81,10 +80,10 @@ export class AnimatedView extends React.Component<AnimatedViewProps, AnimatedVie
                 animatedStyle[prop] = animation.interpolate(interpolation);
             } else {
                 interpolation.forEach(transformation => {
-                    _.forEach(transformation, (interpolation, key) => {
-                        transformStyle.transform.push({ [key]: animation.interpolate(interpolation) });
+                    _.forEach(transformation, (intpolation, key) => {
+                        transformStyle.transform.push({ [key]: animation.interpolate(intpolation) });
                     });
-                })
+                });
             }
         });
         if (style.transform) {

@@ -17,7 +17,9 @@ type Theme = {
         warning: Color,
         sidebar: Color,
         lightGray: Color,
-        borderColor: Color
+        borderColor: Color,
+        white: Color,
+        black: Color
     },
     typography: {
         color: string,
@@ -52,7 +54,9 @@ const theme: Theme = {
         warning: "#f0ad4e",
         sidebar: "#484848",
         lightGray: "#BFBFBF",
-        borderColor: "#F5F5F5"
+        borderColor: "#F5F5F5",
+        white: "white",
+        black: "black"
     },
     typography: {
         color: "#666666",

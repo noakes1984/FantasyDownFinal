@@ -11,6 +11,7 @@ type VisibleState = {
     visible: boolean
 };
 
+// eslint-disable-next-line react/prefer-stateless-function, react/no-multi-comp
 class Phone extends React.Component<BaseProps> {
     render(): React.Node {
         return (
@@ -19,6 +20,7 @@ class Phone extends React.Component<BaseProps> {
     }
 }
 
+// eslint-disable-next-line react/prefer-stateless-function, react/no-multi-comp
 class Mac extends React.Component<BaseProps> {
     render(): React.Node {
         return (
@@ -31,6 +33,7 @@ class Mac extends React.Component<BaseProps> {
     }
 }
 
+// eslint-disable-next-line react/no-multi-comp
 export default class Connect extends React.Component<NoProps, VisibleState> {
 
     show() {

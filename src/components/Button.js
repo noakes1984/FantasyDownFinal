@@ -17,7 +17,7 @@ type ButtonProps = BaseProps & {
     loading?: boolean
 };
 
-export default class Button extends React.Component<ButtonProps> {
+export default class Button extends React.PureComponent<ButtonProps> {
     render(): React.Node {
         const {label, full, primary, disabled, transparent, onPress, style, loading} = this.props;
         const computedStyle = [styles.base];
@@ -26,39 +26,40 @@ export default class Button extends React.Component<ButtonProps> {
         }
         computedStyle.push(style);
         return (
-            <NBButton {...{
-                    full, primary, onPress, style: computedStyle,
-                    rounded: true, transparent: !primary || transparent, disabled
+            <NBButton
+                {...{
+                    full,
+                    primary,
+                    onPress,
+                    style: computedStyle,
+                    rounded: true,
+                    transparent: !primary || transparent,
+                    disabled
                 }}
             >
-            {
-                !!loading && (
-                    <Spinner color="white" />
-                )
-            }
-            {
-                !loading && (
-                    <Text
-                        style={[
-                            primary ? Theme.typography.large : Theme.typography.regular,
-                            {
-                                color: disabled
-                                    ? "transparent"
-                                    : (
-                                        primary ?
-                                            (transparent ? Theme.palette.primary : "white")
-                                                :
-                                            Theme.typography.color
-                                    ),
-                                fontSize: primary ? 16 : Theme.typography.regular.fontSize,
-                                fontFamily: Theme.typography.semibold
-                            }
-                        ]}
-                    >
-                    {label}
-                    </Text>
-                )
-            }
+                {
+                    !!loading && (
+                        <Spinner color="white" />
+                    )
+                }
+                {
+                    !loading && (
+                        <Text
+                            style={[
+                                primary ? Theme.typography.large : Theme.typography.regular,
+                                // eslint-disable-next-line
+                                {
+                                    // eslint-disable-next-line
+                                    color: disabled ? "transparent" : (primary ? (transparent ? Theme.palette.primary : "white") : Theme.typography.color),
+                                    fontSize: primary ? 16 : Theme.typography.regular.fontSize,
+                                    fontFamily: Theme.typography.semibold
+                                }
+                            ]}
+                        >
+                            {label}
+                        </Text>
+                    )
+                }
             </NBButton>
         );
     }
@@ -71,6 +72,6 @@ const styles = StyleSheet.create({
         shadowColor: "rgba(0, 170, 255, 0.29)",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 1,
-        shadowRadius: 7,
+        shadowRadius: 7
     }
 });

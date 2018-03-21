@@ -36,6 +36,7 @@ export default class ProfileComp extends React.Component<ScreenProps<> & Injecte
     }
 
     @autobind
+    // eslint-disable-next-line class-methods-use-this
     keyExtractor(item: FeedEntry): string {
         return item.post.id;
     }
@@ -74,7 +75,7 @@ const {statusBarHeight} = Constants;
 const AnimatedImage = Animated.createAnimatedComponent(Image);
 const styles = StyleSheet.create({
     header: {
-        marginBottom: avatarSize * 0.5 + Theme.spacing.small
+        marginBottom: (avatarSize * 0.5) + Theme.spacing.small
     },
     cover: {
         width,
@@ -83,7 +84,7 @@ const styles = StyleSheet.create({
     avatar: {
         position: "absolute",
         right: Theme.spacing.small,
-        bottom: - avatarSize * 0.5
+        bottom: -avatarSize * 0.5
     },
     settings: {
         position: "absolute",

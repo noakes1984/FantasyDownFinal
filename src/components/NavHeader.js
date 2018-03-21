@@ -2,7 +2,7 @@
 import autobind from "autobind-decorator";
 import * as React from "react";
 import {StyleSheet, View, TouchableOpacity, Platform, SafeAreaView} from "react-native";
-import { Feather as Icon } from "@expo/vector-icons";
+import {Feather as Icon} from "@expo/vector-icons";
 
 import Text from "./Text";
 import {Theme} from "./Theme";
@@ -34,13 +34,13 @@ export default class NavHeader extends React.Component<NavHeaderProps> {
             <SafeAreaView style={styles.container}>
                 <View style={styles.content}>
                     <View style={styles.side}>
-                    {back && (
-                        <TouchableOpacity {...{onPress}}>
-                            <View style={styles.back}>
-                                <Icon name="chevron-left" size={25} />
-                            </View>
-                        </TouchableOpacity>
-                    )}
+                        {back && (
+                            <TouchableOpacity {...{onPress}}>
+                                <View style={styles.back}>
+                                    <Icon name="chevron-left" size={25} />
+                                </View>
+                            </TouchableOpacity>
+                        )}
                     </View>
                     <Text type="header3">{title}</Text>
                     <View style={styles.side} />

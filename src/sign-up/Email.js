@@ -28,6 +28,7 @@ export default class Email extends React.Component<NavigationProps<*>, EmailStat
     next() {
         const {email} = this.state;
         if (email === "") {
+            // eslint-disable-next-line
             alert("Please provide an email.");
         } else {
             SignUpStore.email = email;
@@ -42,7 +43,7 @@ export default class Email extends React.Component<NavigationProps<*>, EmailStat
                 <TextField
                     placeholder="Email"
                     keyboardType="email-address"
-                    contrast={true}
+                    contrast
                     autoCapitalize="none"
                     autoCorrect={false}
                     returnKeyType="go"
@@ -70,8 +71,5 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         marginVertical: Theme.spacing.tiny
-    },
-    header: {
-        color: "white"
     }
 });

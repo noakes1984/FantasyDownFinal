@@ -29,7 +29,6 @@ export const serializeException = (e: string | {}): string => {
     } else if (e.message) {
         // $FlowFixMe
         return e.message;
-    } else {
-        return JSON.stringify(e);
     }
-}
+    return JSON.stringify(e);
+};

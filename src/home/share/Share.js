@@ -1,7 +1,7 @@
 // @flow
 import autobind from "autobind-decorator";
 import * as React from "react";
-import {StyleSheet, View, Dimensions, TouchableWithoutFeedback, TouchableOpacity, Modal, Platform} from "react-native";
+import {StyleSheet, View, Dimensions, TouchableWithoutFeedback, TouchableOpacity, Modal} from "react-native";
 import {Camera, Permissions} from "expo";
 import { Feather as Icon } from "@expo/vector-icons";
 
@@ -76,7 +76,6 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
     render(): React.Node {
         const {navigation} = this.props;
         const {hasCameraPermission, type, flashMode, loading} = this.state;
-        const isAndroid = Platform.OS === "android";
         if (hasCameraPermission === null) {
             return (
                 <View style={styles.refreshContainer}>
@@ -108,7 +107,7 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
                         <View style={styles.btn} />
                     </TouchableOpacity>
                 </View>
-                <Modal transparent visible={loading && isAndroid} onRequestClose={this.toggle}>
+                <Modal transparent visible={loading} onRequestClose={this.toggle}>
                     <View style={styles.modal}>
                         <SpinningIndicator />
                     </View>

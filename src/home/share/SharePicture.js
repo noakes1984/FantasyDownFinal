@@ -14,11 +14,8 @@ import type {Post} from "../../components/Model";
 import type {Picture} from "../../components/ImageUpload";
 
 type SharePictureState = {
-    loadingLabel: string,
     loading: boolean,
-    caption: string,
-    uploadDone: boolean,
-    retry: boolean
+    caption: string
 };
 
 export default class SharePicture extends React.Component<ScreenParams<Picture>, SharePictureState> {
@@ -28,43 +25,28 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
     preview: string;
     url: string;
 
+    componentWillMount() {
+        this.setState({ loading: false, caption: "" });
+    }
+
     @autobind
     async upload(): Promise<void> {
         const {navigation} = this.props;
         const picture = navigation.state.params;
-        try {
-            this.setState({ retry: false });
-            await ImageUpload.upload(picture, this.name);
-            this.url = await Firebase.storage.ref(this.name).getDownloadURL();
-            this.setState({ uploadDone: true });
-        } catch (e) {
-            const message = serializeException(e);
-            // eslint-disable-next-line no-alert
-            alert(message);
-            this.setState({ retry: true });
-        }
-    }
-
-    async componentWillMount(): Promise<void> {
-        const {navigation} = this.props;
-        const picture = navigation.state.params;
-        this.setState({ loading: false, loadingLabel: "", caption: "", uploadDone: false, retry: false });
         this.id = ImageUpload.uid();
         this.name = `${this.id}.jpg`;
         this.preview = await ImageUpload.preview(picture);
-        await this.upload();
+        await ImageUpload.upload(picture, this.name);
+        this.url = await Firebase.storage.ref(this.name).getDownloadURL();
     }
 
     @autobind
     async onPress(): Promise<void> {
         const {navigation} = this.props;
-        const {caption, uploadDone} = this.state;
-        if (!uploadDone) {
-            return;
-        }
+        const {caption} = this.state;
         this.setState({ loading: true });
         try {
-            this.setState({ loadingLabel: "Saving Post..." });
+            await this.upload();
             const {uid} = Firebase.auth.currentUser;
             const post: Post = {
                 id: this.id,
@@ -96,13 +78,17 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
     render(): React.Node {
         const {onPress, onChangeText} = this;
         const {navigation} = this.props;
-        const {loading, loadingLabel, uploadDone, retry} = this.state;
+        const {loading} = this.state;
         const source = navigation.state.params;
         if (loading) {
             return (
                 <View style={styles.loading}>
                     <RefreshIndicator />
-                    <Text>{loadingLabel}</Text>
+                    <Text style={styles.saving}>Saving...</Text>
+                    <Text style={styles.savingNote}>
+                    Uploading pictures is a bit slow at the moment
+                    but it will be dramatically faster in the next Expo version
+                    </Text>
                 </View>
             );
         }
@@ -118,29 +104,13 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
                         onSubmitEditing={onPress}
                         {...{onChangeText}}
                     />
-                    {
-                        retry && (
-                            <Button
-                                primary
-                                full
-                                label="Retry processing"
-                                style={styles.btn}
-                                onPress={this.upload}
-                            />
-                        )
-                    }
-                    {
-                        !retry && (
-                            <Button
-                                primary
-                                full
-                                label={!uploadDone ? "Uploading Picture..." : "Share Picture"}
-                                style={styles.btn}
-                                {...{onPress}}
-                            />
-
-                        )
-                    }
+                    <Button
+                        primary
+                        full
+                        label="Share Picture"
+                        style={styles.btn}
+                        {...{onPress}}
+                    />
                 </Content>
             </View>
         );
@@ -168,5 +138,11 @@ const styles = StyleSheet.create({
     },
     btn: {
         margin: Theme.spacing.base
+    },
+    saving: {
+        marginBottom: Theme.spacing.base
+    },
+    savingNote: {
+        textAlign: "center"
     }
 });

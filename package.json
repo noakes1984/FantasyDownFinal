@@ -1,6 +1,6 @@
 {
     "name": "react-native-fiber-firebase",
-    "version": "1.0.17-firebase",
+    "version": "1.0.18-firebase",
     "private": true,
     "devDependencies": {
         "babel-eslint": "^8.2.1",

@@ -21,7 +21,6 @@
     },
     "main": "./node_modules/react-native-scripts/build/bin/crna-entry.js",
     "scripts": {
-        "install": "cd functions && yarn install",
         "start": "react-native-scripts start",
         "eject": "react-native-scripts eject",
         "android": "react-native-scripts android",
@@ -31,9 +30,7 @@
         "flow": "flow check --show-all-errors | flow-result-checker",
         "lint": "eslint App.js App.test.js src/",
         "deploy:expo": "exp publish",
-        "deploy:functions": "firebase deploy --only functions",
-        "deploy": "firebase deploy --token \"$FIREBASE_TOKEN\" && yarn deploy:expo",
-        "backend": "firebase serve --only functions"
+        "deploy": "firebase deploy --token \"$FIREBASE_TOKEN\" && yarn deploy:expo"
     },
     "jest": {
         "preset": "jest-expo",

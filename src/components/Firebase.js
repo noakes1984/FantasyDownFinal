@@ -11,14 +11,7 @@ const config = {
     messagingSenderId: "387191574162"
 };
 
-const endpoint = {
-    prod: "https://us-central1-react-native-fiber.cloudfunctions.net/api",
-    dev: "http://localhost:5000/react-native-fiber/us-central1/api"
-};
-
 export default class Firebase {
-
-    static endpoint = endpoint.prod;
 
     static firestore: firebase.firestore.Firestore;
     static auth: firebase.auth.Auth;

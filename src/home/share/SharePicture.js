@@ -2,7 +2,7 @@
 import moment from "moment";
 import autobind from "autobind-decorator";
 import * as React from "react";
-import {StyleSheet, TextInput, Image, Dimensions, View} from "react-native";
+import {StyleSheet, TextInput, Image, Dimensions, View, Alert} from "react-native";
 import {Content} from "native-base";
 
 import {
@@ -21,7 +21,6 @@ type SharePictureState = {
 export default class SharePicture extends React.Component<ScreenParams<Picture>, SharePictureState> {
 
     id: string;
-    name: string;
     preview: string;
     url: string;
 
@@ -31,13 +30,16 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
 
     @autobind
     async upload(): Promise<void> {
-        const {navigation} = this.props;
-        const picture = navigation.state.params;
-        this.id = ImageUpload.uid();
-        this.name = `${this.id}.jpg`;
-        this.preview = await ImageUpload.preview(picture);
-        await ImageUpload.upload(picture, this.name);
-        this.url = await Firebase.storage.ref(this.name).getDownloadURL();
+        try {
+            const {navigation} = this.props;
+            const picture = navigation.state.params;
+            this.id = ImageUpload.uid();
+            this.preview = await ImageUpload.preview(picture);
+            this.url = await ImageUpload.upload(picture);
+        } catch (e) {
+            console.error(e);
+            Alert.alert(e);
+        }
     }
 
     @autobind

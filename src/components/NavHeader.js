@@ -58,7 +58,8 @@ const styles = StyleSheet.create({
         shadowRadius: 5,
         borderColor: Theme.palette.borderColor,
         borderBottomWidth: Platform.OS === "ios" ? 0 : 1,
-        zIndex: 10000
+        zIndex: 10000,
+        backgroundColor: "white"
     },
     content: {
         height: 57,

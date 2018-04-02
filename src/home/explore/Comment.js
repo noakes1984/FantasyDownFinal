@@ -38,7 +38,8 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.14,
         shadowRadius: 6,
         borderColor: Theme.palette.borderColor,
-        borderWidth: Platform.OS === "ios" ? 0 : 1
+        borderWidth: Platform.OS === "ios" ? 0 : 1,
+        backgroundColor: "white"
     },
     author: {
         color: "black",

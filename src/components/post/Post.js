@@ -101,7 +101,8 @@ const styles = StyleSheet.create({
         shadowRadius: 6,
         borderColor: Theme.palette.borderColor,
         borderWidth: Platform.OS === "ios" ? 0 : 1,
-        marginVertical: Theme.spacing.small
+        marginVertical: Theme.spacing.small,
+        backgroundColor: "white"
     },
     content: {
         padding: Theme.spacing.small

@@ -20,11 +20,12 @@ type CircleState = {
 
 class Circle extends React.Component<CircleProps, CircleState> {
 
-    animation;
+    state = {
+        animation: new Animated.Value(0)
+    };
 
-    animate() {
-        const animation = new Animated.Value(0);
-        this.setState({ animation });
+    componentDidMount() {
+        const {animation} = this.state;
         Animated.loop(Animated.timing(
             animation,
             {
@@ -33,10 +34,6 @@ class Circle extends React.Component<CircleProps, CircleState> {
                 useNativeDriver: true
             }
         )).start();
-    }
-
-    componentWillMount() {
-        this.animate();
     }
 
     render(): React.Node {

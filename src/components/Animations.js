@@ -47,10 +47,8 @@ export class AnimatedView extends React.Component<AnimatedViewProps, AnimatedVie
         easing: Easing.inOut(Easing.ease)
     }
 
-    componentWillMount() {
-        this.setState({
-            animation: new Animated.Value(0)
-        });
+    state = {
+        animation: new Animated.Value(0)
     }
 
     componentDidMount() {
@@ -80,8 +78,8 @@ export class AnimatedView extends React.Component<AnimatedViewProps, AnimatedVie
                 animatedStyle[prop] = animation.interpolate(interpolation);
             } else {
                 interpolation.forEach(transformation => {
-                    _.forEach(transformation, (intpolation, key) => {
-                        transformStyle.transform.push({ [key]: animation.interpolate(intpolation) });
+                    _.forEach(transformation, (i, key) => {
+                        transformStyle.transform.push({ [key]: animation.interpolate(i) });
                     });
                 });
             }

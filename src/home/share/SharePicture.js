@@ -37,6 +37,7 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
             this.preview = await ImageUpload.preview(picture);
             this.url = await ImageUpload.upload(picture);
         } catch (e) {
+            // eslint-disable-next-line no-console
             console.error(e);
             Alert.alert(e);
         }
@@ -66,8 +67,7 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
             NavigationHelpers.reset(navigation, "Home");
         } catch (e) {
             const message = serializeException(e);
-            // eslint-disable-next-line no-alert
-            alert(message);
+            Alert.alert(message);
             this.setState({ loading: false });
         }
     }
@@ -87,10 +87,6 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
                 <View style={styles.loading}>
                     <RefreshIndicator />
                     <Text style={styles.saving}>Saving...</Text>
-                    <Text style={styles.savingNote}>
-                    Uploading pictures is a bit slow at the moment
-                    but it will be dramatically faster in the next Expo version
-                    </Text>
                 </View>
             );
         }
@@ -143,8 +139,5 @@ const styles = StyleSheet.create({
     },
     saving: {
         marginBottom: Theme.spacing.base
-    },
-    savingNote: {
-        textAlign: "center"
     }
 });

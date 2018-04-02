@@ -30,14 +30,7 @@ export default class ImageUpload {
             .storage
             .ref()
             .child(ImageUpload.uid());
-        const task = ref.put(blob);
-        return new Promise((resolve, reject) => {
-            task.on(
-                "state_changed",
-                () => {},
-                error => reject(error),
-                () => resolve(task.snapshot.downloadURL)
-            );
-        });
+        const snapshot = await ref.put(blob);
+        return snapshot.downloadURL;
     }
 }

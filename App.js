@@ -60,7 +60,7 @@ export default class App extends React.Component<{}, AppState> {
         isUserAuthenticated: false
     };
 
-    componentWillMount() {
+    componentDidMount() {
         StatusBar.setBarStyle("dark-content");
         if (Platform.OS === "android") {
             StatusBar.setBackgroundColor("white");

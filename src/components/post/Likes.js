@@ -23,27 +23,28 @@ type LikesState = {
 
 export default class Likes extends React.Component<LikesProps, LikesState> {
 
-    componentWillMount() {
-        const {likes} = this.props;
-        const {uid} = Firebase.auth.currentUser;
-        const isLiked = likes.indexOf(uid) !== -1;
-        this.setState({ isLiked, count: likes.length });
-    }
+    state = {
+        animation: new Animated.Value(0),
+        isLiked: false,
+        count: 0
+    };
 
-    componentWillReceiveProps(nextProps: LikesProps) {
-        const {likes} = nextProps;
+    static getDerivedStateFromProps({ likes }: LikesProps): LikesState {
         const {uid} = Firebase.auth.currentUser;
         const isLiked = likes.indexOf(uid) !== -1;
-        this.setState({ isLiked, count: likes.length });
+        return {
+            animation: new Animated.Value(0),
+            isLiked,
+            count: likes.length
+        };
     }
 
     @autobind
     toggle() {
         const {post} = this.props;
-        const {isLiked, count} = this.state;
+        const {isLiked, count, animation} = this.state;
         const {uid} = Firebase.auth.currentUser;
         if (!isLiked) {
-            const animation = new Animated.Value(0);
             this.setState({ animation, isLiked: !isLiked, count: count + 1 });
             Animated.timing(
                 animation,

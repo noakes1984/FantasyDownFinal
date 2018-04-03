@@ -18,9 +18,10 @@ export default class Name extends React.Component<NavigationProps<*>, NameState>
 
     lastName: TextInput;
 
-    componentWillMount() {
-        this.setState({ firstName: "", lastName: "" });
-    }
+    state = {
+        firstName: "",
+        lastName: ""
+    };
 
     @autobind
     setFirstName(firstName: string) {

@@ -27,12 +27,17 @@ type PostState = {
 
 export default class PostComp extends React.Component<PostProps, PostState> {
 
+    state: $Shape<PostState> = {};
+
     unsubscribeToPost: () => void;
     unsubscribeToProfile: () => void;
 
-    componentWillMount() {
-        const {post, profile, store} = this.props;
-        this.setState({ post, profile });
+    static getDerivedStateFromProps({ profile, post }: PostProps): PostState {
+        return { post, profile };
+    }
+
+    componentDidMount() {
+        const {post, store} = this.props;
         this.unsubscribeToPost = store.subscribeToPost(post.id, newPost => this.setState({ post: newPost }));
         // eslint-disable-next-line max-len
         this.unsubscribeToProfile = store.subscribeToProfile(post.uid, newProfile => this.setState({ profile: newProfile }));
@@ -101,7 +106,8 @@ const styles = StyleSheet.create({
         shadowRadius: 6,
         borderColor: Theme.palette.borderColor,
         borderWidth: Platform.OS === "ios" ? 0 : 1,
-        marginVertical: Theme.spacing.small
+        marginVertical: Theme.spacing.small,
+        backgroundColor: "white"
     },
     content: {
         padding: Theme.spacing.small

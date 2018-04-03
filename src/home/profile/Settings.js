@@ -25,7 +25,18 @@ type SettingsState = {
 
 export default class Settings extends React.Component<ScreenParams<{ profile: Profile }>, SettingsState> {
 
-    async componentWillMount(): Promise<void> {
+    state = {
+        name: "",
+        picture: {
+            uri: "",
+            width: 0,
+            height: 0
+        },
+        loading: false,
+        hasCameraRollPermission: null
+    };
+
+    async componentDidMount(): Promise<void> {
         const {navigation} = this.props;
         const {profile} = navigation.state.params;
         const picture = {
@@ -50,11 +61,8 @@ export default class Settings extends React.Component<ScreenParams<{ profile: Pr
                 await Firebase.firestore.collection("users").doc(uid).update({ name });
             }
             if (picture.uri !== originalProfile.picture.uri) {
-                const id = ImageUpload.uid();
-                const imgName = `${id}.jpg`;
                 const preview = await ImageUpload.preview(picture);
-                await ImageUpload.upload(picture, imgName);
-                const uri = await Firebase.storage.ref(imgName).getDownloadURL();
+                const uri = await ImageUpload.upload(picture);
                 await Firebase.firestore.collection("users").doc(uid).update({ picture: { preview, uri } });
             }
             NavigationHelpers.reset(navigation, "Home");

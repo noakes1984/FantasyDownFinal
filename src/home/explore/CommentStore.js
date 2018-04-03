@@ -15,10 +15,6 @@ export default class CommentsStore {
     @computed get comment(): string { return this._comment; }
     set comment(comment: string) { this._comment = comment; }
 
-    constructor(postId: string) {
-        this.init(postId);
-    }
-
     async init(postId: string): Promise<void> {
         const query = Firebase.firestore.collection("feed")
             .doc(postId)

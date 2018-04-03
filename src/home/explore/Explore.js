@@ -25,16 +25,17 @@ type InjectedProps = {
 @inject("feedStore", "profileStore") @observer
 export default class Explore extends React.Component<ScreenProps<> & InjectedProps, ExploreState> {
 
+    state = {
+        scrollAnimation: new Animated.Value(0)
+    };
+
     @autobind
     profile() {
         this.props.navigation.navigate("Profile");
     }
 
-    async componentWillMount(): Promise<void> {
+    componentDidMount() {
         this.props.feedStore.checkForNewEntriesInFeed();
-        this.setState({
-            scrollAnimation: new Animated.Value(0)
-        });
     }
 
     render(): React.Node {

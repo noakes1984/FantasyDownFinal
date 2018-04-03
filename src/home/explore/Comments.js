@@ -17,11 +17,11 @@ import type {Comment} from "../../components/Model";
 @observer
 export default class CommentsComp extends React.Component<ScreenParams<{ post: string }>> {
 
-    commentsStore: CommentsStore;
+    commentsStore: CommentsStore = new CommentsStore();
 
-    async componentWillMount(): Promise<void> {
+    async componentDidMount(): Promise<void> {
         const {post} = this.props.navigation.state.params;
-        this.commentsStore = new CommentsStore(post);
+        this.commentsStore.init(post);
     }
 
     @autobind
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.14,
         shadowRadius: 6,
-        borderTopWidth: Platform.OS === "ios" ? 0 : 1,
+        borderTopWidth: 1,
         borderColor: Theme.palette.borderColor,
         paddingLeft: Theme.spacing.small,
         paddingRight: Theme.spacing.small,

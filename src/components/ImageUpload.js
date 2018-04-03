@@ -23,31 +23,14 @@ export default class ImageUpload {
         return `data:image/jpeg;base64,${result.base64 || ""}`;
     }
 
-    static async upload(picture: Picture, name: string): Promise<void> {
-        try {
-            const body = new FormData();
-            // $FlowFixMe
-            body.append("picture", {
-                uri: picture.uri,
-                name,
-                type: "image/jpg"
-            });
-            const res = await fetch(`${Firebase.endpoint}/picture`, {
-                method: "POST",
-                body,
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "multipart/form-data"
-                }
-            });
-            if (res.status !== 200) {
-                // eslint-disable-next-line no-console
-                console.error(res);
-                throw new Error("An error happened when uploading the picture. Please try again.");
-            }
-        } catch (e) {
-            // eslint-disable-next-line no-alert
-            alert(e);
-        }
+    static async upload(picture: Picture): Promise<string> {
+        const response = await fetch(picture.uri);
+        const blob = await response.blob();
+        const ref = Firebase
+            .storage
+            .ref()
+            .child(ImageUpload.uid());
+        const snapshot = await ref.put(blob);
+        return snapshot.downloadURL;
     }
 }

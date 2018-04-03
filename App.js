@@ -47,10 +47,12 @@ XMLHttpRequest.prototype.send = function (body: string) {
 };
 
 // https://github.com/firebase/firebase-js-sdk/issues/97
+if (!console.ignoredYellowBox) {
+    // $FlowFixMe
+    console.ignoredYellowBox = [];
+}
 // $FlowFixMe
-console.ignoredYellowBox = [
-    "Setting a timer"
-];
+console.ignoredYellowBox.push("Setting a timer");
 
 export default class App extends React.Component<{}, AppState> {
 
@@ -60,7 +62,7 @@ export default class App extends React.Component<{}, AppState> {
         isUserAuthenticated: false
     };
 
-    componentWillMount() {
+    componentDidMount() {
         StatusBar.setBarStyle("dark-content");
         if (Platform.OS === "android") {
             StatusBar.setBackgroundColor("white");
@@ -168,7 +170,7 @@ const HomeTabs = TabNavigator({
     Share: { screen: ShareNavigator },
     Profile: { screen: ProfileNavigator }
 }, {
-    animationEnabled: false,
+    animationEnabled: true,
     tabBarComponent: HomeTab,
     tabBarPosition: "bottom",
     swipeEnabled: false

@@ -20,7 +20,7 @@ type InjectedProps = {
 @inject("profileStore", "userFeedStore") @observer
 export default class ProfileComp extends React.Component<ScreenProps<> & InjectedProps> {
 
-    componentWillMount() {
+    componentDidMount() {
         this.props.userFeedStore.checkForNewEntriesInFeed();
     }
 

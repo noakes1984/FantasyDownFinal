@@ -17,9 +17,10 @@ type PasswordState = {
 
 export default class Password extends React.Component<NavigationProps<*>, PasswordState> {
 
-    componentWillMount() {
-        this.setState({ password: "" });
-    }
+    state = {
+        password: "",
+        loading: false
+    };
 
     @autobind
     setPassword(password: string) {

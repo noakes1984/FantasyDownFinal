@@ -2,7 +2,7 @@
 import moment from "moment";
 import autobind from "autobind-decorator";
 import * as React from "react";
-import {StyleSheet, TextInput, Image, Dimensions, View} from "react-native";
+import {StyleSheet, TextInput, Image, Dimensions, View, Alert} from "react-native";
 import {Content} from "native-base";
 
 import {
@@ -21,23 +21,27 @@ type SharePictureState = {
 export default class SharePicture extends React.Component<ScreenParams<Picture>, SharePictureState> {
 
     id: string;
-    name: string;
     preview: string;
     url: string;
 
-    componentWillMount() {
-        this.setState({ loading: false, caption: "" });
-    }
+    state = {
+        loading: false,
+        caption: ""
+    };
 
     @autobind
     async upload(): Promise<void> {
-        const {navigation} = this.props;
-        const picture = navigation.state.params;
-        this.id = ImageUpload.uid();
-        this.name = `${this.id}.jpg`;
-        this.preview = await ImageUpload.preview(picture);
-        await ImageUpload.upload(picture, this.name);
-        this.url = await Firebase.storage.ref(this.name).getDownloadURL();
+        try {
+            const {navigation} = this.props;
+            const picture = navigation.state.params;
+            this.id = ImageUpload.uid();
+            this.preview = await ImageUpload.preview(picture);
+            this.url = await ImageUpload.upload(picture);
+        } catch (e) {
+            // eslint-disable-next-line no-console
+            console.error(e);
+            Alert.alert(e);
+        }
     }
 
     @autobind
@@ -64,8 +68,7 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
             NavigationHelpers.reset(navigation, "Home");
         } catch (e) {
             const message = serializeException(e);
-            // eslint-disable-next-line no-alert
-            alert(message);
+            Alert.alert(message);
             this.setState({ loading: false });
         }
     }
@@ -85,10 +88,6 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
                 <View style={styles.loading}>
                     <RefreshIndicator />
                     <Text style={styles.saving}>Saving...</Text>
-                    <Text style={styles.savingNote}>
-                    Uploading pictures is a bit slow at the moment
-                    but it will be dramatically faster in the next Expo version
-                    </Text>
                 </View>
             );
         }
@@ -141,8 +140,5 @@ const styles = StyleSheet.create({
     },
     saving: {
         marginBottom: Theme.spacing.base
-    },
-    savingNote: {
-        textAlign: "center"
     }
 });

@@ -14,7 +14,7 @@ import type {ScreenProps} from "../components/Types";
 
 export default class Walkthrough extends React.Component<ScreenProps<>> {
 
-    componentWillMount() {
+    componentDidMount() {
         StatusBar.setBarStyle("light-content");
         if (Platform.OS === "android") {
             StatusBar.setBackgroundColor("#0059FF");

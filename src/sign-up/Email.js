@@ -15,9 +15,9 @@ type EmailState = {
 
 export default class Email extends React.Component<NavigationProps<*>, EmailState> {
 
-    componentWillMount() {
-        this.setState({ email: "" });
-    }
+    state = {
+        email: ""
+    };
 
     @autobind
     setEmail(email: string) {

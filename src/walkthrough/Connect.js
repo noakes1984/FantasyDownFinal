@@ -36,16 +36,16 @@ class Mac extends React.Component<BaseProps> {
 // eslint-disable-next-line react/no-multi-comp
 export default class Connect extends React.Component<NoProps, VisibleState> {
 
+    state = {
+        visible: true
+    };
+
     show() {
         this.setState({ visible: true });
     }
 
     hide() {
         this.setState({ visible: false });
-    }
-
-    componentWillMount() {
-        this.setState({ visible: true });
     }
 
     render(): React.Node {

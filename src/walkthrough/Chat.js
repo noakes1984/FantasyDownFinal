@@ -35,16 +35,16 @@ type VisibleState = {
 // eslint-disable-next-line react/no-multi-comp
 export default class Chat extends React.Component<NoProps, VisibleState> {
 
+    state = {
+        visible: false
+    };
+
     hide() {
         this.setState({ visible: false });
     }
 
     show() {
         this.setState({ visible: true });
-    }
-
-    componentWillMount() {
-        this.setState({ visible: false });
     }
 
     render(): React.Node {

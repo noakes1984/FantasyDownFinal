@@ -47,11 +47,12 @@ XMLHttpRequest.prototype.send = function (body: string) {
 };
 
 // https://github.com/firebase/firebase-js-sdk/issues/97
-// $FlowFixMe
 if (!console.ignoredYellowBox) {
+    // $FlowFixMe
     console.ignoredYellowBox = [];
 }
-console.ignoredYellowBox.push('Warning: Failed propType');
+// $FlowFixMe
+console.ignoredYellowBox.push("Setting a timer");
 
 export default class App extends React.Component<{}, AppState> {
 

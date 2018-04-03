@@ -29,7 +29,8 @@ export default class Settings extends React.Component<ScreenParams<{ profile: Pr
         name: "",
         picture: {
             uri: "",
-            preview: ""
+            width: 0,
+            height: 0
         },
         loading: false,
         hasCameraRollPermission: null

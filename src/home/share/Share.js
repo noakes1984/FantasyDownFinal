@@ -24,15 +24,15 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
 
     state = {
         hasCameraPermission: null,
+        type: Camera.Constants.Type.back,
+        flashMode: Camera.Constants.FlashMode.off,
         loading: false
     };
 
     async componentDidMount(): Promise<void> {
         const {status} = await Permissions.askAsync(Permissions.CAMERA);
         this.setState({
-            hasCameraPermission: status === "granted",
-            type: Camera.Constants.Type.back,
-            flashMode: Camera.Constants.FlashMode.off
+            hasCameraPermission: status === "granted"
         });
     }
 

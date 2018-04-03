@@ -9,10 +9,15 @@ type State = {
     canOpen: boolean | null
 };
 
+const onPress = async (): Promise<void> => Linking.openURL("app-settings:");
+
 export default class EnableCameraPermission extends React.Component<Props, State> {
 
-    async componentWillMount(): Promise<void> {
-        this.setState({ canOpen: null });
+    state = {
+        canOpen: null
+    };
+
+    async componentDidMount(): Promise<void> {
         const canOpen = await Linking.canOpenURL("app-settings:");
         this.setState({ canOpen });
     }
@@ -28,9 +33,9 @@ export default class EnableCameraPermission extends React.Component<Props, State
         }
         return (
             <View style={styles.container}>
-                <Text type="header3" gutterBottom style={styles.text}>Take Pictures with Fiber</Text>
-                <Text gutterBottom style={styles.text}>
-                    Allow access to your camera to start taking photos with Fiber.
+                <Text type="header3" style={styles.text} gutterBottom>Take Pictures with Fiber</Text>
+                <Text style={styles.text} gutterBottom>
+                Allow access to your camera to start taking photos with Fiber.
                 </Text>
                 {
                     canOpen === true && (
@@ -49,7 +54,6 @@ export default class EnableCameraPermission extends React.Component<Props, State
     }
 }
 
-const onPress = async (): Promise<void> => Linking.openURL("app-settings:");
 const styles = StyleSheet.create({
     container: {
         flexGrow: 1,

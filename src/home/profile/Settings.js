@@ -25,7 +25,17 @@ type SettingsState = {
 
 export default class Settings extends React.Component<ScreenParams<{ profile: Profile }>, SettingsState> {
 
-    async componentWillMount(): Promise<void> {
+    state = {
+        name: "",
+        picture: {
+            uri: "",
+            preview: ""
+        },
+        loading: false,
+        hasCameraRollPermission: null
+    };
+
+    async componentDidMount(): Promise<void> {
         const {navigation} = this.props;
         const {profile} = navigation.state.params;
         const picture = {

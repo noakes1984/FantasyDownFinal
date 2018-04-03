@@ -24,9 +24,10 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
     preview: string;
     url: string;
 
-    componentWillMount() {
-        this.setState({ loading: false, caption: "" });
-    }
+    state = {
+        loading: false,
+        caption: ""
+    };
 
     @autobind
     async upload(): Promise<void> {

@@ -9,10 +9,13 @@ type State = {
     canOpen: boolean | null
 };
 
-export default class EnableCameraPermission extends React.Component<Props, State> {
+export default class EnableCameraRollPermission extends React.Component<Props, State> {
 
-    async componentWillMount(): Promise<void> {
-        this.setState({ canOpen: null });
+    state = {
+        canOpen: null
+    };
+
+    async componentDidMount(): Promise<void> {
         const canOpen = await Linking.canOpenURL("app-settings:");
         this.setState({ canOpen });
     }

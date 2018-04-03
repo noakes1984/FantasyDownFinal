@@ -27,7 +27,7 @@ type PostState = {
 
 export default class PostComp extends React.Component<PostProps, PostState> {
 
-    state = {};
+    state: $Shape<PostState> = {};
 
     unsubscribeToPost: () => void;
     unsubscribeToProfile: () => void;

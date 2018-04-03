@@ -169,7 +169,7 @@ const HomeTabs = TabNavigator({
     Share: { screen: ShareNavigator },
     Profile: { screen: ProfileNavigator }
 }, {
-    animationEnabled: false,
+    animationEnabled: true,
     tabBarComponent: HomeTab,
     tabBarPosition: "bottom",
     swipeEnabled: false

@@ -38,6 +38,7 @@ const styles = StyleSheet.create({
         alignItems: "center"
     },
     text: {
+        textAlign: "center",
         marginTop: Theme.spacing.base
     }
 });

@@ -4,11 +4,13 @@ import * as React from "react";
 import {Image as RNImage, Animated, StyleSheet, View, Platform} from "react-native";
 import {BlurView} from "expo";
 import {type StyleObj} from "react-native/Libraries/StyleSheet/StyleSheetTypes";
+import type {ImageSourcePropType} from "react-native/Libraries/Image/ImageSourcePropType";
 
 import CacheManager from "./CacheManager";
 
 type ImageProps = {
     style?: StyleObj,
+    defaultSource?: ImageSourcePropType,
     preview?: string,
     uri: string
 };
@@ -20,23 +22,20 @@ type ImageState = {
 
 export default class Image extends React.Component<ImageProps, ImageState> {
 
-    subscribedToCache = true;
-
     state = {
         uri: undefined,
         intensity: new Animated.Value(100)
-    }
-
-    load(props: ImageProps) {
-        const {uri} = props;
-        CacheManager.cache(uri, this.setURI);
-    }
-
-    setURI = (uri: string) => {
-        if (this.subscribedToCache) {
-            this.setState({ uri });
-        }
     };
+
+    async load({uri}: ImageProps): Promise<void> {
+        if (uri) {
+            const entry = CacheManager.get(uri);
+            const path = await entry.getPath();
+            if (path) {
+                this.setState({ uri: path });
+            }
+        }
+    }
 
     componentDidMount() {
         this.load(this.props);
@@ -55,19 +54,24 @@ export default class Image extends React.Component<ImageProps, ImageState> {
     }
 
     componentWillUnmount() {
-        this.subscribedToCache = false;
+        const {uri} = this.props;
+        const entry = CacheManager.get(uri);
+        entry.cancel();
     }
 
     render(): React.Node {
-        const {preview, style} = this.props;
+        const {preview, style, defaultSource, ...otherProps} = this.props;
         const {uri, intensity} = this.state;
+        const hasDefaultSource = !!defaultSource;
         const hasPreview = !!preview;
+        const hasURI = !!uri;
+        const isImageReady = uri && uri !== preview;
         const opacity = intensity.interpolate({
             inputRange: [0, 100],
             outputRange: [0, 0.5]
         });
         const computedStyle = [
-            StyleSheet.absoluteFillObject,
+            StyleSheet.absoluteFill,
             _.transform(
                 _.pickBy(StyleSheet.flatten(style), (value, key) => propsToCopy.indexOf(key) !== -1),
                 // $FlowFixMe
@@ -77,7 +81,16 @@ export default class Image extends React.Component<ImageProps, ImageState> {
         return (
             <View {...{style}}>
                 {
-                    hasPreview && (
+                    (hasDefaultSource && !hasPreview && !hasURI) && (
+                        <RNImage
+                            source={defaultSource}
+                            style={computedStyle}
+                            {...otherProps}
+                        />
+                    )
+                }
+                {
+                    hasPreview && !isImageReady && (
                         <RNImage
                             source={{ uri: preview }}
                             resizeMode="cover"
@@ -87,11 +100,11 @@ export default class Image extends React.Component<ImageProps, ImageState> {
                     )
                 }
                 {
-                    (uri && uri !== preview) && (
+                    isImageReady && (
                         <RNImage
                             source={{ uri }}
-                            resizeMode="cover"
                             style={computedStyle}
+                            {...otherProps}
                         />
                     )
                 }

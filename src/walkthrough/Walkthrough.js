@@ -12,7 +12,15 @@ import Share from "./Share";
 import {Button, Theme} from "../components";
 import type {ScreenProps} from "../components/Types";
 
-export default class Walkthrough extends React.Component<ScreenProps<>> {
+type WalkthroughState = {
+    disabled: boolean
+};
+
+export default class Walkthrough extends React.Component<ScreenProps<>, WalkthroughState> {
+
+    state = {
+        disabled: false
+    };
 
     componentDidMount() {
         StatusBar.setBarStyle("light-content");
@@ -23,6 +31,11 @@ export default class Walkthrough extends React.Component<ScreenProps<>> {
 
     home() {
         const {navigation} = this.props;
+        const {disabled} = this.state;
+        if (disabled) {
+            return;
+        }
+        this.setState({ disabled: true });
         StatusBar.setBarStyle("dark-content");
         if (Platform.OS === "android") {
             StatusBar.setBackgroundColor("white");

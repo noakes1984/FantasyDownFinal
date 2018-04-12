@@ -14,6 +14,7 @@ export {default as LoadingIndicator} from "./LoadingIndicator";
 export {default as Logo} from "./Logo";
 export {default as Avatar} from "./Avatar";
 export {default as SmartImage} from "./SmartImage";
+export {default as CacheManager} from "./CacheManager";
 export {default as RefreshIndicator} from "./RefreshIndicator";
 export {default as NavHeader} from "./NavHeader";
 export {default as Firebase} from "./Firebase";

@@ -9,7 +9,7 @@ import {useStrict} from "mobx";
 import {Provider} from "mobx-react/native";
 import {Feather} from "@expo/vector-icons";
 
-import {Images, Firebase, FeedStore} from "./src/components";
+import {Images, Firebase, FeedStore, CacheManager} from "./src/components";
 import {Welcome} from "./src/welcome";
 import {Walkthrough} from "./src/walkthrough";
 import {SignUpName, SignUpEmail, SignUpPassword, Login} from "./src/sign-up";
@@ -62,7 +62,8 @@ export default class App extends React.Component<{}, AppState> {
         isUserAuthenticated: false
     };
 
-    componentDidMount() {
+    async componentDidMount(): Promise<void> {
+        await CacheManager.clearCache();
         StatusBar.setBarStyle("dark-content");
         if (Platform.OS === "android") {
             StatusBar.setBackgroundColor("white");

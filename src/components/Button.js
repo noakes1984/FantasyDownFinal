@@ -32,7 +32,6 @@ export default class Button extends React.PureComponent<ButtonProps> {
                     primary,
                     onPress,
                     style: computedStyle,
-                    rounded: true,
                     transparent: !primary || transparent,
                     disabled
                 }}

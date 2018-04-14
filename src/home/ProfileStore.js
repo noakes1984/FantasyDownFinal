@@ -21,11 +21,7 @@ export default class ProfileStore {
     @computed get profile(): Profile { return this._profile; }
     set profile(profile: Profile) { this._profile = profile; }
 
-    constructor() {
-        this.initProfile();
-    }
-
-    async initProfile(): Promise<void> {
+    async init(): Promise<void> {
         // Load Profile
         const {uid} = Firebase.auth.currentUser;
         Firebase.firestore.collection("users").doc(uid).onSnapshot(async snap => {

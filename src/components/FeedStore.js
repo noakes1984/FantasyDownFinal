@@ -35,7 +35,7 @@ export default class FeedStore {
     set feed(feed: Feed) { this._feed = feed; }
 
     // eslint-disable-next-line flowtype/no-weak-types
-    constructor(query: any) {
+    init(query: any) {
         this.query = query;
         this.loadFeed();
     }

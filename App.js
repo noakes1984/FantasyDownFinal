@@ -11,6 +11,7 @@ import {Feather} from "@expo/vector-icons";
 
 import {Images, Firebase, FeedStore} from "./src/components";
 import type {ScreenProps} from "./src/components/Types";
+
 import {Welcome} from "./src/welcome";
 import {Walkthrough} from "./src/walkthrough";
 import {SignUpName, SignUpEmail, SignUpPassword, Login} from "./src/sign-up";

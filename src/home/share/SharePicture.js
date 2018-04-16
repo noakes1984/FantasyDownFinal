@@ -6,7 +6,7 @@ import {StyleSheet, TextInput, Image, Dimensions, View, Alert} from "react-nativ
 import {Content} from "native-base";
 
 import {
-    NavHeader, Button, Theme, RefreshIndicator, Firebase, NavigationHelpers, ImageUpload, serializeException, Text
+    NavHeader, Button, Theme, RefreshIndicator, Firebase, ImageUpload, serializeException, Text
 } from "../../components";
 
 import type {ScreenParams} from "../../components/Types";

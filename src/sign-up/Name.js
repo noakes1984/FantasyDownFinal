@@ -62,7 +62,7 @@ export default class Name extends React.Component<NavigationProps<*>, NameState>
     render(): React.Node {
         const {navigation} = this.props;
         return (
-            <SignUpContainer title="Your Name" subtitle="Who are you" next={this.next} {...{navigation}}>
+            <SignUpContainer title="Your Name" subtitle="Who are you" next={this.next} first {...{navigation}}>
                 <TextField
                     placeholder="First Name"
                     autoCapitalize="none"

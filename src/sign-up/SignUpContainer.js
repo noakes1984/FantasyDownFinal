@@ -13,6 +13,7 @@ type SignUpContainerProps = NavigationProps<*> & {
     next: () => void | Promise<void>,
     children?: React.ChildrenArray<React.Element<*>>,
     nextLabel: string,
+    first?: boolean,
     loading?: boolean
 };
 
@@ -24,7 +25,12 @@ export default class SignUpContainer extends React.Component<SignUpContainerProp
 
     @autobind
     back() {
-        this.props.navigation.goBack();
+        const {navigation, first} = this.props;
+        if (first) {
+            navigation.navigate("Login");
+        } else {
+            navigation.pop();
+        }
     }
 
     render(): React.Node {

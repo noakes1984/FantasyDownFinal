@@ -6,7 +6,7 @@ import {StyleSheet, TextInput, Image, Dimensions, View, Alert} from "react-nativ
 import {Content} from "native-base";
 
 import {
-    NavHeader, Button, Theme, RefreshIndicator, Firebase, NavigationHelpers, ImageUpload, serializeException, Text
+    NavHeader, Button, Theme, RefreshIndicator, Firebase, ImageUpload, serializeException, Text
 } from "../../components";
 
 import type {ScreenParams} from "../../components/Types";
@@ -65,7 +65,8 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
                 }
             };
             await Firebase.firestore.collection("feed").doc(this.id).set(post);
-            NavigationHelpers.reset(navigation, "Home");
+            navigation.pop(1);
+            navigation.navigate("Explore");
         } catch (e) {
             const message = serializeException(e);
             Alert.alert(message);

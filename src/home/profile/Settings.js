@@ -7,7 +7,7 @@ import {Content} from "native-base";
 import {Feather as Icon} from "@expo/vector-icons";
 
 import {
-    NavHeader, Firebase, Button, TextField, Theme, ImageUpload, serializeException, NavigationHelpers, RefreshIndicator
+    NavHeader, Firebase, Button, TextField, Theme, ImageUpload, serializeException, RefreshIndicator
 } from "../../components";
 
 import EnableCameraRollPermission from "./EnableCameraRollPermission";
@@ -65,7 +65,7 @@ export default class Settings extends React.Component<ScreenParams<{ profile: Pr
                 const uri = await ImageUpload.upload(picture);
                 await Firebase.firestore.collection("users").doc(uid).update({ picture: { preview, uri } });
             }
-            NavigationHelpers.reset(navigation, "Home");
+            navigation.pop();
         } catch (e) {
             const message = serializeException(e);
             // eslint-disable-next-line no-alert

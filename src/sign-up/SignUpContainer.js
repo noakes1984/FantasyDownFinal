@@ -13,6 +13,7 @@ type SignUpContainerProps = NavigationProps<*> & {
     next: () => void | Promise<void>,
     children?: React.ChildrenArray<React.Element<*>>,
     nextLabel: string,
+    first?: boolean,
     loading?: boolean
 };
 
@@ -24,7 +25,12 @@ export default class SignUpContainer extends React.Component<SignUpContainerProp
 
     @autobind
     back() {
-        this.props.navigation.goBack();
+        const {navigation, first} = this.props;
+        if (first) {
+            navigation.navigate("Login");
+        } else {
+            navigation.pop();
+        }
     }
 
     render(): React.Node {
@@ -35,12 +41,12 @@ export default class SignUpContainer extends React.Component<SignUpContainerProp
                     <View style={styles.innerContainer}>
                         <View>
                             <Text type="large">{subtitle}</Text>
-                            <Text type="header2" gutterBottom={true}>{title}</Text>
+                            <Text type="header2" gutterBottom>{title}</Text>
                         </View>
                         <View>{children}</View>
                         <View>
-                            <Button label={nextLabel} full={true} primary={true} onPress={next} {...{loading}} />
-                            <Button label="Back" full={true} onPress={this.back} />
+                            <Button label={nextLabel} full primary onPress={next} {...{loading}} />
+                            <Button label="Back" full onPress={this.back} />
                         </View>
                     </View>
                 </Content>
@@ -55,7 +61,7 @@ const styles = StyleSheet.create({
         padding: Theme.spacing.base
     },
     innerContainer: {
-        height: height - Theme.spacing.base * 2,
+        height: height - (Theme.spacing.base * 2),
         justifyContent: "center"
     }
 });

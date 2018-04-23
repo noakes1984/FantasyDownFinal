@@ -2,9 +2,9 @@
 import autobind from "autobind-decorator";
 import * as React from "react";
 import {StyleSheet, View, TouchableWithoutFeedback} from "react-native";
+import {Feather as Icon} from "@expo/vector-icons";
 
 import Likes from "./Likes";
-import {Feather as Icon} from "@expo/vector-icons";
 
 import Text from "../Text";
 import {Theme} from "../Theme";

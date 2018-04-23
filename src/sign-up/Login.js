@@ -56,7 +56,8 @@ export default class Login extends React.Component<NavigationProps<*>, LoginStat
             }
             this.setState({ loading: true });
             await Firebase.auth.signInWithEmailAndPassword(email, password);
-        } catch(e) {
+        } catch (e) {
+            // eslint-disable-next-line no-alert
             alert(e);
             this.setState({ loading: false });
         }
@@ -76,7 +77,7 @@ export default class Login extends React.Component<NavigationProps<*>, LoginStat
                 <TextField
                     placeholder="Email"
                     keyboardType="email-address"
-                    contrast={true}
+                    contrast
                     autoCapitalize="none"
                     autoCorrect={false}
                     returnKeyType="next"
@@ -84,9 +85,9 @@ export default class Login extends React.Component<NavigationProps<*>, LoginStat
                     onChangeText={this.setEmail}
                 />
                 <TextField
-                    secureTextEntry={true}
+                    secureTextEntry
                     placeholder="Password"
-                    contrast={true}
+                    contrast
                     autoCapitalize="none"
                     autoCorrect={false}
                     returnKeyType="go"

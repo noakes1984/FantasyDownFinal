@@ -20,23 +20,14 @@ type CircleState = {
 
 class Circle extends React.Component<CircleProps, CircleState> {
 
-    animate() {
-        const animation = new Animated.Value(0);
-        this.setState({ animation });
-        Animated.loop(
-            Animated.timing(
-                animation,
-                {
-                    toValue: 1,
-                    duration: 2000,
-                    useNativeDriver: Platform.OS === "ios"
-                }
-            )
-        ).start();
-    }
+    state = {
+        animation: new Animated.Value(0)
+    };
 
-    componentWillMount() {
-        this.animate();
+    componentDidMount() {
+        const {animation} = this.state;
+        const options = { toValue: 1, duration: 2000, useNativeDriver: Platform.OS === "ios" };
+        Animated.loop(Animated.timing(animation, options)).start();
     }
 
     render(): React.Node {
@@ -45,7 +36,7 @@ class Circle extends React.Component<CircleProps, CircleState> {
         const factor = order - 1;
         const part = 1 / total;
         const scale = animation.interpolate({
-            inputRange: [0, part * factor, part * factor + part * 0.5, part * factor + part, 1],
+            inputRange: [0, part * factor, (part * factor) + (part * 0.5), (part * factor) + part, 1],
             outputRange: [1, 1, 3, 1, 1]
         });
         return (
@@ -54,7 +45,8 @@ class Circle extends React.Component<CircleProps, CircleState> {
     }
 }
 
-export default class RefreshIndicator extends React.Component<RefreshIndicatorProps> {
+// eslint-disable-next-line react/no-multi-comp
+export default class RefreshIndicator extends React.PureComponent<RefreshIndicatorProps> {
 
     static defaultProps = {
         refreshing: true

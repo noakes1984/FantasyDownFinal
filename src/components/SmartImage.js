@@ -1,93 +1,110 @@
 // @flow
-import autobind from "autobind-decorator";
 import * as _ from "lodash";
 import * as React from "react";
 import {Image as RNImage, Animated, StyleSheet, View, Platform} from "react-native";
 import {BlurView} from "expo";
 import {type StyleObj} from "react-native/Libraries/StyleSheet/StyleSheetTypes";
+import type {ImageSourcePropType} from "react-native/Libraries/Image/ImageSourcePropType";
 
 import CacheManager from "./CacheManager";
 
 type ImageProps = {
     style?: StyleObj,
+    defaultSource?: ImageSourcePropType,
     preview?: string,
     uri: string
 };
 
 type ImageState = {
-    uri: string,
+    uri: ?string,
     intensity: Animated.Value
 };
 
 export default class Image extends React.Component<ImageProps, ImageState> {
 
-    style: StyleObj;
-    subscribedToCache = true;
+    state = {
+        uri: undefined,
+        intensity: new Animated.Value(100)
+    };
 
-    load(props: ImageProps) {
-        const {uri, style} = props;
-        this.style = [
-            StyleSheet.absoluteFill,
-            _.pickBy(StyleSheet.flatten(style), (value, key) => propsToCopy.indexOf(key) !== -1)
-        ];
-        CacheManager.cache(uri, this.setURI);
-    }
-
-    componentWillMount() {
-        const intensity = new Animated.Value(100);
-        this.setState({ intensity });
-        this.load(this.props);
-    }
-
-    componentWillReceiveProps(props: ImageProps) {
-        this.load(props);
-    }
-
-    @autobind
-    setURI(uri: string) {
-        if (this.subscribedToCache) {
-            this.setState({ uri });
+    async load({uri}: ImageProps): Promise<void> {
+        if (uri) {
+            const entry = CacheManager.get(uri);
+            const path = await entry.getPath();
+            if (path) {
+                this.setState({ uri: path });
+            }
         }
+    }
+
+    componentDidMount() {
+        this.load(this.props);
     }
 
     componentDidUpdate(prevProps: ImageProps, prevState: ImageState) {
         const {preview} = this.props;
         const {uri, intensity} = this.state;
-        if (uri && preview && uri !== preview && prevState.uri === undefined) {
-            Animated.timing(intensity, { duration: 300, toValue: 0, useNativeDriver: true }).start();
+        if (this.props.uri !== prevProps.uri) {
+            this.load(this.props);
+        } else if (uri && preview && uri !== preview && prevState.uri === undefined) {
+            Animated
+                .timing(intensity, { duration: 300, toValue: 0, useNativeDriver: Platform.OS === "android" })
+                .start();
         }
     }
 
     componentWillUnmount() {
-        this.subscribedToCache = false;
+        const {uri} = this.props;
+        const entry = CacheManager.get(uri);
+        entry.cancel();
     }
 
     render(): React.Node {
-        const {style: computedStyle} = this;
-        const {preview, style} = this.props;
+        const {preview, style, defaultSource, ...otherProps} = this.props;
         const {uri, intensity} = this.state;
+        const hasDefaultSource = !!defaultSource;
         const hasPreview = !!preview;
+        const hasURI = !!uri;
+        const isImageReady = uri && uri !== preview;
         const opacity = intensity.interpolate({
             inputRange: [0, 100],
             outputRange: [0, 0.5]
         });
+        const computedStyle = [
+            StyleSheet.absoluteFill,
+            _.transform(
+                _.pickBy(StyleSheet.flatten(style), (value, key) => propsToCopy.indexOf(key) !== -1),
+                // $FlowFixMe
+                (result, value, key) => Object.assign(result, { [key]: (value - (style.borderWidth || 0)) })
+            )
+        ];
         return (
             <View {...{style}}>
                 {
-                    hasPreview && (
+                    (hasDefaultSource && !hasPreview && !hasURI) && (
                         <RNImage
-                            source={{ uri: preview }}
-                            resizeMode="cover"
+                            source={defaultSource}
                             style={computedStyle}
+                            {...otherProps}
                         />
                     )
                 }
                 {
-                    (uri && uri !== preview) && (
+                    hasPreview && !isImageReady && (
                         <RNImage
-                            source={{ uri }}
+                            source={{ uri: preview }}
                             resizeMode="cover"
                             style={computedStyle}
+                            blurRadius={Platform.OS === "android" ? 0.5 : 0}
+                        />
+                    )
+                }
+                {
+                    isImageReady && (
+                        <RNImage
+                            source={{ uri }}
+                            style={computedStyle}
+                            {...otherProps}
                         />
                     )
                 }
@@ -98,7 +115,7 @@ export default class Image extends React.Component<ImageProps, ImageState> {
                 }
                 {
                     hasPreview && Platform.OS === "android" && (
-                        <Animated.View style={[computedStyle, { backgroundColor: "black", opacity }]} />
+                        <Animated.View style={[computedStyle, { backgroundColor: black, opacity }]} />
                     )
                 }
             </View>
@@ -106,8 +123,8 @@ export default class Image extends React.Component<ImageProps, ImageState> {
     }
 }
 
+const black = "black";
 const propsToCopy = [
     "borderRadius", "borderBottomLeftRadius", "borderBottomRightRadius", "borderTopLeftRadius", "borderTopRightRadius"
 ];
-
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);

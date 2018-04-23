@@ -11,7 +11,7 @@ type ContainerProps = BaseProps & {
     gutter: number
 };
 
-export default class Container extends React.Component<ContainerProps> {
+export default class Container extends React.PureComponent<ContainerProps> {
 
     static defaultProps = {
         gutter: 0

@@ -10,7 +10,7 @@ type CommentProps = {
     profile: Profile
 };
 
-export default class CommentComp extends React.Component<CommentProps> {
+export default class CommentComp extends React.PureComponent<CommentProps> {
 
     render(): React.Node {
         const {text} = this.props.comment;
@@ -38,7 +38,8 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.14,
         shadowRadius: 6,
         borderColor: Theme.palette.borderColor,
-        borderWidth: Platform.OS === "ios" ? 0 : 1
+        borderWidth: Platform.OS === "ios" ? 0 : 1,
+        backgroundColor: "white"
     },
     author: {
         color: "black",

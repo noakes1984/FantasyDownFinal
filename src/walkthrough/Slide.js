@@ -11,7 +11,7 @@ type SlideProps = {
     icon: React.Element<*>
 };
 
-export default class Slide extends React.Component<SlideProps> {
+export default class Slide extends React.PureComponent<SlideProps> {
 
     render(): React.Node {
         const {title, description, icon} = this.props;
@@ -36,11 +36,11 @@ const styles = StyleSheet.create({
     slide: {
         paddingHorizontal: Theme.spacing.base * 2,
         paddingBottom: Theme.spacing.base * 2,
-        paddingTop: Theme.spacing.base * 2 + Constants.statusBarHeight,
+        paddingTop: (Theme.spacing.base * 2) + Constants.statusBarHeight,
         flexGrow: 1
     },
     title: {
-        color: "white"
+        color: Theme.palette.white
     },
     description: {
         position: "absolute",

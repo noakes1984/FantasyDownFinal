@@ -3,7 +3,7 @@ import type { StyleObj } from "react-native/Libraries/StyleSheet/StyleSheetTypes
 import type {
     // eslint-disable-next-line no-unused-vars
     NavigationNavigatorProps, NavigationScreenProp, NavigationState
-} from "react-navigation/src/TypeDefinition";
+} from "react-navigation";
 
 export type ScreenProps<O: {} = {}, S: {} = NavigationState> = NavigationNavigatorProps<O, S>;
 

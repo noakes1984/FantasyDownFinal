@@ -9,7 +9,7 @@ type AvatarProps = BaseProps & {
     size: number
 };
 
-export default class Avatar extends React.Component<AvatarProps> {
+export default class Avatar extends React.PureComponent<AvatarProps> {
 
     static defaultProps = {
         size: 50

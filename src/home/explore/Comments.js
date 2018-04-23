@@ -17,11 +17,11 @@ import type {Comment} from "../../components/Model";
 @observer
 export default class CommentsComp extends React.Component<ScreenParams<{ post: string }>> {
 
-    commentsStore: CommentsStore;
+    commentsStore: CommentsStore = new CommentsStore();
 
-    async componentWillMount(): Promise<void> {
+    async componentDidMount(): Promise<void> {
         const {post} = this.props.navigation.state.params;
-        this.commentsStore = new CommentsStore(post);
+        this.commentsStore.init(post);
     }
 
     @autobind
@@ -57,9 +57,9 @@ export default class CommentsComp extends React.Component<ScreenParams<{ post: s
         const {comments, comment} = commentsStore;
         return (
             <View style={styles.container}>
-                <NavHeader title="Comments" back={true} {...{navigation, backFn}} />
+                <NavHeader title="Comments" back {...{navigation, backFn}} />
                 <FlatList
-                    inverted={true}
+                    inverted
                     data={comments}
                     keyExtractor={item => item.comment.id}
                     renderItem={({ item }) => <CommentComp comment={item.comment} profile={item.profile} />}
@@ -70,13 +70,13 @@ export default class CommentsComp extends React.Component<ScreenParams<{ post: s
                             style={styles.input}
                             placeholder="Write a comment"
                             value={comment}
-                            autoFocus={true}
+                            autoFocus
                             returnKeyType="send"
                             onSubmitEditing={this.send}
                             underlineColorAndroid="transparent"
                             {...{onChangeText}}
                         />
-                        <TouchableOpacity primary={true} transparent={true} onPress={this.send}>
+                        <TouchableOpacity primary transparent onPress={this.send}>
                             <Text style={styles.btnText}>Send</Text>
                         </TouchableOpacity>
                     </View>
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.14,
         shadowRadius: 6,
-        borderTopWidth: Platform.OS === "ios" ? 0 : 1,
+        borderTopWidth: 1,
         borderColor: Theme.palette.borderColor,
         paddingLeft: Theme.spacing.small,
         paddingRight: Theme.spacing.small,
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
         alignItems: "center"
     },
     input: {
-        height: Theme.typography.regular.lineHeight + Theme.spacing.base * 2,
+        height: Theme.typography.regular.lineHeight + (Theme.spacing.base * 2),
         flex: 1
     },
     btnText: {

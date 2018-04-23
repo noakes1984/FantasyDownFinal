@@ -17,13 +17,21 @@ type OdometerState = {
 
 export default class Odometer extends React.Component<OdometerProps, OdometerState> {
 
-    componentWillMount() {
-        const {count} = this.props;
+    state = {
+        count: 0
+    };
+
+    static getDerivedStateFromProps({ count }: OdometerProps): OdometerState {
+        return { count };
+    }
+
+    increment() {
+        const count = this.state.count + 1;
         this.setState({ count });
     }
 
-    componentWillReceiveProps(nextProps: OdometerProps) {
-        const {count} = nextProps;
+    decrement() {
+        const count = this.state.count - 1;
         this.setState({ count });
     }
 
@@ -32,15 +40,17 @@ export default class Odometer extends React.Component<OdometerProps, OdometerSta
         const numbers = `${this.state.count}`.split("").map(char => parseInt(char, 10));
         return (
             <View style={styles.row}>
-            {
-                numbers.map((digit, key) => <Digit {...{ key, digit, color }} />)
-            }
+                {
+                    numbers.map((digit, key) => <Digit {...{ key, digit, color }} />)
+                }
             </View>
         );
     }
 }
 
 type DigitProps = {
+    // FIXME: once this fix is published: https://github.com/yannickcr/eslint-plugin-react/issues/1751
+    // eslint-disable-next-line react/no-unused-prop-types
     digit: number,
     color: string
 };
@@ -52,56 +62,50 @@ type DigitState = {
     goesUp: 1 | -1
 };
 
-class Digit extends React.Component<DigitProps, DigitState> {
+// eslint-disable-next-line react/no-multi-comp
+class Digit extends React.PureComponent<DigitProps, DigitState> {
 
-    componentWillMount() {
-        const {digit} = this.props;
-        this.setState({
-            digit: digit,
-            lastDigit: digit,
-            animation: new Animated.Value(1),
-            goesUp: 1
-        });
+    state = {
+        digit: 0,
+        lastDigit: 0,
+        animation: new Animated.Value(1),
+        goesUp: 1
     }
 
-    componentWillReceiveProps(nextProps: DigitProps) {
+    static getDerivedStateFromProps({ digit }: DigitProps, { digit: lastDigit }: DigitState): ?DigitState {
         const animation = new Animated.Value(0);
-        const lastDigit = this.props.digit;
-        const digit = nextProps.digit;
         if (digit === lastDigit) {
-            return;
+            return null;
         }
         const goesUp = lastDigit > digit ? -1 : 1;
-        this.setState({ lastDigit, digit, animation, goesUp });
-        Animated
-        .timing(
+        Animated.timing(
             animation,
             {
                 duration: 600,
                 toValue: 1,
                 easing: Easing.bezier(0.175, 0.885, 0.32, 1.275)
             }
-        )
-        .start();
+        ).start();
+        return { lastDigit, digit, animation, goesUp };
     }
 
-     render(): React.Node {
-         const {color} = this.props;
-         const {digit, lastDigit, animation, goesUp} = this.state;
-         const height = Theme.typography.regular.fontSize;
-         const opacity = animation.interpolate(directInverseInterpolation());
-         const translateY = animation.interpolate(simpleInterpolation(0, goesUp * height));
-         const newOpacity = animation.interpolate(directInterpolation());
-         const newTranslateY = animation.interpolate(simpleInterpolation(goesUp * -height, 0));
-         const lastDigitStyle = [styles.text, {color}, { opacity, transform: [{ translateY }]}];
-         const digitStyle = [styles.text, {color}, { opacity: newOpacity, transform: [{ translateY: newTranslateY }]}];
-         return (
-             <View style={styles.container}>
+    render(): React.Node {
+        const {color} = this.props;
+        const {digit, lastDigit, animation, goesUp} = this.state;
+        const height = Theme.typography.regular.fontSize;
+        const opacity = animation.interpolate(directInverseInterpolation());
+        const translateY = animation.interpolate(simpleInterpolation(0, goesUp * height));
+        const newOpacity = animation.interpolate(directInterpolation());
+        const newTranslateY = animation.interpolate(simpleInterpolation(goesUp * -height, 0));
+        const lastDigitStyle = [styles.text, {color}, { opacity, transform: [{ translateY }]}];
+        const digitStyle = [styles.text, {color}, { opacity: newOpacity, transform: [{ translateY: newTranslateY }]}];
+        return (
+            <View style={styles.container}>
                 <AnimatedText style={lastDigitStyle}>{`${lastDigit}`}</AnimatedText>
                 <AnimatedText style={digitStyle}>{`${digit}`}</AnimatedText>
-             </View>
-         );
-     }
+            </View>
+        );
+    }
 }
 
 const AnimatedText = Animated.createAnimatedComponent(Text);

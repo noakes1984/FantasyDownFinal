@@ -1,7 +1,7 @@
 // @flow
 import autobind from "autobind-decorator";
 import * as React from "react";
-import moment from "moment"
+import moment from "moment";
 import {StyleSheet, View, Animated, SafeAreaView, TouchableWithoutFeedback, Platform} from "react-native";
 import {inject, observer} from "mobx-react/native";
 
@@ -25,16 +25,17 @@ type InjectedProps = {
 @inject("feedStore", "profileStore") @observer
 export default class Explore extends React.Component<ScreenProps<> & InjectedProps, ExploreState> {
 
+    state = {
+        scrollAnimation: new Animated.Value(0)
+    };
+
     @autobind
     profile() {
         this.props.navigation.navigate("Profile");
     }
 
-    async componentWillMount(): Promise<void> {
+    componentDidMount() {
         this.props.feedStore.checkForNewEntriesInFeed();
-        this.setState({
-            scrollAnimation: new Animated.Value(0)
-        });
     }
 
     render(): React.Node {
@@ -58,7 +59,7 @@ export default class Explore extends React.Component<ScreenProps<> & InjectedPro
         });
         const height = scrollAnimation.interpolate({
             inputRange: [0, 60],
-            outputRange: Platform.OS === "android" ? [70, 70] : [100,  60],
+            outputRange: Platform.OS === "android" ? [70, 70] : [100, 60],
             extrapolate: "clamp"
         });
         const marginTop = scrollAnimation.interpolate({
@@ -78,7 +79,7 @@ export default class Explore extends React.Component<ScreenProps<> & InjectedPro
                         <View>
                             <AnimatedText
                                 type="large"
-                                style={{ position: "absolute", top: 0, opacity, transform: [{ translateY }] }}
+                                style={[styles.newPosts, { opacity, transform: [{ translateY }] }]}
                             >
                             New posts
                             </AnimatedText>
@@ -86,7 +87,7 @@ export default class Explore extends React.Component<ScreenProps<> & InjectedPro
                                 type="header2"
                                 style={{ fontSize, marginTop }}
                             >
-                            {moment().format("dddd")}
+                                {moment().format("dddd")}
                             </AnimatedText>
                         </View>
                         {
@@ -102,15 +103,13 @@ export default class Explore extends React.Component<ScreenProps<> & InjectedPro
                 </AnimatedSafeAreaView>
                 <Feed
                     store={feedStore}
-                    onScroll={Animated.event(
-                        [{
-                            nativeEvent: {
-                                contentOffset: {
-                                    y: scrollAnimation
-                                }
+                    onScroll={Animated.event([{
+                        nativeEvent: {
+                            contentOffset: {
+                                y: scrollAnimation
                             }
-                        }]
-                    )}
+                        }
+                    }])}
                     {...{navigation}}
                 />
             </View>
@@ -136,5 +135,9 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center"
+    },
+    newPosts: {
+        position: "absolute",
+        top: 0
     }
 });

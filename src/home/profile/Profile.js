@@ -1,10 +1,10 @@
 // @flow
 import autobind from "autobind-decorator";
 import * as React from "react";
-import {View, StyleSheet, Dimensions, TouchableOpacity, Image, Animated} from "react-native";
+import {View, StyleSheet, Dimensions, TouchableOpacity, Image} from "react-native";
 import {Feather as Icon} from "@expo/vector-icons";
 import {inject, observer} from "mobx-react/native";
-import {Constants} from "expo";
+import {Constants, LinearGradient} from "expo";
 
 import ProfileStore from "../ProfileStore";
 
@@ -20,7 +20,7 @@ type InjectedProps = {
 @inject("profileStore", "userFeedStore") @observer
 export default class ProfileComp extends React.Component<ScreenProps<> & InjectedProps> {
 
-    componentWillMount() {
+    componentDidMount() {
         this.props.userFeedStore.checkForNewEntriesInFeed();
     }
 
@@ -36,6 +36,7 @@ export default class ProfileComp extends React.Component<ScreenProps<> & Injecte
     }
 
     @autobind
+    // eslint-disable-next-line class-methods-use-this
     keyExtractor(item: FeedEntry): string {
         return item.post.id;
     }
@@ -44,26 +45,32 @@ export default class ProfileComp extends React.Component<ScreenProps<> & Injecte
         const {navigation, userFeedStore, profileStore} = this.props;
         const {profile} = profileStore;
         return (
-            <Feed
-                bounce={false}
-                ListHeaderComponent={(
-                    <View style={styles.header}>
-                        <AnimatedImage style={styles.cover} source={Images.cover} />
-                        <TouchableOpacity onPress={this.settings} style={styles.settings}>
-                            <View>
-                                <Icon name="settings" size={25} color="white" />
+            <View style={styles.container}>
+                <LinearGradient
+                    colors={["#5cc0f1", "#d6ebf4", "white"]}
+                    style={styles.gradient}
+                />
+                <Feed
+                    bounce={false}
+                    ListHeaderComponent={(
+                        <View style={styles.header}>
+                            <Image style={styles.cover} source={Images.cover} />
+                            <TouchableOpacity onPress={this.settings} style={styles.settings}>
+                                <View>
+                                    <Icon name="settings" size={25} color="white" />
+                                </View>
+                            </TouchableOpacity>
+                            <View style={styles.title}>
+                                <Text type="large" style={styles.outline}>{profile.outline}</Text>
+                                <Text type="header2" style={styles.name}>{profile.name}</Text>
                             </View>
-                        </TouchableOpacity>
-                        <View style={styles.title}>
-                            <Text type="large" style={styles.outline}>{profile.outline}</Text>
-                            <Text type="header2" style={styles.name}>{profile.name}</Text>
+                            <Avatar size={avatarSize} style={styles.avatar} {...profile.picture} />
                         </View>
-                        <Avatar size={avatarSize} style={styles.avatar} {...profile.picture} />
-                    </View>
-                )}
-                store={userFeedStore}
-                {...{navigation}}
-            />
+                    )}
+                    store={userFeedStore}
+                    {...{navigation}}
+                />
+            </View>
         );
     }
 }
@@ -71,10 +78,19 @@ export default class ProfileComp extends React.Component<ScreenProps<> & Injecte
 const avatarSize = 100;
 const {width} = Dimensions.get("window");
 const {statusBarHeight} = Constants;
-const AnimatedImage = Animated.createAnimatedComponent(Image);
 const styles = StyleSheet.create({
+    container: {
+        flex: 1
+    },
+    gradient: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: width
+    },
     header: {
-        marginBottom: avatarSize * 0.5 + Theme.spacing.small
+        marginBottom: (avatarSize * 0.5) + Theme.spacing.small
     },
     cover: {
         width,
@@ -83,7 +99,7 @@ const styles = StyleSheet.create({
     avatar: {
         position: "absolute",
         right: Theme.spacing.small,
-        bottom: - avatarSize * 0.5
+        bottom: -avatarSize * 0.5
     },
     settings: {
         position: "absolute",

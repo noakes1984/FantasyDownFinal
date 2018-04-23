@@ -21,16 +21,19 @@ export default class Switch extends React.Component<SwitchProps, SwitchState> {
         onTintColor: Theme.palette.primary
     };
 
-    componentWillMount() {
-        const {defaultValue} = this.props;
-        this.setState({ value: !!defaultValue });
+    static getDerivedStateFromProps({ defaultValue }: SwitchProps): SwitchState {
+        return { value: !!defaultValue };
     }
+
+    state = {
+        value: false
+    };
 
     @autobind
     toggle() {
         const {onToggle} = this.props;
         const {value} = this.state;
-        this.setState({ value: !value })
+        this.setState({ value: !value });
         if (onToggle) {
             onToggle(!value);
         }

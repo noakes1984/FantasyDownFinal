@@ -20,25 +20,25 @@ export class HomeTab extends React.Component<NavigationProps<*>> {
     render(): React.Node {
         const {navigation} = this.props;
         const navState = navigation.state;
-        const currentIndex = navState.index;
+        const cIdx = navState.index;
         return (
             <SafeAreaView style={styles.tabs}>
                 <View style={styles.container}>
-                {
-                    HomeTab.tabs.map((info, i) => {
-                        const color = i === currentIndex ? Theme.palette.primary : Theme.palette.lightGray;
-                        return (
-                            <TouchableWithoutFeedback
-                                key={info.label}
-                                onPress={() => i !== currentIndex ? this.props.navigation.navigate(info.label) : null}
-                            >
-                                <View style={styles.tab}>
-                                    <Icon name={info.icon} size={25} {...{ color }} />
-                                </View>
-                            </TouchableWithoutFeedback>
-                        );
-                    })
-                }
+                    {
+                        HomeTab.tabs.map((info, i) => {
+                            const color = i === cIdx ? Theme.palette.primary : Theme.palette.lightGray;
+                            return (
+                                <TouchableWithoutFeedback
+                                    key={info.label}
+                                    onPress={() => (i !== cIdx ? this.props.navigation.navigate(info.label) : null)}
+                                >
+                                    <View style={styles.tab}>
+                                        <Icon name={info.icon} size={25} {...{ color }} />
+                                    </View>
+                                </TouchableWithoutFeedback>
+                            );
+                        })
+                    }
                 </View>
             </SafeAreaView>
         );
@@ -65,8 +65,5 @@ const styles = StyleSheet.create({
         height: 57,
         justifyContent: "center",
         alignItems: "center"
-    },
-    label: {
-        ...Theme.typography.micro
     }
 });

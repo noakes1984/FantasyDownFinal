@@ -1,6 +1,4 @@
 // @flow
-import autobind from "autobind-decorator";
-
 import * as React from "react";
 import {StyleSheet, View, Linking} from "react-native";
 
@@ -11,53 +9,50 @@ type State = {
     canOpen: boolean | null
 };
 
-export default class EnableCameraPermission extends React.Component<Props, State> {
+export default class EnableCameraRollPermission extends React.Component<Props, State> {
 
-    async componentWillMount(): Promise<void> {
-        this.setState({ canOpen: null });
+    state = {
+        canOpen: null
+    };
+
+    async componentDidMount(): Promise<void> {
         const canOpen = await Linking.canOpenURL("app-settings:");
         this.setState({ canOpen });
     }
 
-    @autobind
-    async onPress(): Promise<void> {
-        Linking.openURL("app-settings:");
-    }
-
     render(): React.Node {
-        const {onPress} = this;
         const {canOpen} = this.state;
         if (canOpen === null) {
             return (
                 <View style={styles.container}>
-                    <RefreshIndicator refreshing={true} />
+                    <RefreshIndicator refreshing />
                 </View>
-            )
-        } else {
-            return (
-                <View style={styles.container}>
-                    <Text type="header3" gutterBottom={true} style={styles.text}>Take Pictures with Fiber</Text>
-                    <Text gutterBottom={true} style={styles.text}>
-                    Allow access to your camera roll to start taking photos with Fiber.
-                    </Text>
-                    {
-                        canOpen === true && (
-                            <Button label="Enable Camera Roll Access" primary={true} full={true} {...{onPress}} />
-                        )
-                    }
-                    {
-                        canOpen === false && (
-                            <Text gutterBottom={true} style={styles.text}>
-                            Allow access to your camera roll in the app settings.
-                            </Text>
-                        )
-                    }
-                </View>
-            )
+            );
         }
+        return (
+            <View style={styles.container}>
+                <Text type="header3" gutterBottom style={styles.text}>Take Pictures with Fiber</Text>
+                <Text gutterBottom style={styles.text}>
+                Allow access to your camera roll to start taking photos with Fiber.
+                </Text>
+                {
+                    canOpen === true && (
+                        <Button label="Enable Camera Roll Access" primary full {...{onPress}} />
+                    )
+                }
+                {
+                    canOpen === false && (
+                        <Text gutterBottom style={styles.text}>
+                        Allow access to your camera roll in the app settings.
+                        </Text>
+                    )
+                }
+            </View>
+        );
     }
 }
 
+const onPress = async (): Promise<void> => Linking.openURL("app-settings:");
 const styles = StyleSheet.create({
     container: {
         flexGrow: 1,

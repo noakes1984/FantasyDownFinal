@@ -10,7 +10,7 @@ type BubbleProps = {
     right?: boolean
 };
 
-class Bubble extends React.Component<BubbleProps> {
+class Bubble extends React.PureComponent<BubbleProps> {
     render(): React.Node {
         const {right} = this.props;
         return (
@@ -32,7 +32,12 @@ type VisibleState = {
     visible: boolean
 };
 
+// eslint-disable-next-line react/no-multi-comp
 export default class Chat extends React.Component<NoProps, VisibleState> {
+
+    state = {
+        visible: false
+    };
 
     hide() {
         this.setState({ visible: false });
@@ -40,10 +45,6 @@ export default class Chat extends React.Component<NoProps, VisibleState> {
 
     show() {
         this.setState({ visible: true });
-    }
-
-    componentWillMount() {
-        this.setState({ visible: false });
     }
 
     render(): React.Node {
@@ -54,7 +55,7 @@ export default class Chat extends React.Component<NoProps, VisibleState> {
         return (
             <View style={styles.container}>
                 <Bubble />
-                <Bubble right={true} />
+                <Bubble right />
             </View>
         );
     }

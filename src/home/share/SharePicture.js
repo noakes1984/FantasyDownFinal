@@ -2,11 +2,11 @@
 import moment from "moment";
 import autobind from "autobind-decorator";
 import * as React from "react";
-import {StyleSheet, TextInput, Image, Dimensions, View} from "react-native";
+import {StyleSheet, TextInput, Image, Dimensions, View, Alert} from "react-native";
 import {Content} from "native-base";
 
 import {
-    NavHeader, Button, Theme, RefreshIndicator, Firebase, NavigationHelpers, ImageUpload, serializeException, Text
+    NavHeader, Button, Theme, RefreshIndicator, Firebase, ImageUpload, serializeException, Text
 } from "../../components";
 
 import type {ScreenParams} from "../../components/Types";
@@ -14,56 +14,43 @@ import type {Post} from "../../components/Model";
 import type {Picture} from "../../components/ImageUpload";
 
 type SharePictureState = {
-    loadingLabel: string,
     loading: boolean,
-    caption: string,
-    uploadDone: boolean,
-    retry: boolean
+    caption: string
 };
 
 export default class SharePicture extends React.Component<ScreenParams<Picture>, SharePictureState> {
 
     id: string;
-    name: string;
     preview: string;
     url: string;
 
+    state = {
+        loading: false,
+        caption: ""
+    };
+
     @autobind
     async upload(): Promise<void> {
-        const {navigation} = this.props;
-        const picture = navigation.state.params;
         try {
-            this.setState({ retry: false });
-            await ImageUpload.upload(picture, this.name);
-            this.url = await Firebase.storage.ref(this.name).getDownloadURL();
-            this.setState({ uploadDone: true });
+            const {navigation} = this.props;
+            const picture = navigation.state.params;
+            this.id = ImageUpload.uid();
+            this.preview = await ImageUpload.preview(picture);
+            this.url = await ImageUpload.upload(picture);
         } catch (e) {
-            const message = serializeException(e);
-            alert(message);
-            this.setState({ retry: true });
+            // eslint-disable-next-line no-console
+            console.error(e);
+            Alert.alert(e);
         }
-    }
-
-    async componentWillMount(): Promise<void> {
-        const {navigation} = this.props;
-        const picture = navigation.state.params;
-        this.setState({ loading: false, loadingLabel: "", caption: "", uploadDone: false, retry: false });
-        this.id = ImageUpload.uid();
-        this.name = `${this.id}.jpg`;
-        this.preview = await ImageUpload.preview(picture);
-        await this.upload();
     }
 
     @autobind
     async onPress(): Promise<void> {
         const {navigation} = this.props;
-        const {caption, uploadDone} = this.state;
-        if (!uploadDone) {
-            return;
-        }
+        const {caption} = this.state;
         this.setState({ loading: true });
         try {
-            this.setState({ loadingLabel: "Saving Post..." });
+            await this.upload();
             const {uid} = Firebase.auth.currentUser;
             const post: Post = {
                 id: this.id,
@@ -78,10 +65,11 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
                 }
             };
             await Firebase.firestore.collection("feed").doc(this.id).set(post);
-            NavigationHelpers.reset(navigation, "Home");
-        } catch(e) {
+            navigation.pop(1);
+            navigation.navigate("Explore");
+        } catch (e) {
             const message = serializeException(e);
-            alert(message);
+            Alert.alert(message);
             this.setState({ loading: false });
         }
     }
@@ -94,19 +82,19 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
     render(): React.Node {
         const {onPress, onChangeText} = this;
         const {navigation} = this.props;
-        const {loading, loadingLabel, uploadDone, retry} = this.state;
+        const {loading} = this.state;
         const source = navigation.state.params;
         if (loading) {
             return (
                 <View style={styles.loading}>
                     <RefreshIndicator />
-                    <Text>{loadingLabel}</Text>
+                    <Text style={styles.saving}>Saving...</Text>
                 </View>
-            )
+            );
         }
         return (
             <View style={styles.container}>
-                <NavHeader back={true} title="Share" {...{navigation}} />
+                <NavHeader back title="Share" {...{navigation}} />
                 <Content>
                     <Image {...{ source }} style={styles.picture} />
                     <TextInput
@@ -116,29 +104,13 @@ export default class SharePicture extends React.Component<ScreenParams<Picture>,
                         onSubmitEditing={onPress}
                         {...{onChangeText}}
                     />
-                    {
-                        retry && (
-                            <Button
-                                primary={true}
-                                full={true}
-                                label="Retry processing"
-                                style={styles.btn}
-                                onPress={this.upload}
-                            />
-                        )
-                    }
-                    {
-                        !retry && (
-                            <Button
-                                primary={true}
-                                full={true}
-                                label={!uploadDone ? "Uploading Picture..." : "Share Picture"}
-                                style={styles.btn}
-                                {...{onPress}}
-                            />
-
-                        )
-                    }
+                    <Button
+                        primary
+                        full
+                        label="Share Picture"
+                        style={styles.btn}
+                        {...{onPress}}
+                    />
                 </Content>
             </View>
         );
@@ -166,5 +138,8 @@ const styles = StyleSheet.create({
     },
     btn: {
         margin: Theme.spacing.base
+    },
+    saving: {
+        marginBottom: Theme.spacing.base
     }
 });

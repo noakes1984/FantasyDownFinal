@@ -1,16 +1,17 @@
 // @flow
-/* eslint-disable no-console */
-import autobind from "autobind-decorator";
+/* eslint-disable no-console, func-names */
 import * as React from "react";
 import {StatusBar, Platform} from "react-native";
 import {StyleProvider} from "native-base";
-import {StackNavigator, TabNavigator} from "react-navigation";
+import {SwitchNavigator, StackNavigator, TabNavigator} from "react-navigation";
 import {Font, AppLoading} from "expo";
 import {useStrict} from "mobx";
-import {Provider} from "mobx-react/native";
+import {Provider, inject} from "mobx-react/native";
 import {Feather} from "@expo/vector-icons";
 
 import {Images, Firebase, FeedStore} from "./src/components";
+import type {ScreenProps} from "./src/components/Types";
+
 import {Welcome} from "./src/welcome";
 import {Walkthrough} from "./src/walkthrough";
 import {SignUpName, SignUpEmail, SignUpPassword, Login} from "./src/sign-up";
@@ -21,113 +22,108 @@ import {
 import getTheme from "./native-base-theme/components";
 import variables from "./native-base-theme/variables/commonColor";
 
-interface AppState {
-    staticAssetsLoaded: boolean,
-    authStatusReported: boolean,
-    isUserAuthenticated: boolean
-}
+const SFProTextMedium = require("./fonts/SF-Pro-Text-Medium.otf");
+const SFProTextHeavy = require("./fonts/SF-Pro-Text-Heavy.otf");
+const SFProTextBold = require("./fonts/SF-Pro-Text-Bold.otf");
+const SFProTextSemibold = require("./fonts/SF-Pro-Text-Semibold.otf");
+const SFProTextRegular = require("./fonts/SF-Pro-Text-Regular.otf");
+const SFProTextLight = require("./fonts/SF-Pro-Text-Light.otf");
 
 useStrict(true);
 
 const originalSend = XMLHttpRequest.prototype.send;
 // https://github.com/firebase/firebase-js-sdk/issues/283
 // $FlowFixMe
-XMLHttpRequest.prototype.send = function(body: string) {
-  if (body === "") {
-    originalSend.call(this);
-  } else {
-    originalSend.call(this, body);
-  }
+XMLHttpRequest.prototype.send = function (body: string) {
+    if (body === "") {
+        originalSend.call(this);
+    } else {
+        originalSend.call(this, body);
+    }
 };
 
 // https://github.com/firebase/firebase-js-sdk/issues/97
+if (!console.ignoredYellowBox) {
+    // $FlowFixMe
+    console.ignoredYellowBox = [];
+}
 // $FlowFixMe
-console.ignoredYellowBox = [
-    "Setting a timer"
-];
+console.ignoredYellowBox.push("Setting a timer");
 
-export default class App extends React.Component<{}, AppState> {
+@inject("profileStore", "feedStore", "userFeedStore")
+class Loading extends React.Component<ScreenProps<>> {
 
-    state: AppState = {
-        staticAssetsLoaded: false,
-        authStatusReported: false,
-        isUserAuthenticated: false
-    };
-
-    componentWillMount() {
-        StatusBar.setBarStyle("dark-content");
-        if (Platform.OS === "android") {
-            StatusBar.setBackgroundColor("white");
-        }
-        this.loadStaticResources();
+    async componentDidMount(): Promise<void> {
+        const {navigation, profileStore, feedStore, userFeedStore} = this.props;
+        await Loading.loadStaticResources();
         Firebase.init();
         Firebase.auth.onAuthStateChanged(user => {
-            this.setState({
-                authStatusReported: true,
-                isUserAuthenticated: !!user
-            });
+            const isUserAuthenticated = !!user;
+            if (isUserAuthenticated) {
+                const {uid} = Firebase.auth.currentUser;
+                const feedQuery = Firebase.firestore
+                    .collection("feed")
+                    .orderBy("timestamp", "desc");
+                const userFeedQuery = Firebase.firestore
+                    .collection("feed")
+                    .where("uid", "==", uid)
+                    .orderBy("timestamp", "desc");
+                profileStore.init();
+                feedStore.init(feedQuery);
+                userFeedStore.init(userFeedQuery);
+                navigation.navigate("Home");
+            } else {
+                navigation.navigate("Welcome");
+            }
         });
     }
 
-    async loadStaticResources(): Promise<void> {
+    static async loadStaticResources(): Promise<void> {
         try {
             const images = Images.downloadAsync();
             const fonts = Font.loadAsync({
-                "SFProText-Medium": require("./fonts/SF-Pro-Text-Medium.otf"),
-                "SFProText-Heavy": require("./fonts/SF-Pro-Text-Heavy.otf"),
-                "SFProText-Bold": require("./fonts/SF-Pro-Text-Bold.otf"),
-                "SFProText-Semibold": require("./fonts/SF-Pro-Text-Semibold.otf"),
-                "SFProText-Regular": require("./fonts/SF-Pro-Text-Regular.otf"),
-                "SFProText-Light": require("./fonts/SF-Pro-Text-Light.otf")
+                "SFProText-Medium": SFProTextMedium,
+                "SFProText-Heavy": SFProTextHeavy,
+                "SFProText-Bold": SFProTextBold,
+                "SFProText-Semibold": SFProTextSemibold,
+                "SFProText-Regular": SFProTextRegular,
+                "SFProText-Light": SFProTextLight
             });
             const icons = Font.loadAsync(Feather.font);
             await Promise.all([...images, fonts, icons]);
-            this.setState({ staticAssetsLoaded: true });
-        } catch(error) {
+        } catch (error) {
             console.error(error);
         }
     }
 
     render(): React.Node {
-        const {onNavigationStateChange} = this;
-        const {staticAssetsLoaded, authStatusReported, isUserAuthenticated} = this.state;
-        let feedStore, profileStore, userFeedStore;
-        if (isUserAuthenticated) {
-            const {uid} = Firebase.auth.currentUser;
-            const feedQuery = Firebase.firestore
-                .collection("feed")
-                .orderBy("timestamp", "desc");
-            const userFeedQuery = Firebase.firestore
-                .collection("feed")
-                .where("uid", "==", uid)
-                .orderBy("timestamp", "desc");
-            profileStore = new ProfileStore();
-            feedStore = new FeedStore(feedQuery);
-            userFeedStore = new FeedStore(userFeedQuery);
+        return <AppLoading />;
+    }
+}
+
+// eslint-disable-next-line react/no-multi-comp
+export default class App extends React.Component<{}> {
+
+    profileStore = new ProfileStore();
+    feedStore = new FeedStore();
+    userFeedStore = new FeedStore();
+
+    componentDidMount() {
+        StatusBar.setBarStyle("dark-content");
+        if (Platform.OS === "android") {
+            StatusBar.setBackgroundColor("white");
         }
-        return <StyleProvider style={getTheme(variables)}>
-            {
-                (staticAssetsLoaded && authStatusReported) ?
-                    (
-                        isUserAuthenticated
-                            ?
-                                (
-                                    <Provider {...{feedStore, profileStore, userFeedStore}} >
-                                        <Home {...{onNavigationStateChange}} />
-                                    </Provider>
-                                )
-                            :
-                                <AppNavigator {...{onNavigationStateChange}} />
-                    )
-                :
-                    <AppLoading />
-            }
-        </StyleProvider>;
     }
 
-    @autobind
-    onNavigationStateChange() {
-        return undefined;
+    render(): React.Node {
+        const {feedStore, profileStore, userFeedStore} = this;
+        return (
+            <StyleProvider style={getTheme(variables)}>
+                <Provider {...{feedStore, profileStore, userFeedStore}}>
+                    <AppNavigator onNavigationStateChange={() => undefined} />
+                </Provider>
+            </StyleProvider>
+        );
     }
 }
 
@@ -143,7 +139,7 @@ const ExploreNavigator = StackNavigator({
     Comments: { screen: Comments }
 }, StackNavigatorOptions);
 
-const ProfileNavigator =  StackNavigator({
+const ProfileNavigator = StackNavigator({
     Profile: { screen: Profile },
     Settings: { screen: Settings },
     Comments: { screen: Comments }
@@ -159,23 +155,29 @@ const HomeTabs = TabNavigator({
     Share: { screen: ShareNavigator },
     Profile: { screen: ProfileNavigator }
 }, {
-    animationEnabled: false,
+    animationEnabled: true,
     tabBarComponent: HomeTab,
     tabBarPosition: "bottom",
     swipeEnabled: false
 });
 
-const Home = StackNavigator({
+const HomeNavigator = SwitchNavigator({
     Walkthrough: { screen: Walkthrough },
     Home: { screen: HomeTabs }
 }, StackNavigatorOptions);
 
-const AppNavigator = StackNavigator({
-    Welcome: { screen: Welcome },
-    Login: { screen: Login },
+const SignUpNavigator = StackNavigator({
     SignUp: { screen: SignUpName },
     SignUpEmail: { screen: SignUpEmail },
     SignUpPassword: { screen: SignUpPassword }
+}, StackNavigatorOptions);
+
+const AppNavigator = SwitchNavigator({
+    Loading: { screen: Loading },
+    Welcome: { screen: Welcome },
+    Login: { screen: Login },
+    SignUp: { screen: SignUpNavigator },
+    Home: { screen: HomeNavigator }
 }, StackNavigatorOptions);
 
 export {AppNavigator};

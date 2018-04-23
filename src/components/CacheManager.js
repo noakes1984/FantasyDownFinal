@@ -1,50 +1,69 @@
 // @flow
+import * as _ from "lodash";
 import {FileSystem} from "expo";
 import SHA1 from "crypto-js/sha1";
 
-type Listener = string => mixed;
+const BASE_DIR = `${FileSystem.cacheDirectory}expo-image-cache/`;
 
-export default class CacheManager {
+export class CacheEntry {
 
-    static listeners: { [uri: string]: Listener[] } = {};
+    uri: string
+    path: string;
+    canceled: boolean = false;
 
-    static async cache(uri: string, listener: Listener): Promise<void> {
-        const {path, exists} = await getCacheEntry(uri);
-        if (isDownloading(uri)) {
-            addListener(uri, listener);
-        } else if (exists) {
-            listener(path);
-        } else {
-            addListener(uri, listener);
-            try {
-                await FileSystem.downloadAsync(uri, path);
-                notifyAll(uri, path);
-            } catch (e) {
-                notifyAll(uri, uri);
-            }
-            unsubscribe(uri);
+    constructor(uri: string) {
+        this.uri = uri;
+    }
+
+    async getPath(): Promise<?string> {
+        const {uri} = this;
+        const {path, exists, tmpPath} = await getCacheEntry(uri);
+        if (exists) {
+            return path;
         }
+        this.canceled = false;
+        await FileSystem.downloadAsync(uri, tmpPath);
+        await FileSystem.moveAsync({ from: tmpPath, to: path });
+        if (!this.canceled) {
+            return path;
+        }
+        return undefined;
+    }
+
+    async cancel(): Promise<void> {
+        this.canceled = true;
     }
 }
 
-const unsubscribe = (uri: string) => delete CacheManager.listeners[uri];
+export default class CacheManager {
 
-const notifyAll = (uri: string, path: string) => CacheManager.listeners[uri].forEach(listener => listener(path));
+    static entries: { [uri: string]: CacheEntry } = {};
 
-const addListener = (uri: string, listener: Listener) => {
-    if (!CacheManager.listeners[uri]) {
-        CacheManager.listeners[uri] = [];
+    static get(uri: string): CacheEntry {
+        if (!CacheManager.entries[uri]) {
+            CacheManager.entries[uri] = new CacheEntry(uri);
+        }
+        return CacheManager.entries[uri];
     }
-    CacheManager.listeners[uri].push(listener);
-};
 
-const isDownloading = (uri: string): boolean => CacheManager.listeners[uri] !== undefined;
+    static async clearCache(): Promise<void> {
+        await FileSystem.deleteAsync(BASE_DIR, { idempotent: true });
+        await FileSystem.makeDirectoryAsync(BASE_DIR);
+    }
+}
 
-const getCacheEntry = async (uri): Promise<{ exists: boolean, path: string }> => {
+const getCacheEntry = async (uri: string): Promise<{ exists: boolean, path: string, tmpPath: string }> => {
     const filename = uri.substring(uri.lastIndexOf("/"), uri.indexOf("?") === -1 ? uri.length : uri.indexOf("?"));
     const ext = filename.indexOf(".") === -1 ? ".jpg" : filename.substring(filename.lastIndexOf("."));
-    const path = FileSystem.cacheDirectory + SHA1(uri) + ext;
+    const path = `${BASE_DIR}${SHA1(uri)}${ext}`;
+    const tmpPath = `${BASE_DIR}${SHA1(uri)}-${_.uniqueId()}${ext}`;
+    // TODO: maybe we don't have to do this every time
+    try {
+        await FileSystem.makeDirectoryAsync(BASE_DIR);
+    } catch (e) {
+        // do nothing
+    }
     const info = await FileSystem.getInfoAsync(path);
     const {exists} = info;
-    return { exists, path };
+    return { exists, path, tmpPath };
 };

@@ -2,6 +2,7 @@
 import * as React from "react";
 import {StyleSheet, View, Platform} from "react-native";
 
+import {Theme} from "../components";
 import {AnimatedView, simpleInterpolation, directInterpolation} from "../components/Animations";
 
 type NoProps = {};
@@ -12,16 +13,16 @@ type ShareState = {
 
 export default class Share extends React.Component<NoProps, ShareState> {
 
+    state = {
+        visible: false
+    };
+
     hide() {
         this.setState({ visible: false });
     }
 
     show() {
         this.setState({ visible: true });
-    }
-
-    componentWillMount() {
-        this.setState({ visible: false });
     }
 
     render(): React.Node {
@@ -52,13 +53,15 @@ export default class Share extends React.Component<NoProps, ShareState> {
     }
 }
 
+const backgroundColor = "#E0F5FF";
+const shadowColor = "#0091FF";
 const styles = StyleSheet.create({
     container: {
         flexDirection: "row"
     },
     picture: {
-        backgroundColor: "#E0F5FF",
-        borderColor: "white",
+        backgroundColor,
+        borderColor: Theme.palette.white,
         borderRadius: Platform.OS === "ios" ? 7 : 0
     },
     frontPicture: {
@@ -69,7 +72,7 @@ const styles = StyleSheet.create({
         borderRightWidth: 10,
         borderBottomWidth: 42,
         zIndex: 200,
-        shadowColor: "#0091FF",
+        shadowColor,
         shadowOffset: { width: 5, height: 10 },
         shadowOpacity: 0.54,
         shadowRadius: 9,

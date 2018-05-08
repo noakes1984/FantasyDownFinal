@@ -19,6 +19,9 @@
         "androidStatusBar": {
             "backgroundColor": "#ffffff",
             "barStyle": "dark-content"
+        },
+        "ios": {
+            "bundleIdentifier": "com.wcandillon.fiber"
         }
     }
 }

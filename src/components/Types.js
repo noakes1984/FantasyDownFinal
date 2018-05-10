@@ -1,5 +1,5 @@
 // @flow
-import type { StyleObj } from "react-native/Libraries/StyleSheet/StyleSheetTypes";
+import type {____ViewStyleProp_Internal as Style} from "react-native/Libraries/StyleSheet/StyleSheetTypes";
 import type {
     // eslint-disable-next-line no-unused-vars
     NavigationNavigatorProps, NavigationScreenProp, NavigationState
@@ -14,5 +14,5 @@ export type NavigationProps<S: {} = NavigationState> = {
 export type ScreenParams<P> = ScreenProps<{}, { params: P }>;
 
 export type BaseProps = {
-    style?: StyleObj
+    style?: Style
 };

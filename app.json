@@ -1,7 +1,7 @@
 {
     "expo": {
         "name": "react-native-fiber-firebase",
-        "version": "1.0.18",
+        "version": "1.0.19",
         "description": "UI elements, multi-screen implemented in React Native, now in one handy kit",
         "sdkVersion": "26.0.0",
         "orientation": "portrait",

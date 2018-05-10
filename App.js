@@ -22,11 +22,17 @@ import {
 import getTheme from "./native-base-theme/components";
 import variables from "./native-base-theme/variables/commonColor";
 
+// $FlowFixMe
 const SFProTextMedium = require("./fonts/SF-Pro-Text-Medium.otf");
+// $FlowFixMe
 const SFProTextHeavy = require("./fonts/SF-Pro-Text-Heavy.otf");
+// $FlowFixMe
 const SFProTextBold = require("./fonts/SF-Pro-Text-Bold.otf");
+// $FlowFixMe
 const SFProTextSemibold = require("./fonts/SF-Pro-Text-Semibold.otf");
+// $FlowFixMe
 const SFProTextRegular = require("./fonts/SF-Pro-Text-Regular.otf");
+// $FlowFixMe
 const SFProTextLight = require("./fonts/SF-Pro-Text-Light.otf");
 
 useStrict(true);

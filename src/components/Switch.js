@@ -1,7 +1,7 @@
 // @flow
 import autobind from "autobind-decorator";
 import * as React from "react";
-import {Switch as RNSwitch} from "react-native";
+import {Platform, Switch as RNSwitch} from "react-native";
 
 import {Theme} from "./Theme";
 
@@ -45,6 +45,7 @@ export default class Switch extends React.Component<SwitchProps, SwitchState> {
         return (
             <RNSwitch
                 {...{onTintColor, value}}
+                thumbTintColor={Platform.OS === "android" ? "white" : undefined}
                 onValueChange={this.toggle}
             />
         );

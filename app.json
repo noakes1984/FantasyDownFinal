@@ -3,7 +3,7 @@
         "name": "react-native-fiber-firebase",
         "version": "1.1.1",
         "description": "UI elements, multi-screen implemented in React Native, now in one handy kit",
-        "sdkVersion": "26.0.0",
+        "sdkVersion": "27.0.0",
         "orientation": "portrait",
         "privacy": "public",
         "icon": "./app.png",

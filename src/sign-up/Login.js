@@ -72,6 +72,7 @@ export default class Login extends React.Component<NavigationProps<*>, LoginStat
                 subtitle="Get Started"
                 nextLabel="Login"
                 next={this.login}
+                first
                 {...{ navigation, loading }}
             >
                 <TextField

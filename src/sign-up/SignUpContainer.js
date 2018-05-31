@@ -27,7 +27,7 @@ export default class SignUpContainer extends React.Component<SignUpContainerProp
     back() {
         const {navigation, first} = this.props;
         if (first) {
-            navigation.navigate("Login");
+            navigation.navigate("Welcome");
         } else {
             navigation.pop();
         }

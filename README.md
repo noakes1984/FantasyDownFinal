@@ -1,4 +1,4 @@
-## React Native Fiber Firebase v1.1.0
+## React Native Fiber Firebase v1.1.2
 
 Thanks for purchasing the React Native Fiber Firebase.
 

@@ -1,10 +1,10 @@
 // @flow
 import * as React from "react";
-import {StyleSheet, View, Platform} from "react-native";
+import { StyleSheet, View, Platform } from "react-native";
 
-import {AnimatedView} from "../components";
+import { AnimatedView } from "../components";
 
-import type {BaseProps} from "../components/Types";
+import type { BaseProps } from "../components/Types";
 
 type NoProps = {};
 type VisibleState = {
@@ -14,9 +14,7 @@ type VisibleState = {
 // eslint-disable-next-line react/prefer-stateless-function, react/no-multi-comp
 class Phone extends React.Component<BaseProps> {
     render(): React.Node {
-        return (
-            <AnimatedView style={styles.phone} />
-        );
+        return <AnimatedView style={styles.phone} />;
     }
 }
 
@@ -35,7 +33,6 @@ class Mac extends React.Component<BaseProps> {
 
 // eslint-disable-next-line react/no-multi-comp
 export default class Connect extends React.Component<NoProps, VisibleState> {
-
     state = {
         visible: true
     };
@@ -49,7 +46,7 @@ export default class Connect extends React.Component<NoProps, VisibleState> {
     }
 
     render(): React.Node {
-        const {visible} = this.state;
+        const { visible } = this.state;
         if (!visible) {
             return <View />;
         }

@@ -1,23 +1,21 @@
 // @flow
 /* eslint-disable no-console, func-names */
 import * as React from "react";
-import {StatusBar, Platform} from "react-native";
-import {StyleProvider} from "native-base";
-import {SwitchNavigator, StackNavigator, TabNavigator} from "react-navigation";
-import {Font, AppLoading} from "expo";
-import {useStrict} from "mobx";
-import {Provider, inject} from "mobx-react/native";
-import {Feather} from "@expo/vector-icons";
+import { StatusBar, Platform } from "react-native";
+import { StyleProvider } from "native-base";
+import { SwitchNavigator, StackNavigator, TabNavigator } from "react-navigation";
+import { Font, AppLoading } from "expo";
+import { useStrict } from "mobx";
+import { Provider, inject } from "mobx-react/native";
+import { Feather } from "@expo/vector-icons";
 
-import {Images, Firebase, FeedStore} from "./src/components";
-import type {ScreenProps} from "./src/components/Types";
+import { Images, Firebase, FeedStore } from "./src/components";
+import type { ScreenProps } from "./src/components/Types";
 
-import {Welcome} from "./src/welcome";
-import {Walkthrough} from "./src/walkthrough";
-import {SignUpName, SignUpEmail, SignUpPassword, Login} from "./src/sign-up";
-import {
-    Profile, Explore, Share, SharePicture, HomeTab, Comments, Settings, ProfileStore
-} from "./src/home";
+import { Welcome } from "./src/welcome";
+import { Walkthrough } from "./src/walkthrough";
+import { SignUpName, SignUpEmail, SignUpPassword, Login } from "./src/sign-up";
+import { Explore, Profile, Share, HomeTab, Comments, Settings, ProfileStore } from "./src/home";
 
 import getTheme from "./native-base-theme/components";
 import variables from "./native-base-theme/variables/commonColor";
@@ -40,7 +38,7 @@ useStrict(true);
 const originalSend = XMLHttpRequest.prototype.send;
 // https://github.com/firebase/firebase-js-sdk/issues/283
 // $FlowFixMe
-XMLHttpRequest.prototype.send = function (body: string) {
+XMLHttpRequest.prototype.send = function(body: string) {
     if (body === "") {
         originalSend.call(this);
     } else {
@@ -58,18 +56,15 @@ console.ignoredYellowBox.push("Setting a timer");
 
 @inject("profileStore", "feedStore", "userFeedStore")
 class Loading extends React.Component<ScreenProps<>> {
-
     async componentDidMount(): Promise<void> {
-        const {navigation, profileStore, feedStore, userFeedStore} = this.props;
+        const { navigation, profileStore, feedStore, userFeedStore } = this.props;
         await Loading.loadStaticResources();
         Firebase.init();
         Firebase.auth.onAuthStateChanged(user => {
             const isUserAuthenticated = !!user;
             if (isUserAuthenticated) {
-                const {uid} = Firebase.auth.currentUser;
-                const feedQuery = Firebase.firestore
-                    .collection("feed")
-                    .orderBy("timestamp", "desc");
+                const { uid } = Firebase.auth.currentUser;
+                const feedQuery = Firebase.firestore.collection("feed").orderBy("timestamp", "desc");
                 const userFeedQuery = Firebase.firestore
                     .collection("feed")
                     .where("uid", "==", uid)
@@ -109,7 +104,6 @@ class Loading extends React.Component<ScreenProps<>> {
 
 // eslint-disable-next-line react/no-multi-comp
 export default class App extends React.Component<{}> {
-
     profileStore = new ProfileStore();
     feedStore = new FeedStore();
     userFeedStore = new FeedStore();
@@ -122,10 +116,10 @@ export default class App extends React.Component<{}> {
     }
 
     render(): React.Node {
-        const {feedStore, profileStore, userFeedStore} = this;
+        const { feedStore, profileStore, userFeedStore } = this;
         return (
             <StyleProvider style={getTheme(variables)}>
-                <Provider {...{feedStore, profileStore, userFeedStore}}>
+                <Provider {...{ feedStore, profileStore, userFeedStore }}>
                     <AppNavigator onNavigationStateChange={() => undefined} />
                 </Provider>
             </StyleProvider>
@@ -140,50 +134,70 @@ const StackNavigatorOptions = {
     }
 };
 
-const ExploreNavigator = StackNavigator({
-    Explore: { screen: Explore },
-    Comments: { screen: Comments }
-}, StackNavigatorOptions);
+const ExploreNavigator = StackNavigator(
+    {
+        Explore: { screen: Explore },
+        Comments: { screen: Comments }
+    },
+    StackNavigatorOptions
+);
 
-const ProfileNavigator = StackNavigator({
-    Profile: { screen: Profile },
-    Settings: { screen: Settings },
-    Comments: { screen: Comments }
-}, StackNavigatorOptions);
+const ProfileNavigator = StackNavigator(
+    {
+        Profile: { screen: Profile },
+        Settings: { screen: Settings },
+        Comments: { screen: Comments }
+    },
+    StackNavigatorOptions
+);
 
-const ShareNavigator = StackNavigator({
-    Share: { screen: Share },
-    SharePicture: { screen: SharePicture }
-}, StackNavigatorOptions);
+const ShareNavigator = StackNavigator(
+    {
+        Share: { screen: Share }
+    },
+    StackNavigatorOptions
+);
 
-const HomeTabs = TabNavigator({
-    Explore: { screen: ExploreNavigator },
-    Share: { screen: ShareNavigator },
-    Profile: { screen: ProfileNavigator }
-}, {
-    animationEnabled: true,
-    tabBarComponent: HomeTab,
-    tabBarPosition: "bottom",
-    swipeEnabled: false
-});
+const HomeTabs = TabNavigator(
+    {
+        Explore: { screen: ExploreNavigator },
+        Share: { screen: ShareNavigator },
+        Profile: { screen: ProfileNavigator }
+    },
+    {
+        animationEnabled: false,
+        tabBarComponent: HomeTab,
+        tabBarPosition: "bottom",
+        swipeEnabled: true
+    }
+);
 
-const HomeNavigator = SwitchNavigator({
-    Walkthrough: { screen: Walkthrough },
-    Home: { screen: HomeTabs }
-}, StackNavigatorOptions);
+const HomeNavigator = SwitchNavigator(
+    {
+        Walkthrough: { screen: Walkthrough },
+        Home: { screen: HomeTabs }
+    },
+    StackNavigatorOptions
+);
 
-const SignUpNavigator = StackNavigator({
-    SignUp: { screen: SignUpName },
-    SignUpEmail: { screen: SignUpEmail },
-    SignUpPassword: { screen: SignUpPassword }
-}, StackNavigatorOptions);
+const SignUpNavigator = StackNavigator(
+    {
+        SignUp: { screen: SignUpName },
+        SignUpEmail: { screen: SignUpEmail },
+        SignUpPassword: { screen: SignUpPassword }
+    },
+    StackNavigatorOptions
+);
 
-const AppNavigator = SwitchNavigator({
-    Loading: { screen: Loading },
-    Welcome: { screen: Welcome },
-    Login: { screen: Login },
-    SignUp: { screen: SignUpNavigator },
-    Home: { screen: HomeNavigator }
-}, StackNavigatorOptions);
+const AppNavigator = SwitchNavigator(
+    {
+        Loading: { screen: Loading },
+        Welcome: { screen: Welcome },
+        Login: { screen: Login },
+        SignUp: { screen: SignUpNavigator },
+        Home: { screen: HomeNavigator }
+    },
+    StackNavigatorOptions
+);
 
-export {AppNavigator};
+export { AppNavigator };

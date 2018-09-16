@@ -1,7 +1,7 @@
 // @flow
 import autobind from "autobind-decorator";
 import * as React from "react";
-import {View, StyleSheet, SafeAreaView, StatusBar, Platform} from "react-native";
+import { View, StyleSheet, SafeAreaView, StatusBar, Platform } from "react-native";
 import Swiper from "react-native-swiper";
 
 import Slide from "./Slide";
@@ -9,15 +9,14 @@ import Connect from "./Connect";
 import Chat from "./Chat";
 import Share from "./Share";
 
-import {Button, Theme} from "../components";
-import type {ScreenProps} from "../components/Types";
+import { Button, Theme } from "../components";
+import type { ScreenProps } from "../components/Types";
 
 type WalkthroughState = {
     disabled: boolean
 };
 
 export default class Walkthrough extends React.Component<ScreenProps<>, WalkthroughState> {
-
     state = {
         disabled: false
     };
@@ -30,8 +29,8 @@ export default class Walkthrough extends React.Component<ScreenProps<>, Walkthro
     }
 
     home() {
-        const {navigation} = this.props;
-        const {disabled} = this.state;
+        const { navigation } = this.props;
+        const { disabled } = this.state;
         if (disabled) {
             return;
         }
@@ -58,16 +57,14 @@ export default class Walkthrough extends React.Component<ScreenProps<>, Walkthro
     }
 
     render(): React.Node {
-        const {renderPagination} = this;
+        const { renderPagination } = this;
         return (
             <Swiper loop={false} {...{ renderPagination, onIndexChanged }}>
-                {
-                    slides.map(slide => (
-                        <View key={slide.title}>
-                            <Slide {...slide} />
-                        </View>
-                    ))
-                }
+                {slides.map(slide => (
+                    <View key={slide.title}>
+                        <Slide {...slide} />
+                    </View>
+                ))}
             </Swiper>
         );
     }
@@ -85,23 +82,23 @@ let share: Share;
 
 const slides = [
     {
-        title: "Connect",
-        description: "Bring your friends closer by building a network of the people you love.",
-        icon: <Connect ref={ref => (ref ? connect = ref : undefined)} />,
+        title: "Scout",
+        description: "Choose from 50+ different metrics for personalized anaylsis",
+        icon: <Connect ref={ref => (ref ? (connect = ref) : undefined)} />,
         show: () => connect.show(),
         hide: () => connect.hide()
     },
     {
-        title: "Chat",
-        description: "Send messages and stay up to date with friends whenever you need to.",
-        icon: <Chat ref={ref => (ref ? chat = ref : undefined)} />,
+        title: "Pick",
+        description: "Collaborate on bets with your friends with 'collaborative messaging'",
+        icon: <Chat ref={ref => (ref ? (chat = ref) : undefined)} />,
         show: () => chat.show(),
         hide: () => chat.hide()
     },
     {
-        title: "Share",
-        description: "Send your best selfies and show friends what you’re up to.",
-        icon: <Share ref={ref => (ref ? share = ref : undefined)} />,
+        title: "Win",
+        description: "Create 1 on 1 bets with friends using shareable deep links",
+        icon: <Share ref={ref => (ref ? (share = ref) : undefined)} />,
         show: () => share.show(),
         hide: () => share.hide()
     }

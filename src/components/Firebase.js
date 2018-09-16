@@ -2,17 +2,17 @@
 import * as firebase from "firebase";
 import "firebase/firestore";
 
-const config = {
-    apiKey: "AIzaSyD-LiSTZojaA1w3Wdciwf7HI8AP6GE7zLA",
-    authDomain: "react-native-fiber.firebaseapp.com",
-    databaseURL: "https://react-native-fiber.firebaseio.com",
-    projectId: "react-native-fiber",
-    storageBucket: "react-native-fiber.appspot.com",
-    messagingSenderId: "387191574162"
+var config = {
+    apiKey: "AIzaSyBhuG9aWqOPeli7gKjMLi4Hw-9H12ILfFo",
+    authDomain: "fantasydownfinal.firebaseapp.com",
+    databaseURL: "https://fantasydownfinal.firebaseio.com",
+    projectId: "fantasydownfinal",
+    storageBucket: "fantasydownfinal.appspot.com",
+    messagingSenderId: "381147026500"
 };
+//firebase.initializeApp(config);
 
 export default class Firebase {
-
     static firestore: firebase.firestore.Firestore;
     static auth: firebase.auth.Auth;
     static storage: firebase.storage.Storage;

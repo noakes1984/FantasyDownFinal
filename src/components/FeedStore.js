@@ -1,18 +1,19 @@
 // @flow
 import * as _ from "lodash";
-import {observable, computed} from "mobx";
+import { observable, computed } from "mobx";
 
-import {Firebase} from "../components";
-import type {Feed, FeedEntry, Profile, Post} from "../components/Model";
+import { Firebase } from "../components";
+import type { Feed, FeedEntry, Profile, Post } from "../components/Model";
 
 const DEFAULT_PAGE_SIZE = 5;
 
 const DEFAULT_PROFILE: Profile = {
-    name: "John Doe",
-    outline: "React Native",
+    name: "Your Name",
+    outline: "Fantasy Down",
     picture: {
         // eslint-disable-next-line max-len
-        uri: "https://firebasestorage.googleapis.com/v0/b/react-native-ting.appspot.com/o/fiber%2Fprofile%2FJ0k2SZiI9V9KoYZK7Enru5e8CbqFxdzjkHCmzd2yZ1dyR22Vcjc0PXDPslhgH1JSEOKMMOnDcubGv8s4ZxA.jpg?alt=media&token=6d5a2309-cf94-4b8e-a405-65f8c5c6c87c",
+        uri:
+            "https://firebasestorage.googleapis.com/v0/b/react-native-ting.appspot.com/o/fiber%2Fprofile%2FJ0k2SZiI9V9KoYZK7Enru5e8CbqFxdzjkHCmzd2yZ1dyR22Vcjc0PXDPslhgH1JSEOKMMOnDcubGv8s4ZxA.jpg?alt=media&token=6d5a2309-cf94-4b8e-a405-65f8c5c6c87c",
         preview: "data:image/gif;base64,R0lGODlhAQABAPAAAKyhmP///yH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=="
     }
 };
@@ -31,8 +32,13 @@ export default class FeedStore {
 
     @observable _feed: Feed;
 
-    @computed get feed(): Feed { return this._feed; }
-    set feed(feed: Feed) { this._feed = feed; }
+    @computed
+    get feed(): Feed {
+        return this._feed;
+    }
+    set feed(feed: Feed) {
+        this._feed = feed;
+    }
 
     // eslint-disable-next-line flowtype/no-weak-types
     init(query: any) {
@@ -42,14 +48,19 @@ export default class FeedStore {
 
     async joinProfiles(posts: Post[]): Promise<FeedEntry[]> {
         const uids = posts.map(post => post.uid).filter(uid => this.profiles[uid] === undefined);
-        const profilePromises = _.uniq(uids).map(uid => (async () => {
-            try {
-                const profileDoc = await Firebase.firestore.collection("users").doc(uid).get();
-                this.profiles[uid] = profileDoc.data();
-            } catch (e) {
-                this.profiles[uid] = DEFAULT_PROFILE;
-            }
-        })());
+        const profilePromises = _.uniq(uids).map(uid =>
+            (async () => {
+                try {
+                    const profileDoc = await Firebase.firestore
+                        .collection("users")
+                        .doc(uid)
+                        .get();
+                    this.profiles[uid] = profileDoc.data();
+                } catch (e) {
+                    this.profiles[uid] = DEFAULT_PROFILE;
+                }
+            })()
+        );
         await Promise.all(profilePromises);
         return posts.map(post => {
             const profile = this.profiles[post.uid];
@@ -110,26 +121,32 @@ export default class FeedStore {
     }
 
     subscribeToPost(id: string, callback: Post => void): Subscription {
-        return Firebase.firestore.collection("feed").where("id", "==", id).onSnapshot(async snap => {
-            const post = snap.docs[0].data();
-            callback(post);
-            this.feed.forEach((entry, index) => {
-                if (entry.post.id === post.id) {
-                    this.feed[index].post = post;
-                }
+        return Firebase.firestore
+            .collection("feed")
+            .where("id", "==", id)
+            .onSnapshot(async snap => {
+                const post = snap.docs[0].data();
+                callback(post);
+                this.feed.forEach((entry, index) => {
+                    if (entry.post.id === post.id) {
+                        this.feed[index].post = post;
+                    }
+                });
             });
-        });
     }
 
     subscribeToProfile(id: string, callback: Profile => void): Subscription {
-        return Firebase.firestore.collection("users").doc(id).onSnapshot(async snap => {
-            const profile = snap.exists ? snap.data() : DEFAULT_PROFILE;
-            callback(profile);
-            this.feed.forEach((entry, index) => {
-                if (entry.post.uid === id) {
-                    this.feed[index].profile = profile;
-                }
+        return Firebase.firestore
+            .collection("users")
+            .doc(id)
+            .onSnapshot(async snap => {
+                const profile = snap.exists ? snap.data() : DEFAULT_PROFILE;
+                callback(profile);
+                this.feed.forEach((entry, index) => {
+                    if (entry.post.uid === id) {
+                        this.feed[index].profile = profile;
+                    }
+                });
             });
-        });
     }
 }

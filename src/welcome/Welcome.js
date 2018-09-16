@@ -1,13 +1,12 @@
 // @flow
 import autobind from "autobind-decorator";
 import * as React from "react";
-import {StyleSheet, Dimensions, Linking, TouchableOpacity} from "react-native";
+import { StyleSheet, Dimensions, Linking, TouchableOpacity } from "react-native";
 
-import {Text, Button, Container, Logo, Theme, AnimatedView, Firebase, serializeException} from "../components";
-import type {ScreenProps} from "../components/Types";
+import { Text, Button, Container, Logo, Theme, AnimatedView, Firebase, serializeException } from "../components";
+import type { ScreenProps } from "../components/Types";
 
 export default class Welcome extends React.Component<ScreenProps<>> {
-
     @autobind
     signUp() {
         this.props.navigation.navigate("SignUp");
@@ -17,28 +16,28 @@ export default class Welcome extends React.Component<ScreenProps<>> {
     login() {
         this.props.navigation.navigate("Login");
     }
-
+    //<Logo />
     render(): React.Node {
         return (
             <Container gutter={2} style={styles.root}>
-                <Logo />
                 <AnimatedView style={styles.container}>
-                    <Text type="header1" style={styles.header}>Fiber</Text>
+                    <Text type="header1" style={styles.header}>
+                        Fantasy Down
+                    </Text>
                 </AnimatedView>
                 <AnimatedView style={styles.container} delay={600} duration={300}>
                     <Button label="Login" onPress={this.login} full primary />
-                    <Button label="Login Anonymously" onPress={loginAnonymously} full />
                     <Button label="Sign Up" onPress={this.signUp} full />
                 </AnimatedView>
                 <TouchableOpacity style={styles.framer} onPress={framer}>
-                    <Text style={styles.framerText}>Designed by Framer</Text>
+                    <Text style={styles.framerText}>Learn More</Text>
                 </TouchableOpacity>
             </Container>
         );
     }
 }
 
-const framer = () => Linking.openURL("https://framer.com/fiber");
+const framer = () => Linking.openURL("https://www.fantasydown.com");
 const loginAnonymously = async (): Promise<void> => {
     try {
         await Firebase.auth.signInAnonymously();
@@ -47,7 +46,7 @@ const loginAnonymously = async (): Promise<void> => {
         alert(serializeException(e));
     }
 };
-const {width} = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
     root: {
         justifyContent: "flex-end",

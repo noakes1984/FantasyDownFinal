@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { GiftedChat } from "react-native-gifted-chat";
 const firebase = require("firebase");
 import md5 from "../../lib/md5";
+import {NavHeader} from "../../components";
 
 //import { Colors, Styles } from "../Shared";
 
@@ -13,14 +14,19 @@ import md5 from "../../lib/md5";
 export default class Chat extends Component {
     constructor(props) {
         super(props);
+
+        console.log('Loaded chat');
+        console.log('props', this.props);
+
         this.state = {
             messages: []
         };
 
         this.user = firebase.auth().currentUser;
-        this.friend = this.props.friend;
+        this.friend = this.props.navigation.getParam('friend', {});
 
         this.chatRef = this.getRef().child("chat/" + this.generateChatId());
+        console.log('chatRef', this.generateChatId());
         this.chatRefData = this.chatRef.orderByChild("order");
         this.onSend = this.onSend.bind(this);
     }
@@ -30,12 +36,12 @@ export default class Chat extends Component {
         else return `${this.friend.uid}-${this.user.uid}`;
     }
 
-    static route = {
-        navigationBar: {
-            title: "Chat"
-            //...Styles.NavBarStyles
-        }
-    };
+    // static route = {
+    //     navigationBar: {
+    //         title: "Chat"
+    //         //...Styles.NavBarStyles
+    //     }
+    // };
 
     getRef() {
         return firebase.database().ref();
@@ -92,14 +98,19 @@ export default class Chat extends Component {
         });
     }
     render() {
+        const {navigation} = this.props;
+
         return (
-            <GiftedChat
-                messages={this.state.messages}
-                onSend={this.onSend.bind(this)}
-                user={{
-                    _id: this.user.uid
-                }}
-            />
+            <View style={{flex:1}}>
+                <NavHeader title="Chat" {...{ navigation }} />
+                <GiftedChat
+                    messages={this.state.messages}
+                    onSend={this.onSend.bind(this)}
+                    user={{
+                        _id: this.user.uid
+                    }}
+                />
+            </View>
         );
     }
 }

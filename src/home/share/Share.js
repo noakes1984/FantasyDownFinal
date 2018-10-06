@@ -37,7 +37,6 @@ import EnableCameraPermission from "./EnableCameraPermission";
 
 import Chat from "./Chat";
 import md5 from "../../lib/md5";
-var navigator;
 
 import { RefreshIndicator, Theme, NavHeader, SpinningIndicator, serializeException } from "../../components";
 import type { ScreenProps } from "../../components/Types";
@@ -48,15 +47,13 @@ type ShareState = {
     loading: boolean
 };
 
-const navigation = null;
-
 export default class Share extends React.Component<ScreenProps<>, ShareState> {
-    state = { loggedIn: null };
-
-    /////
+    state = {
+        loggedIn: null
+    };
 
     componentDidMount() {
-        console.log("Eat Shit and Die: " + firebase.auth().currentUser.email);
+        console.log("Share constructor: " + firebase.auth().currentUser.email);
         firebase.auth().onAuthStateChanged(user => {
             if (user) {
                 this.setState({ loggedIn: true });
@@ -76,12 +73,7 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
             loading: true
         };
 
-        this.friendsRef = this.getRef().child("friends");
-
-        navigator = this.props.navigator;
-        console.log("Navigator: " + navigator);
-        console.log("Navigation: " + navigation);
-    }
+        this.friendsRef = this.getRef().child("friends");}
 
     getRef() {
         return firebase.database().ref();
@@ -109,13 +101,18 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
             });
         });
     }
+
+    _pushChatScreen = (rowData) => {
+        // console.log(this.props.navigation);
+        // this.props.navigation.push('chat', {friend: rowData})
+        this.props.navigation.push('Chat', {friend: rowData});
+    }
+
     //    const { navigate } = this.props.navigation;
     //  this.props.navigator.push
     renderRow = rowData => {
-        const navigation = this.props.navigation;
-
         return (
-            <TouchableOpacity onPress={() => this.props.navigation.push("chat")}>
+            <TouchableOpacity onPress={() => this._pushChatScreen(rowData)}>
                 <View style={styles.profileContainer}>
                     <Image
                         source={{
@@ -130,6 +127,8 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
     };
 
     render() {
+        const {navigation} = this.props;
+
         return (
             <View style={styles.container}>
                 <NavHeader title="Chat" {...{ navigation }} />

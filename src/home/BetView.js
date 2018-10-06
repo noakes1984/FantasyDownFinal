@@ -86,7 +86,7 @@ export default class BetView extends Component {
                     title: "Dolphins vs Patriots",
                     content: {
                         id: 5,
-                        title: "Dolpins vs Patriots",
+                        title: "Dolphins vs Patriots",
                         teamHome: "Dolphins",
                         teamAway: "Patriots"
                     }
@@ -182,10 +182,10 @@ export default class BetView extends Component {
                     }
                 },
                 {
-                    id: 14,
+                    id: 15,
                     title: "Chiefs vs Broncos",
                     content: {
-                        id: 14,
+                        id: 15,
                         title: "Chiefs vs Broncos",
                         teamHome: "Chiefs",
                         teamAway: "Broncos"
@@ -350,7 +350,6 @@ export default class BetView extends Component {
             >
                 <View style={{ flexDirection: "row" }}>
                     <View style={{ flex: 1, marginBottom: 30, marginRight: 5 }}>
-                        <BetView />
                         <Button
                             style={{ backgroundColor: teamHomeColor }}
                             onPress={() => this.selectTeam(event, event.teamHome)}

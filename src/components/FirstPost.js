@@ -11,8 +11,6 @@ import { ModalBetView } from "./../home/explore/ModalBetView";
 import type { NavigationProps } from "./Types";
 import Modal from "react-native-modal"; // 2.4.0
 
-import BetView from "../home/BetView";
-
 export default class FirstPost extends React.Component<NavigationProps<>> {
     state = {
         visibleModal: 1,
@@ -57,10 +55,10 @@ export default class FirstPost extends React.Component<NavigationProps<>> {
     render(): React.Node {
         return (
             <View style={styles.container}>
-                <TouchableOpacity onPress={() => this._renderModalContent()}>
-                    <Icon name="plus-circle" color={Theme.palette.primary} size={25} />
-                </TouchableOpacity>
-                <Text style={styles.text}>Create a Bet!</Text>
+                {/*<TouchableOpacity onPress={() => this._renderModalContent()}>*/}
+                    {/*<Icon name="plus-circle" color={Theme.palette.primary} size={25} />*/}
+                {/*</TouchableOpacity>*/}
+                <Text style={styles.text}>This is the first post.</Text>
             </View>
         );
     }

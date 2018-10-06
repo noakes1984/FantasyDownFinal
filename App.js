@@ -15,7 +15,7 @@ import type { ScreenProps } from "./src/components/Types";
 import { Welcome } from "./src/welcome";
 import { Walkthrough } from "./src/walkthrough";
 import { SignUpName, SignUpEmail, SignUpPassword, Login } from "./src/sign-up";
-import { Explore, Profile, Share, HomeTab, Comments, Settings, ProfileStore } from "./src/home";
+import { Explore, Profile, Share, HomeTab, Comments, Settings, ProfileStore, Chat } from "./src/home";
 
 import getTheme from "./native-base-theme/components";
 import variables from "./native-base-theme/variables/commonColor";
@@ -137,7 +137,7 @@ const StackNavigatorOptions = {
 const ExploreNavigator = StackNavigator(
     {
         Explore: { screen: Explore },
-        Comments: { screen: Comments }
+        Comments: { screen: Comments },
     },
     StackNavigatorOptions
 );
@@ -153,9 +153,14 @@ const ProfileNavigator = StackNavigator(
 
 const ShareNavigator = StackNavigator(
     {
-        Share: { screen: Share }
-    },
-    StackNavigatorOptions
+        Share: { screen: Share },
+        Chat: { screen: Chat }
+    }, {
+        cardStyle: {
+            backgroundColor: 'white'
+        }
+    }
+    // StackNavigatorOptions
 );
 
 const HomeTabs = TabNavigator(
@@ -174,7 +179,7 @@ const HomeTabs = TabNavigator(
 
 const HomeNavigator = SwitchNavigator(
     {
-        Walkthrough: { screen: Walkthrough },
+        // Walkthrough: { screen: Walkthrough },
         Home: { screen: HomeTabs }
     },
     StackNavigatorOptions
@@ -195,7 +200,7 @@ const AppNavigator = SwitchNavigator(
         Welcome: { screen: Welcome },
         Login: { screen: Login },
         SignUp: { screen: SignUpNavigator },
-        Home: { screen: HomeNavigator }
+        Home: { screen: HomeNavigator },
     },
     StackNavigatorOptions
 );

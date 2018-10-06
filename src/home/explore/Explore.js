@@ -13,13 +13,15 @@ import {
 } from "react-native";
 import { inject, observer } from "mobx-react/native";
 import { ModalBetView } from "./ModalBetView";
-import { BetView } from "../BetView";
 import Modal from "react-native-modal"; // 2.4.0
 
 import ProfileStore from "../ProfileStore";
 
 import { Text, Theme, Avatar, Feed, FeedStore } from "../../components";
 import type { ScreenProps } from "../../components/Types";
+import {Feather as Icon} from "@expo/vector-icons";
+
+import BetView from "../BetView";
 
 const AnimatedText = Animated.createAnimatedComponent(Text);
 const AnimatedSafeAreaView = Animated.createAnimatedComponent(SafeAreaView);
@@ -48,33 +50,26 @@ export default class Explore extends React.Component<ScreenProps<> & InjectedPro
     preview: string;
     url: string;
 
-    _renderButton = (text, onPress) => (
-        <TouchableOpacity onPress={onPress}>
-            <View style={styles.button}>
-                <Text>{text}</Text>
-            </View>
-        </TouchableOpacity>
-    );
-    runThisShit() {
-        console.log("Run this shit");
-        /*
-      <View style={styles.modalContent}>
-          <Text>Hello how are you doing this morning!</Text>
-          {this._renderButton("Close", () => this.setState({ visibleModal: null }))} new
-          BetView()._renderModalContent();
-      </View>*/
-    }
-    componentDidMount() {
-        isVisibleModal === true;
+    constructor(props) {
+        super(props);
     }
 
-    _renderModalContent = () => (
-        <View style={styles.modalContent}>
-            <View backgroundColor="gray">
-                {this._renderButton("Close", () => this.setState({ isVisibleModal: null }))}
-            </View>
-        </View>
-    );
+    componentDidMount() {
+
+    }
+
+    _renderModalContent = () => {
+        this.setState({
+            isModalVisible: true
+        });
+    };
+
+    _hideBetView = () => {
+        this.setState({
+            isModalVisible: false
+        });
+    };
+
     @autobind
     profile() {
         this.props.navigation.navigate("Profile");
@@ -159,6 +154,7 @@ export default class Explore extends React.Component<ScreenProps<> & InjectedPro
     componentDidMount() {
         this.props.feedStore.checkForNewEntriesInFeed();
         console.log("Explore.js");
+
     }
 
     render(): React.Node {
@@ -198,12 +194,15 @@ export default class Explore extends React.Component<ScreenProps<> & InjectedPro
         return (
             <View style={styles.container}>
                 <Modal
-                    isVisible={this.state.isVisibleModal === true}
-                    animationInTiming={2000}
-                    animationOutTiming={2000}
-                    backdropTransitionInTiming={2000}
-                    backdropTransitionOutTiming={2000}
-                />
+                    isVisible={this.state.isModalVisible === true}
+                    animationInTiming={500}
+                    animationOutTiming={500}
+                    backdropTransitionInTiming={500}
+                    backdropTransitionOutTiming={500}
+                    onBackdropPress={() => this._hideBetView()}
+                >
+                    <BetView />
+                </Modal>
                 <AnimatedSafeAreaView style={[styles.header, { shadowOpacity }]}>
                     <Animated.View style={[styles.innerHeader, { height }]}>
                         <View>
@@ -229,6 +228,7 @@ export default class Explore extends React.Component<ScreenProps<> & InjectedPro
                     </Animated.View>
                 </AnimatedSafeAreaView>
                 <Feed
+                    style={{backgroundColor: "red"}}
                     store={feedStore}
                     onScroll={Animated.event([
                         {
@@ -241,6 +241,11 @@ export default class Explore extends React.Component<ScreenProps<> & InjectedPro
                     ])}
                     {...{ navigation }}
                 />
+                <View style={{position: "absolute", bottom: 30, right: 30}}>
+                    <TouchableOpacity onPress={() => this._renderModalContent()}>
+                        <Icon name="plus-circle" color={Theme.palette.primary} size={60} />
+                    </TouchableOpacity>
+                </View>
             </View>
         );
     }
@@ -289,5 +294,5 @@ const styles = StyleSheet.create({
     newPosts: {
         position: "absolute",
         top: 0
-    }
+    },
 });

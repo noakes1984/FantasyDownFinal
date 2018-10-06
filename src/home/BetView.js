@@ -1,32 +1,42 @@
 import React, { Component } from "react";
-import { Alert, TouchableOpacity, Platform, StyleSheet, View, TextInput } from "react-native";
 import {
-    Container,
+    // Alert,
+    // TouchableOpacity,
+    AppRegistry,
+    StyleSheet,
+    View
+    // TextInput
+} from "react-native";
+import {
+    // Container,
     Button,
-    Header,
-    Content,
+    // Header,
+    // Content,
     Accordion,
     Text,
-    StyleProvider,
+    // StyleProvider
     Item,
-    Input,
-    Footer,
-    FooterTab,
-    Textarea,
-    Spinner
+    Input
+    // Footer,
+    // FooterTab,
+    // Textarea,
+    // Spinner
 } from "native-base";
-import getTheme from "../../../native-base-theme/components";
+import getTheme from "../../native-base-theme/components";
 import branch, { BranchEvent } from "react-native-branch";
 
-type Props = {};
+// type Props = {};
 
-export default class App extends Component<Props> {
+export default class BetView extends Component {
+    state = {};
+
     constructor(props) {
         super(props);
-        console.log("ModalBetView is running");
+
         this.state = {
             screen: "bet",
             isGeneratingBet: false,
+            visibleModal: 1,
 
             //wallet: null,
 
@@ -165,17 +175,17 @@ export default class App extends Component<Props> {
                     id: 14,
                     title: "Ravens vs Steelers",
                     content: {
-                        id: 14,
+                        id: 13,
                         title: "Ravens vs Steelers",
                         teamHome: "Ravens",
                         teamAway: "Steelers"
                     }
                 },
                 {
-                    id: 15,
+                    id: 14,
                     title: "Chiefs vs Broncos",
                     content: {
-                        id: 15,
+                        id: 14,
                         title: "Chiefs vs Broncos",
                         teamHome: "Chiefs",
                         teamAway: "Broncos"
@@ -192,10 +202,12 @@ export default class App extends Component<Props> {
     }
 
     componentWillMount() {
-        console.log("");
+        console.log("BetView Class is running");
     }
 
     async componentDidMount() {
+        console.log("BetView Class is running");
+
         branch.subscribe(({ error, params }) => {
             if (error) {
                 console.error("Error from Branch: " + error);
@@ -268,10 +280,6 @@ export default class App extends Component<Props> {
     generateBet = async (eventId, choice, amount, createDeepLink = false) => {
         this.setState({ generatingBet: true });
 
-        console.log("contract");
-
-        console.log("something");
-
         if (createDeepLink) {
             // only canonicalIdentifier is required
             let branchUniversalObject = await branch.createBranchUniversalObject("canonicalIdentifier", {
@@ -283,7 +291,7 @@ export default class App extends Component<Props> {
                         id: eventId.toString(),
                         choice: choice,
                         amount: amount,
-                        contractAddress: ""
+                        contractAddress: "Hello"
                     }
                 }
             });
@@ -299,28 +307,6 @@ export default class App extends Component<Props> {
         }
 
         this.setState({ isGeneratingBet: false });
-    };
-
-    retrieveBalancePressed = async () => {
-        console.log("this.state.mnemonic", this.state.mnemonic);
-        let address = this.getAddressFromMnemonic(this.state.mnemonic);
-        let balance = await this.getBalance(address);
-
-        this.web3.eth.call(
-            {
-                to: "tokenContractAddress"
-                // data: contractData
-            },
-            function(err, result) {
-                if (result) {
-                    let tokens = "This.web3.utils.toBN(result).toString()";
-                    console.log("tokens");
-                    console.log("Tokens Owned: ");
-                } else {
-                    console.log(err); // Dump errors here
-                }
-            }
-        );
     };
 
     _renderSectionTitle(event) {
@@ -341,7 +327,7 @@ export default class App extends Component<Props> {
         let teamHomeText = "#000000";
         let teamAwayText = "#000000";
         if (event.selected === event.teamHome) {
-            teamHomeColor = "lightgray";
+            teamHomeColor = "lightgreen";
             teamHomeText = "#ffffff";
         }
         if (event.selected === event.teamAway) {
@@ -353,11 +339,18 @@ export default class App extends Component<Props> {
             <View
                 style={[
                     styles.content,
-                    { flexDirection: "column", padding: 10, borderBottomWidth: 1, borderBottomColor: "#eeeeee" }
+                    {
+                        backgroundColor: "lightgray",
+                        flexDirection: "column",
+                        padding: 10,
+                        borderBottomWidth: 1,
+                        borderBottomColor: "#eeeeee"
+                    }
                 ]}
             >
                 <View style={{ flexDirection: "row" }}>
                     <View style={{ flex: 1, marginBottom: 30, marginRight: 5 }}>
+                        <BetView />
                         <Button
                             style={{ backgroundColor: teamHomeColor }}
                             onPress={() => this.selectTeam(event, event.teamHome)}
@@ -387,9 +380,10 @@ export default class App extends Component<Props> {
                                 value={this.state.amount}
                                 onChangeText={amount => this.setState({ amount: amount })}
                                 keyboardType="numeric"
+                                backgroundColor="white"
                             />
                         </Item>
-                        <Text> Coins</Text>
+                        <Text>Coins</Text>
                     </View>
                     {!this.state.isGeneratingBet && (
                         <Button
@@ -407,24 +401,14 @@ export default class App extends Component<Props> {
     }
 
     render() {
-        console.log(this.state.screen);
         return (
             <View style={[styles.container]}>
-                <StyleProvider style={getTheme()}>
-                    <Container style={{ flex: 1, alignSelf: "stretch" }}>
-                        <Header />
-                        <Content>
-                            {this.state.screen === "bet" && (
-                                <Accordion
-                                    style={{ flex: 1 }}
-                                    dataArray={this.state.events}
-                                    renderHeader={this.renderHeader}
-                                    renderContent={this.renderContent}
-                                />
-                            )}
-                        </Content>
-                    </Container>
-                </StyleProvider>
+                <Accordion
+                    style={{ flex: 1 }}
+                    dataArray={this.state.events}
+                    renderHeader={this.renderHeader}
+                    renderContent={this.renderContent}
+                />
             </View>
         );
     }
@@ -437,6 +421,7 @@ const styles = StyleSheet.create({
         alignItems: "center"
     },
     header: {
+        backgroundColor: "white",
         borderBottomWidth: 1,
         borderBottomColor: "#eeeeee",
         padding: 20
@@ -444,7 +429,26 @@ const styles = StyleSheet.create({
     headerText: {
         fontSize: 24
     },
+    button: {
+        backgroundColor: "lightblue",
+        padding: 12,
+        margin: 16,
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 4,
+        borderColor: "rgba(0, 0, 0, 0.1)"
+    },
+    modalContent: {
+        backgroundColor: "white",
+        padding: 22,
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 4,
+        borderColor: "rgba(0, 0, 0, 0.1)"
+    },
     content: {
         flexDirection: "row"
     }
 });
+
+module.exports = BetView;

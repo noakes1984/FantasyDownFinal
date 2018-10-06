@@ -53,6 +53,8 @@ const navigation = null;
 export default class Share extends React.Component<ScreenProps<>, ShareState> {
     state = { loggedIn: null };
 
+    /////
+
     componentDidMount() {
         console.log("Eat Shit and Die: " + firebase.auth().currentUser.email);
         firebase.auth().onAuthStateChanged(user => {
@@ -67,8 +69,6 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
 
     constructor(props) {
         super(props);
-
-        //const { navigation } = this.props;
         this.state = {
             dataSource: new ListView.DataSource({
                 rowHasChanged: (row1, row2) => row1 !== row2
@@ -78,8 +78,9 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
 
         this.friendsRef = this.getRef().child("friends");
 
-        //navigation = this.props.navigator;
-        console.log("Navigator: " + navigation);
+        navigator = this.props.navigator;
+        console.log("Navigator: " + navigator);
+        console.log("Navigation: " + navigation);
     }
 
     getRef() {
@@ -108,38 +109,13 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
             });
         });
     }
-
-    static route = {
-        navigationBar: {
-            title: "Friends",
-            //...Styles.NavBarStyles,
-            renderRight: (route, props) => (
-                <Button
-                    primary
-                    style={styles.rightButton}
-                    onPress={() => {
-                        firebase
-                            .auth()
-                            .signOut()
-                            .then(
-                                () => {
-                                    navigator.pop();
-                                },
-                                function(error) {
-                                    // An error happened.
-                                }
-                            );
-                    }}
-                >
-                    Log out
-                </Button>
-            )
-        }
-    };
-
+    //    const { navigate } = this.props.navigation;
+    //  this.props.navigator.push
     renderRow = rowData => {
+        const navigation = this.props.navigation;
+
         return (
-            <TouchableOpacity navigation={() => navigate.navigation("chat")}>
+            <TouchableOpacity onPress={() => this.props.navigation.push("chat")}>
                 <View style={styles.profileContainer}>
                     <Image
                         source={{
@@ -169,8 +145,8 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
         );
     }
 }
-/*
 
+/*
 <TouchableOpacity style={{ backgroundColor: "blue", flex: 0.3 }} />
 /////
 export default class Share extends React.Component<ScreenProps<>, ShareState> {
@@ -208,12 +184,12 @@ const styles = StyleSheet.create({
     },
     myFriends: {
         flex: 1,
-        color: "darkGray",
+        // color: "darkGray",
         fontSize: 16,
         padding: 5
     },
     inviteFriends: {
-        color: "lightGray",
+        // color: "lightGray",
         padding: 5
     },
     profileContainer: {

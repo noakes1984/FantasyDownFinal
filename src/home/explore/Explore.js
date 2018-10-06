@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { inject, observer } from "mobx-react/native";
 import { ModalBetView } from "./ModalBetView";
+import { BetView } from "../BetView";
 import Modal from "react-native-modal"; // 2.4.0
 
 import ProfileStore from "../ProfileStore";
@@ -36,8 +37,17 @@ type InjectedProps = {
 @observer
 export default class Explore extends React.Component<ScreenProps<> & InjectedProps, ExploreState> {
     state = {
-        scrollAnimation: new Animated.Value(0)
+        scrollAnimation: new Animated.Value(0),
+        isModalVisible: false,
+        loading: false,
+        caption: ""
     };
+    /////
+
+    id: string;
+    preview: string;
+    url: string;
+
     _renderButton = (text, onPress) => (
         <TouchableOpacity onPress={onPress}>
             <View style={styles.button}>
@@ -45,20 +55,110 @@ export default class Explore extends React.Component<ScreenProps<> & InjectedPro
             </View>
         </TouchableOpacity>
     );
+    runThisShit() {
+        console.log("Run this shit");
+        /*
+      <View style={styles.modalContent}>
+          <Text>Hello how are you doing this morning!</Text>
+          {this._renderButton("Close", () => this.setState({ visibleModal: null }))} new
+          BetView()._renderModalContent();
+      </View>*/
+    }
+    componentDidMount() {
+        isVisibleModal === true;
+    }
 
     _renderModalContent = () => (
         <View style={styles.modalContent}>
-            <ModalBetView />
-            //{this._renderButton("Close", () => this.setState({ visibleModal: null }))}
+            <View backgroundColor="gray">
+                {this._renderButton("Close", () => this.setState({ isVisibleModal: null }))}
+            </View>
         </View>
     );
     @autobind
     profile() {
         this.props.navigation.navigate("Profile");
     }
+    // runThis() {
+    //     const { navigation } = this.props;
+    //     const { caption } = this.state;
+    //     this.setState({ loading: true });
+    //     try {
+    //         const { uid } = Firebase.auth.currentUser;
+    //         const post: Post = {
+    //             id: this.id,
+    //             uid,
+    //             comments: 0,
+    //             likes: [],
+    //             timestamp: parseInt(moment().format("X"), 10),
+    //             text: caption,
+    //             picture: {
+    //                 uri: this.url,
+    //                 preview: this.preview
+    //             }
+    //         };
+    //         Firebase.firestore
+    //             .collection("feed")
+    //             .doc(this.id)
+    //             .set(post);
+    //         navigation.pop(1);
+    //         //    navigation.navigate("Explore");
+    //     } catch (e) {
+    //         const message = serializeException(e);
+    //         Alert.alert(message);
+    //         this.setState({ loading: false });
+    //     }
+    // }
+
+    async upload(): Promise<void> {
+        try {
+            const { navigation } = this.props;
+            const picture = navigation.state.params;
+            this.id = ImageUpload.uid();
+            this.preview = await ImageUpload.preview(picture);
+            this.url = await ImageUpload.upload(picture);
+        } catch (e) {
+            // eslint-disable-next-line no-console
+            console.error(e);
+            Alert.alert(e);
+        }
+    }
+
+    async onPress(): Promise<void> {
+        const { navigation } = this.props;
+        const { caption } = this.state;
+        this.setState({ loading: true });
+        try {
+            await this.upload();
+            const { uid } = Firebase.auth.currentUser;
+            const post: Post = {
+                id: this.id,
+                uid,
+                comments: 0,
+                likes: [],
+                timestamp: parseInt(moment().format("X"), 10),
+                text: caption,
+                picture: {
+                    uri: require("./Artboard.png"),
+                    preview: require("./Artboard.png")
+                }
+            };
+            await Firebase.firestore
+                .collection("feed")
+                .doc(this.id)
+                .set(post);
+            navigation.pop(1);
+            //    navigation.navigate("Explore");
+        } catch (e) {
+            const message = serializeException(e);
+            Alert.alert(message);
+            this.setState({ loading: false });
+        }
+    }
 
     componentDidMount() {
         this.props.feedStore.checkForNewEntriesInFeed();
+        console.log("Explore.js");
     }
 
     render(): React.Node {
@@ -98,15 +198,12 @@ export default class Explore extends React.Component<ScreenProps<> & InjectedPro
         return (
             <View style={styles.container}>
                 <Modal
-                    isVisible={this.state.visibleModal === 1}
+                    isVisible={this.state.isVisibleModal === true}
                     animationInTiming={2000}
                     animationOutTiming={2000}
                     backdropTransitionInTiming={2000}
                     backdropTransitionOutTiming={2000}
-                >
-                    {this._renderModalContent()}
-                </Modal>
-
+                />
                 <AnimatedSafeAreaView style={[styles.header, { shadowOpacity }]}>
                     <Animated.View style={[styles.innerHeader, { height }]}>
                         <View>
@@ -122,7 +219,6 @@ export default class Explore extends React.Component<ScreenProps<> & InjectedPro
                                 {moment().format("dddd")}
                             </AnimatedText>
                         </View>
-
                         {profile && (
                             <TouchableWithoutFeedback onPress={this.profile}>
                                 <View>
@@ -169,7 +265,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         borderRadius: 4,
-        borderColor: "rgba(0, 0, 0, 0.1)"
+        borderColor: "gray"
     },
     bottomModal: {
         justifyContent: "flex-end",

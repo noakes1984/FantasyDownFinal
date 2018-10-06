@@ -1,7 +1,7 @@
 // @flow
 import autobind from "autobind-decorator";
 import * as React from "react";
-import { StyleSheet, View, TouchableWithoutFeedback, TouchableOpacity } from "react-native";
+import { StyleSheet, View, TouchableOpacity } from "react-native";
 import { Feather as Icon } from "@expo/vector-icons";
 
 import Text from "./Text";
@@ -11,10 +11,16 @@ import { ModalBetView } from "./../home/explore/ModalBetView";
 import type { NavigationProps } from "./Types";
 import Modal from "react-native-modal"; // 2.4.0
 
+import BetView from "../home/BetView";
+
 export default class FirstPost extends React.Component<NavigationProps<>> {
     state = {
-        visibleModal: 1
+        visibleModal: 1,
+        modalVisible: false
     };
+    setModalVisible(visible) {
+        this.setState({ modalVisible: visible });
+    }
 
     //Found it
     _renderButton = (text, onPress) => (
@@ -24,6 +30,9 @@ export default class FirstPost extends React.Component<NavigationProps<>> {
             </View>
         </TouchableOpacity>
     );
+    componentDidMount() {
+        console.log("FirstPost.js");
+    }
     _renderButton() {
         <TouchableOpacity onPress={onPress}>
             <View style={styles.button}>
@@ -32,35 +41,26 @@ export default class FirstPost extends React.Component<NavigationProps<>> {
         </TouchableOpacity>;
     }
 
+    //    <Image source={require('../../../assets/img/button.png')} />
+
     _renderModalContent = () => (
-        <View style={styles.modalContent}>
-            <Text>Hello how are you doing this morning!</Text>
-            {this._renderButton("Close", () => this.setState({ visibleModal: null }))}
-        </View>
+        <View style={styles.modalContent}>{(console.log("Button pushed"), <Text>hello</Text>)}</View>
     );
+
     @autobind
     share() {
         this.props.navigation.navigate("Share");
     }
-
+    /*
+() => this.function1()
+() => this.setState({ visibleModal: 1 })*/
     render(): React.Node {
         return (
             <View style={styles.container}>
-                <Modal
-                    isVisible={this.state.visibleModal === 1}
-                    animationInTiming={2000}
-                    animationOutTiming={2000}
-                    backdropTransitionInTiming={2000}
-                    backdropTransitionOutTiming={2000}
-                >
-                    {this._renderModalContent()}
-                </Modal>
-                <TouchableWithoutFeedback
-                    onPress={this._renderButton("A slower modal", () => this.setState({ visibleModal: 1 }))}
-                >
+                <TouchableOpacity onPress={() => this._renderModalContent()}>
                     <Icon name="plus-circle" color={Theme.palette.primary} size={25} />
-                </TouchableWithoutFeedback>
-                <Text style={styles.text}>Make your first bet!</Text>
+                </TouchableOpacity>
+                <Text style={styles.text}>Create a Bet!</Text>
             </View>
         );
     }

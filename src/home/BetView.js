@@ -25,6 +25,8 @@ import {
 import getTheme from "../../native-base-theme/components";
 import branch, { BranchEvent } from "react-native-branch";
 
+import Schedule from '../Schedule';
+
 // type Props = {};
 
 export default class BetView extends Component {
@@ -38,160 +40,9 @@ export default class BetView extends Component {
             isGeneratingBet: false,
             visibleModal: 1,
 
-            //wallet: null,
+            events: Schedule.ss.gms[0].g.map((event) => { return {title: event, content: event}; }),
 
-            events: [
-                {
-                    id: 1,
-                    title: "Vikings vs Rams",
-                    content: {
-                        id: 1,
-                        title: "Vikings vs Rams",
-                        teamHome: "Vikings",
-                        teamAway: "Rams"
-                    }
-                },
-                {
-                    id: 2,
-                    title: "Texans vs Colts",
-                    content: {
-                        id: 2,
-                        title: "Texans vs Colts",
-                        teamHome: "Texans",
-                        teamAway: "Colts"
-                    }
-                },
-                {
-                    id: 3,
-                    title: "Bills vs Packers",
-                    content: {
-                        id: 3,
-                        title: "Bills vs Packers",
-                        teamHome: "Bills",
-                        teamAway: "Packers"
-                    }
-                },
-                {
-                    id: 4,
-                    title: "Buccaneers vs Bears",
-                    content: {
-                        id: 4,
-                        title: "Buccaneers vs Bears",
-                        teamHome: "Buccaneers",
-                        teamAway: "Bears"
-                    }
-                },
-                {
-                    id: 5,
-                    title: "Dolphins vs Patriots",
-                    content: {
-                        id: 5,
-                        title: "Dolphins vs Patriots",
-                        teamHome: "Dolphins",
-                        teamAway: "Patriots"
-                    }
-                },
-                {
-                    id: 6,
-                    title: "Lions vs Cowboys",
-                    content: {
-                        id: 6,
-                        title: "Lions vs Cowboys",
-                        teamHome: "Lions",
-                        teamAway: "Cowboys"
-                    }
-                },
-                {
-                    id: 7,
-                    title: "Bengals vs Falcons",
-                    content: {
-                        id: 7,
-                        title: "Bengals vs Falcons",
-                        teamHome: "Bengals",
-                        teamAway: "Falcons"
-                    }
-                },
-                {
-                    id: 8,
-                    title: "Jets vs Jaguars",
-                    content: {
-                        id: 8,
-                        title: "Jets vs Jaguars",
-                        teamHome: "Jets",
-                        teamAway: "Jaguars"
-                    }
-                },
-                {
-                    id: 9,
-                    title: "Eagles vs Titans",
-                    content: {
-                        id: 9,
-                        title: "Eagles vs Titans",
-                        teamHome: "Eagles",
-                        teamAway: "Titans"
-                    }
-                },
-                {
-                    id: 10,
-                    title: "Browns vs Raiders",
-                    content: {
-                        id: 10,
-                        title: "Browns vs Raiders",
-                        teamHome: "Browns",
-                        teamAway: "Raiders"
-                    }
-                },
-                {
-                    id: 11,
-                    title: "Seahawks vs Cardinals",
-                    content: {
-                        id: 11,
-                        title: "Seahawks vs Cardinals",
-                        teamHome: "Seahawks",
-                        teamAway: "Cardinals"
-                    }
-                },
-                {
-                    id: 12,
-                    title: "Saints vs Giants",
-                    content: {
-                        id: 12,
-                        title: "Saints vs Giants",
-                        teamHome: "Saints",
-                        teamAway: "Giants"
-                    }
-                },
-                {
-                    id: 13,
-                    title: "49ers vs Chargers",
-                    content: {
-                        id: 13,
-                        title: "49ers vs Chargers",
-                        teamHome: "49ers",
-                        teamAway: "Chargers"
-                    }
-                },
-                {
-                    id: 14,
-                    title: "Ravens vs Steelers",
-                    content: {
-                        id: 13,
-                        title: "Ravens vs Steelers",
-                        teamHome: "Ravens",
-                        teamAway: "Steelers"
-                    }
-                },
-                {
-                    id: 15,
-                    title: "Chiefs vs Broncos",
-                    content: {
-                        id: 15,
-                        title: "Chiefs vs Broncos",
-                        teamHome: "Chiefs",
-                        teamAway: "Broncos"
-                    }
-                }
-            ]
+            //wallet: null,
         };
 
         this.selectTeam = this.selectTeam.bind(this);
@@ -208,69 +59,78 @@ export default class BetView extends Component {
     async componentDidMount() {
         console.log("BetView Class is running");
 
-        branch.subscribe(({ error, params }) => {
-            if (error) {
-                console.error("Error from Branch: " + error);
-                return;
-            }
 
-            // params will never be null if error is null
+        // populate games array so it works with native-base accordion
 
-            if (params["+non_branch_link"]) {
-                const nonBranchUrl = params["+non_branch_link"];
-                // Route non-Branch URL if appropriate.
-                return;
-            }
+        console.log(this.games);
 
-            if (!params["+clicked_branch_link"]) {
-                // Indicates initialization success and some other conditions.
-                // No link was opened.
-                return;
-            }
-
-            console.log(params);
-
-            let eventId = parseInt(params.id);
-            console.log("eventId", eventId);
-            let event = this.state.events.filter(event => event.id === eventId)[0];
-            console.log("event", event);
-            let openChoice = event.content.teamHome === params.choice ? event.content.teamAway : event.content.teamHome;
-            console.log("openChoice", openChoice);
-            let message =
-                "Would you like to bet on " +
-                openChoice +
-                " for the event " +
-                event.title +
-                " for " +
-                params.amount +
-                " Coins?";
-            console.log("message", message);
-
-            Alert.alert(
-                "FantasyBet",
-                message,
-                [
-                    { text: "Cancel", onPress: () => console.log("Cancel Pressed"), style: "cancel" },
-                    {
-                        text: "OK",
-                        onPress: () => {
-                            console.log("this.generateBet(params.id, openChoice, params.amount);");
-                        }
-                    }
-                ],
-                { cancelable: false }
-            );
-        });
+        // branch.subscribe(({ error, params }) => {
+        //     if (error) {
+        //         console.error("Error from Branch: " + error);
+        //         return;
+        //     }
+        //
+        //     // params will never be null if error is null
+        //
+        //     if (params["+non_branch_link"]) {
+        //         const nonBranchUrl = params["+non_branch_link"];
+        //         // Route non-Branch URL if appropriate.
+        //         return;
+        //     }
+        //
+        //     if (!params["+clicked_branch_link"]) {
+        //         // Indicates initialization success and some other conditions.
+        //         // No link was opened.
+        //         return;
+        //     }
+        //
+        //     console.log(params);
+        //
+        //     let eventId = parseInt(params.id);
+        //     console.log("eventId", eventId);
+        //     let event = this.state.events.filter(event => event.id === eventId)[0];
+        //     console.log("event", event);
+        //     let openChoice = event.content.teamHome === params.choice ? event.content.teamAway : event.content.teamHome;
+        //     console.log("openChoice", openChoice);
+        //     let message =
+        //         "Would you like to bet on " +
+        //         openChoice +
+        //         " for the event " +
+        //         event.title +
+        //         " for " +
+        //         params.amount +
+        //         " Coins?";
+        //     console.log("message", message);
+        //
+        //     Alert.alert(
+        //         "FantasyBet",
+        //         message,
+        //         [
+        //             { text: "Cancel", onPress: () => console.log("Cancel Pressed"), style: "cancel" },
+        //             {
+        //                 text: "OK",
+        //                 onPress: () => {
+        //                     console.log("this.generateBet(params.id, openChoice, params.amount);");
+        //                 }
+        //             }
+        //         ],
+        //         { cancelable: false }
+        //     );
+        // });
     }
 
     selectTeam = (event, team) => {
+        console.log('event', event);
+        console.log('team', team);
         let events = this.state.events.map(el => {
-            if (el.title === event.title) {
+            if (el.content['-eid'] === event['-eid']) {
                 return { ...el, content: { ...el.content, selected: team } };
             }
 
             return el;
         });
+
+        console.log('state', this.state);
 
         this.setState({
             events: events
@@ -278,35 +138,34 @@ export default class BetView extends Component {
     };
 
     generateBet = async (eventId, choice, amount, createDeepLink = false) => {
-        this.setState({ generatingBet: true });
-
-        if (createDeepLink) {
-            // only canonicalIdentifier is required
-            let branchUniversalObject = await branch.createBranchUniversalObject("canonicalIdentifier", {
-                locallyIndex: true,
-                title: "Fantasy Bet",
-                contentDescription: "Cool Content Description",
-                contentMetadata: {
-                    customMetadata: {
-                        id: eventId.toString(),
-                        choice: choice,
-                        amount: amount,
-                        contractAddress: "Hello"
-                    }
-                }
-            });
-
-            let shareOptions = { messageHeader: "Fantasy Bet", messageBody: "Somebody wants to make a bet!" };
-            let linkProperties = { feature: "share", channel: "RNApp" };
-            let controlParams = { $desktop_url: "http://fantasydown.com/bet", $ios_url: "http://fantasydown.com/bet" };
-            let { channel, completed, error } = await branchUniversalObject.showShareSheet(
-                shareOptions,
-                linkProperties,
-                controlParams
-            );
-        }
-
-        this.setState({ isGeneratingBet: false });
+        // this.setState({ generatingBet: true });
+        // if (createDeepLink) {
+        //     // only canonicalIdentifier is required
+        //     let branchUniversalObject = await branch.createBranchUniversalObject("canonicalIdentifier", {
+        //         locallyIndex: true,
+        //         title: "Fantasy Bet",
+        //         contentDescription: "Cool Content Description",
+        //         contentMetadata: {
+        //             customMetadata: {
+        //                 id: eventId.toString(),
+        //                 choice: choice,
+        //                 amount: amount,
+        //                 contractAddress: "Hello"
+        //             }
+        //         }
+        //     });
+        //
+        //     let shareOptions = { messageHeader: "Fantasy Bet", messageBody: "Somebody wants to make a bet!" };
+        //     let linkProperties = { feature: "share", channel: "RNApp" };
+        //     let controlParams = { $desktop_url: "http://fantasydown.com/bet", $ios_url: "http://fantasydown.com/bet" };
+        //     let { channel, completed, error } = await branchUniversalObject.showShareSheet(
+        //         shareOptions,
+        //         linkProperties,
+        //         controlParams
+        //     );
+        // }
+        //
+        // this.setState({ isGeneratingBet: false });
     };
 
     _renderSectionTitle(event) {
@@ -316,21 +175,23 @@ export default class BetView extends Component {
     renderHeader(title, expanded) {
         return (
             <View style={styles.header}>
-                <Text style={styles.headerText}>{title}</Text>
+                <Text style={styles.headerText}>{title['-hnn'].capitalize()} vs {title['-vnn'].capitalize()}</Text>
             </View>
         );
     }
 
     renderContent(event) {
+        console.log('renderContent event', event);
+
         let teamHomeColor = "#dddddd";
         let teamAwayColor = "#dddddd";
         let teamHomeText = "#000000";
         let teamAwayText = "#000000";
-        if (event.selected === event.teamHome) {
+        if (event.selected === event['-h']) {
             teamHomeColor = "lightgreen";
             teamHomeText = "#ffffff";
         }
-        if (event.selected === event.teamAway) {
+        if (event.selected === event['-v']) {
             teamAwayColor = "lightblue";
             teamAwayText = "#ffffff";
         }
@@ -352,21 +213,21 @@ export default class BetView extends Component {
                     <View style={{ flex: 1, marginBottom: 30, marginRight: 5 }}>
                         <Button
                             style={{ backgroundColor: teamHomeColor }}
-                            onPress={() => this.selectTeam(event, event.teamHome)}
+                            onPress={() => this.selectTeam(event, event['-h'])}
                             light
                             block
                         >
-                            <Text style={{ color: teamHomeText }}>{event.teamHome}</Text>
+                            <Text style={{ color: teamHomeText }}>{event['-h']}</Text>
                         </Button>
                     </View>
                     <View style={{ flex: 1, marginBottom: 30, marginLeft: 5 }}>
                         <Button
                             style={{ backgroundColor: teamAwayColor }}
-                            onPress={() => this.selectTeam(event, event.teamAway)}
+                            onPress={() => this.selectTeam(event, event['-v'])}
                             light
                             block
                         >
-                            <Text style={{ color: teamAwayText }}>{event.teamAway}</Text>
+                            <Text style={{ color: teamAwayText }}>{event['-v']}</Text>
                         </Button>
                     </View>
                 </View>
@@ -402,6 +263,9 @@ export default class BetView extends Component {
     render() {
         return (
             <View style={[styles.container]}>
+                <View style={styles.coinsHeader}>
+                    <Text style={{textAlign: "center"}}>Coins: 500</Text>
+                </View>
                 <Accordion
                     style={{ flex: 1 }}
                     dataArray={this.state.events}
@@ -417,13 +281,22 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: "center",
-        alignItems: "center"
+        alignItems: "center",
+        alignSelf: "stretch",
+        marginTop: 30,
+        marginBottom: 30
+    },
+    coinsHeader: {
+        alignSelf: "stretch",
+        backgroundColor: "white",
+        padding: 10,
     },
     header: {
         backgroundColor: "white",
         borderBottomWidth: 1,
         borderBottomColor: "#eeeeee",
-        padding: 20
+        padding: 20,
+        alignSelf: 'stretch',
     },
     headerText: {
         fontSize: 24

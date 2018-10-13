@@ -229,7 +229,7 @@ export default class Explore extends React.Component<ScreenProps<Picture> & Inje
                 <AnimatedSafeAreaView style={[styles.header, { shadowOpacity }]}>
                     <Animated.View style={[styles.innerHeader, { height }]}>
                         <View>
-                            <Button title="Hello" onPress={this.onChooseImagePress()} />
+                            {/*<Button title="Hello" onPress={this.onChooseImagePress()} />*/}
                             /*New */
                             <AnimatedText
                                 type="large"

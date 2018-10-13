@@ -54,6 +54,10 @@ if (!console.ignoredYellowBox) {
 // $FlowFixMe
 console.ignoredYellowBox.push("Setting a timer");
 
+String.prototype.capitalize = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+}
+
 @inject("profileStore", "feedStore", "userFeedStore")
 class Loading extends React.Component<ScreenProps<>> {
     async componentDidMount(): Promise<void> {

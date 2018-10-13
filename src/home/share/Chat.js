@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { GiftedChat } from "react-native-gifted-chat";
 const firebase = require("firebase");
 import md5 from "../../lib/md5";
-import {NavHeader} from "../../components";
+import { NavHeader } from "../../components";
 
 //import { Colors, Styles } from "../Shared";
 
@@ -15,18 +15,18 @@ export default class Chat extends Component {
     constructor(props) {
         super(props);
 
-        console.log('Loaded chat');
-        console.log('props', this.props);
+        console.log("Loaded chat");
+        console.log("props", this.props);
 
         this.state = {
             messages: []
         };
 
         this.user = firebase.auth().currentUser;
-        this.friend = this.props.navigation.getParam('friend', {});
+        this.friend = this.props.navigation.getParam("friend", {});
 
         this.chatRef = this.getRef().child("chat/" + this.generateChatId());
-        console.log('chatRef', this.generateChatId());
+        console.log("chatRef", this.generateChatId());
         this.chatRefData = this.chatRef.orderByChild("order");
         this.onSend = this.onSend.bind(this);
     }
@@ -98,11 +98,10 @@ export default class Chat extends Component {
         });
     }
     render() {
-        const {navigation} = this.props;
+        const { navigation } = this.props;
 
         return (
-            <View style={{flex:1}}>
-                <NavHeader title="Chat" {...{ navigation }} />
+            <View style={{ flex: 1 }}>
                 <GiftedChat
                     messages={this.state.messages}
                     onSend={this.onSend.bind(this)}

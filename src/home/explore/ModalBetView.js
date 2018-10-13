@@ -16,7 +16,7 @@ import {
     Spinner
 } from "native-base";
 import getTheme from "../../../native-base-theme/components";
-import branch, { BranchEvent } from "react-native-branch";
+//import branch, { BranchEvent } from "react-native-branch";
 
 type Props = {};
 

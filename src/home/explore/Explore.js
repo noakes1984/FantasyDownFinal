@@ -9,17 +9,31 @@ import {
     SafeAreaView,
     TouchableOpacity,
     TouchableWithoutFeedback,
-    Platform
+    Platform,
+    Button,
+    Image,
+    Alert
 } from "react-native";
 import { inject, observer } from "mobx-react/native";
 import { ModalBetView } from "./ModalBetView";
 import Modal from "react-native-modal"; // 2.4.0
 
 import ProfileStore from "../ProfileStore";
+import Pic from "./View.jpg";
 
-import { Text, Theme, Avatar, Feed, FeedStore } from "../../components";
+import Artboard from "./Artboard.jpg";
+
+import * as firebase from "firebase";
+
+import ImagePicker from "expo";
+
+import { Text, Theme, Avatar, Feed, FeedStore, ImageUpload } from "../../components";
 import type { ScreenProps } from "../../components/Types";
-import {Feather as Icon} from "@expo/vector-icons";
+//import type { ScreenParams } from "../../components/Types";
+import type { Post } from "../../components/Model";
+import type { Picture } from "../../components/ImageUpload";
+
+import { Feather as Icon } from "@expo/vector-icons";
 
 import BetView from "../BetView";
 
@@ -37,26 +51,60 @@ type InjectedProps = {
 
 @inject("feedStore", "profileStore")
 @observer
-export default class Explore extends React.Component<ScreenProps<> & InjectedProps, ExploreState> {
+export default class Explore extends React.Component<ScreenProps<Picture> & InjectedProps, ExploreState> {
     state = {
         scrollAnimation: new Animated.Value(0),
         isModalVisible: false,
         loading: false,
         caption: ""
     };
-    /////
 
+    /////
     id: string;
     preview: string;
     url: string;
+    //picture: image;
 
     constructor(props) {
         super(props);
     }
-
-    componentDidMount() {
-
+    componentWillMount() {
+        //this.saveImageMessage(Pic);
+        // const images = {
+        //     profile: {
+        //         profile: require("./Artboard.jpg")
+        //     },
+        //
+        //     image1: require("./View.jpg")
+        // };
+        // console.log(images.image1.uri);
+        // const final = images.image1;
     }
+
+    onChooseImagePress = async () => {
+        let result = await ImagePicker.launchImageLibrary();
+
+        if (!result.cancelled) {
+            this.uploadImage(result.uri, "test-image")
+                .then(() => {
+                    Alert.alert("success");
+                })
+                .catch(error => {
+                    Alert.alert(error);
+                });
+        }
+    };
+
+    uploadImage = async (uri, imageName) => {
+        const response = await fetch(uri);
+        const blob = await response.blob();
+
+        var ref = firebase
+            .storage()
+            .ref()
+            .child("images/", imageName);
+        return ref.put(blob);
+    };
 
     _renderModalContent = () => {
         this.setState({
@@ -74,90 +122,65 @@ export default class Explore extends React.Component<ScreenProps<> & InjectedPro
     profile() {
         this.props.navigation.navigate("Profile");
     }
-    // runThis() {
-    //     const { navigation } = this.props;
-    //     const { caption } = this.state;
-    //     this.setState({ loading: true });
-    //     try {
-    //         const { uid } = Firebase.auth.currentUser;
-    //         const post: Post = {
-    //             id: this.id,
-    //             uid,
-    //             comments: 0,
-    //             likes: [],
-    //             timestamp: parseInt(moment().format("X"), 10),
-    //             text: caption,
-    //             picture: {
-    //                 uri: this.url,
-    //                 preview: this.preview
-    //             }
-    //         };
-    //         Firebase.firestore
-    //             .collection("feed")
-    //             .doc(this.id)
-    //             .set(post);
-    //         navigation.pop(1);
-    //         //    navigation.navigate("Explore");
-    //     } catch (e) {
-    //         const message = serializeException(e);
-    //         Alert.alert(message);
-    //         this.setState({ loading: false });
-    //     }
+
+    //
+    // async saveImageMessage(file) {
+    //     // 1 - We add a message with a loading icon that will get updated with the shared image.
+    //     console.log(file);
+    //     firebase
+    //         .database()
+    //         .ref("DisShit")
+    //         .push({
+    //             name: "firebase.auth().currentUser"
+    //         })
+    //         .then(function() {
+    //             // 2 - Upload the image to Cloud Storage.
+    //             var filePath = "firebase.auth().currentUser.uid/" + file.name;
+    //             return firebase
+    //                 .storage()
+    //                 .ref(filePath)
+    //                 .put(file)
+    //                 .then(function(fileSnapshot) {
+    //                     // 3 - Generate a public URL for the file.
+    //                     return fileSnapshot.ref.getDownloadURL().then(url => {
+    //                         // 4 - Update the chat message placeholder with the image's URL.
+    //                         return messageRef.update({
+    //                             imageUrl: url,
+    //                             storageUri: fileSnapshot.metadata.fullPath
+    //                         });
+    //                     });
+    //                 });
+    //         })
+    //         .catch(function(error) {
+    //             console.error("There was an error uploading a file to Cloud Storage: ", error);
+    //         });
     // }
-
-    async upload(): Promise<void> {
-        try {
-            const { navigation } = this.props;
-            const picture = navigation.state.params;
-            this.id = ImageUpload.uid();
-            this.preview = await ImageUpload.preview(picture);
-            this.url = await ImageUpload.upload(picture);
-        } catch (e) {
-            // eslint-disable-next-line no-console
-            console.error(e);
-            Alert.alert(e);
-        }
-    }
-
-    async onPress(): Promise<void> {
-        const { navigation } = this.props;
-        const { caption } = this.state;
-        this.setState({ loading: true });
-        try {
-            await this.upload();
-            const { uid } = Firebase.auth.currentUser;
-            const post: Post = {
-                id: this.id,
-                uid,
-                comments: 0,
-                likes: [],
-                timestamp: parseInt(moment().format("X"), 10),
-                text: caption,
-                picture: {
-                    uri: require("./Artboard.png"),
-                    preview: require("./Artboard.png")
-                }
-            };
-            await Firebase.firestore
-                .collection("feed")
-                .doc(this.id)
-                .set(post);
-            navigation.pop(1);
-            //    navigation.navigate("Explore");
-        } catch (e) {
-            const message = serializeException(e);
-            Alert.alert(message);
-            this.setState({ loading: false });
-        }
-    }
-
+    //
+    // handleFileUploadSubmit(selectedFile) {
+    //     const storageService = firebase.storage();
+    //     const storageRef = storageService.ref();
+    //     const uploadTask = storageRef.child(`images/`).put(selectedFile); //create a child directory called images, and place the file inside this directory
+    //     uploadTask.on(
+    //         "state_changed",
+    //         snapshot => {
+    //             // Observe state change events such as progress, pause, and resume
+    //         },
+    //         error => {
+    //             // Handle unsuccessful uploads
+    //             console.log(error);
+    //         },
+    //         () => {
+    //             // Do something once upload is complete
+    //             console.log("success");
+    //         }
+    //     );
+    // }
     componentDidMount() {
         this.props.feedStore.checkForNewEntriesInFeed();
-        console.log("Explore.js");
-
     }
 
     render(): React.Node {
+        //const { onPress, onChangeText } = this;
         const { feedStore, profileStore, navigation } = this.props;
         const { scrollAnimation } = this.state;
         const { profile } = profileStore;
@@ -206,6 +229,7 @@ export default class Explore extends React.Component<ScreenProps<> & InjectedPro
                 <AnimatedSafeAreaView style={[styles.header, { shadowOpacity }]}>
                     <Animated.View style={[styles.innerHeader, { height }]}>
                         <View>
+                            <Button title="Hello" onPress={this.onChooseImagePress()} />
                             /*New */
                             <AnimatedText
                                 type="large"
@@ -228,7 +252,7 @@ export default class Explore extends React.Component<ScreenProps<> & InjectedPro
                     </Animated.View>
                 </AnimatedSafeAreaView>
                 <Feed
-                    style={{backgroundColor: "red"}}
+                    style={{ backgroundColor: "red" }}
                     store={feedStore}
                     onScroll={Animated.event([
                         {
@@ -241,7 +265,7 @@ export default class Explore extends React.Component<ScreenProps<> & InjectedPro
                     ])}
                     {...{ navigation }}
                 />
-                <View style={{position: "absolute", bottom: 30, right: 30}}>
+                <View style={{ position: "absolute", bottom: 30, right: 30 }}>
                     <TouchableOpacity onPress={() => this._renderModalContent()}>
                         <Icon name="plus-circle" color={Theme.palette.primary} size={60} />
                     </TouchableOpacity>
@@ -250,7 +274,7 @@ export default class Explore extends React.Component<ScreenProps<> & InjectedPro
         );
     }
 }
-
+//() => this._renderModalContent()
 const styles = StyleSheet.create({
     container: {
         flex: 1
@@ -294,5 +318,5 @@ const styles = StyleSheet.create({
     newPosts: {
         position: "absolute",
         top: 0
-    },
+    }
 });

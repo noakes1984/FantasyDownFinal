@@ -22,7 +22,7 @@ export default class ImageUpload {
 
     static async preview({ uri }: Picture): Promise<string> {
         const result = await manipulate(uri, [{ resize: { width: 10, height: 10 } }], { base64: true });
-        return `data:image/jpeg;base64,${result.base64 || ""}`;
+        return `data:image/jpg;base64,${result.base64 || ""}`;
     }
 
     static async upload(picture: Picture): Promise<string> {

@@ -61,8 +61,8 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
                 timestamp: parseInt(moment().format("X"), 10),
                 text: caption,
                 picture: {
-                    uri: require("./Artboard.png"),
-                    preview: require("./Artboard.png")
+                    uri: "require(./Artboard.png)",
+                    preview: "require(./Artboard.png)"
                 }
             };
             await Firebase.firestore

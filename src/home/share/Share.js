@@ -73,7 +73,8 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
             loading: true
         };
 
-        this.friendsRef = this.getRef().child("friends");}
+        this.friendsRef = this.getRef().child("friends");
+    }
 
     getRef() {
         return firebase.database().ref();
@@ -102,11 +103,11 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
         });
     }
 
-    _pushChatScreen = (rowData) => {
+    _pushChatScreen = rowData => {
         // console.log(this.props.navigation);
         // this.props.navigation.push('chat', {friend: rowData})
-        this.props.navigation.push('Chat', {friend: rowData});
-    }
+        this.props.navigation.push("Chat", { friend: rowData });
+    };
 
     //    const { navigate } = this.props.navigation;
     //  this.props.navigator.push
@@ -127,11 +128,10 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
     };
 
     render() {
-        const {navigation} = this.props;
+        const { navigation } = this.props;
 
         return (
             <View style={styles.container}>
-                <NavHeader title="Chat" {...{ navigation }} />
                 <View style={styles.topGroup}>
                     <Text style={styles.myFriends}>My Friends</Text>
                     <TouchableOpacity>

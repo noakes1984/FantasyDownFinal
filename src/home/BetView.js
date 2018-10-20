@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import {
     // Alert,
-    // TouchableOpacity,
+    //TouchableOpacity,
     AppRegistry,
     StyleSheet,
     View
@@ -13,7 +13,7 @@ import {
     // Header,
     // Content,
     Accordion,
-    Text,
+    //Text,
     // StyleProvider
     Item,
     Input
@@ -24,13 +24,30 @@ import {
 } from "native-base";
 import getTheme from "../../native-base-theme/components";
 import branch, { BranchEvent } from "react-native-branch";
+import moment from "moment";
+import * as firebase from "firebase";
 
-import Schedule from '../Schedule';
+//import { Feather as Icon } from "@expo/vector-icons";
+
+//import { Theme } from "../components/Theme";
+import Schedule from "../Schedule";
+import { Card } from "react-native-elements"; // 0.19.1
+import { Text, Theme, Avatar, Feed, FeedStore, ImageUpload, Firebase } from "../components";
+import type { ScreenProps } from "../components/Types";
+import type { Post } from "../components/Model";
+//import type { Picture } from "../components/ImageUpload";
+
+import { Feather as Icon } from "@expo/vector-icons";
 
 // type Props = {};
 
 export default class BetView extends Component {
     state = {};
+
+    id: string;
+    homeTeam: string;
+    awayTeam: string;
+    amount: string;
 
     constructor(props) {
         super(props);
@@ -39,10 +56,9 @@ export default class BetView extends Component {
             screen: "bet",
             isGeneratingBet: false,
             visibleModal: 1,
-
-            events: Schedule.ss.gms[0].g.map((event) => { return {title: event, content: event}; }),
-
-            //wallet: null,
+            events: Schedule.ss.gms[0].g.map(event => {
+                return { title: event, content: event };
+            })
         };
 
         this.selectTeam = this.selectTeam.bind(this);
@@ -52,18 +68,9 @@ export default class BetView extends Component {
         this.renderContent = this.renderContent.bind(this);
     }
 
-    componentWillMount() {
-        console.log("BetView Class is running");
-    }
-
     async componentDidMount() {
-        console.log("BetView Class is running");
-
-
+        //console.log("BetView Class is running");
         // populate games array so it works with native-base accordion
-
-        console.log(this.games);
-
         // branch.subscribe(({ error, params }) => {
         //     if (error) {
         //         console.error("Error from Branch: " + error);
@@ -120,17 +127,18 @@ export default class BetView extends Component {
     }
 
     selectTeam = (event, team) => {
-        console.log('event', event);
-        console.log('team', team);
+        console.log("event Object deez nuts", event);
+        console.log("team", team);
         let events = this.state.events.map(el => {
-            if (el.content['-eid'] === event['-eid']) {
+            if (el.content["-eid"] === event["-eid"]) {
+                console.log("El return: ", el);
+
                 return { ...el, content: { ...el.content, selected: team } };
             }
-
             return el;
         });
 
-        console.log('state', this.state);
+        console.log("state", this.state);
 
         this.setState({
             events: events
@@ -175,23 +183,78 @@ export default class BetView extends Component {
     renderHeader(title, expanded) {
         return (
             <View style={styles.header}>
-                <Text style={styles.headerText}>{title['-hnn'].capitalize()} vs {title['-vnn'].capitalize()}</Text>
+                <Text style={styles.headerText}>
+                    {title["-hnn"].capitalize()} vs {title["-vnn"].capitalize()}
+                </Text>
             </View>
         );
     }
+    //@autobind
+    profile() {
+        this.props.navigation.navigate("Profile");
+    }
+    async upload(): Promise<void> {
+        try {
+            this.id = await ImageUpload.uid();
+            this.user = Firebase.auth.currentUser;
+        } catch (e) {
+            // eslint-disable-next-line no-console
+            console.error(e);
+            Alert.alert(e);
+        }
+    }
+
+    async saveImageMessage(choice, amount): Promise<void> {
+        try {
+            // this.teamHome = teamHome;
+            // this.teamAway = teamAway;
+            // this.amount = amount;
+            console.log("Selected team" + choice);
+            console.log("Amount wagered: " + amount);
+
+            await this.upload();
+            const { uid } = Firebase.auth.currentUser;
+            const post: Post = {
+                id: this.id,
+                uid,
+                comments: 0,
+                likes: [],
+                timestamp: parseInt(moment().format("X"), 10),
+                text: "",
+                teamHome: "", //this.teamHome,
+                teamAway: "", //this.teamAway,
+                amount: this.state.amount,
+                choice: choice
+            };
+            firebase
+                .firestore()
+                .collection("feed")
+                .doc(uid)
+                .set(post)
+                .then(function() {
+                    console.log("Document successfully written!");
+                    //this.props.feedStore.checkForNewEntriesInFeed();
+                })
+                .catch(function(error) {
+                    console.error("Error writing document: ", error);
+                });
+        } catch (e) {
+            console.log(e);
+        }
+    }
 
     renderContent(event) {
-        console.log('renderContent event', event);
+        console.log("renderContent event: ", event);
 
         let teamHomeColor = "#dddddd";
         let teamAwayColor = "#dddddd";
         let teamHomeText = "#000000";
         let teamAwayText = "#000000";
-        if (event.selected === event['-h']) {
+        if (event.selected === event["-h"]) {
             teamHomeColor = "lightgreen";
             teamHomeText = "#ffffff";
         }
-        if (event.selected === event['-v']) {
+        if (event.selected === event["-v"]) {
             teamAwayColor = "lightblue";
             teamAwayText = "#ffffff";
         }
@@ -213,25 +276,24 @@ export default class BetView extends Component {
                     <View style={{ flex: 1, marginBottom: 30, marginRight: 5 }}>
                         <Button
                             style={{ backgroundColor: teamHomeColor }}
-                            onPress={() => this.selectTeam(event, event['-h'])}
+                            onPress={() => this.selectTeam(event, event["-h"])}
                             light
                             block
                         >
-                            <Text style={{ color: teamHomeText }}>{event['-h']}</Text>
+                            <Text style={{ color: teamHomeText }}>{event["-h"]}</Text>
                         </Button>
                     </View>
                     <View style={{ flex: 1, marginBottom: 30, marginLeft: 5 }}>
                         <Button
                             style={{ backgroundColor: teamAwayColor }}
-                            onPress={() => this.selectTeam(event, event['-v'])}
+                            onPress={() => this.selectTeam(event, event["-v"])}
                             light
                             block
                         >
-                            <Text style={{ color: teamAwayText }}>{event['-v']}</Text>
+                            <Text style={{ color: teamAwayText }}>{event["-v"]}</Text>
                         </Button>
                     </View>
                 </View>
-
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
                     <View style={{ flexDirection: "row", alignItems: "center" }}>
                         <Item regular style={{ width: 100 }}>
@@ -247,7 +309,9 @@ export default class BetView extends Component {
                     </View>
                     {!this.state.isGeneratingBet && (
                         <Button
-                            onPress={() => this.generateBet(event.id, event.selected, this.state.amount, true)}
+                            onPress={() =>
+                                this.saveImageMessage(event.selected, this.state.amount)
+                            } /*() => this.generateBet(event.id, event.selected, this.state.amount, true)}*/
                             primary
                             disabled={!(event.selected && this.state.amount)}
                         >
@@ -263,9 +327,10 @@ export default class BetView extends Component {
     render() {
         return (
             <View style={[styles.container]}>
-                <View style={styles.coinsHeader}>
-                    <Text style={{textAlign: "center"}}>Coins: 500</Text>
-                </View>
+                <Card title="Token Balance">
+                    <View style={styles.logo} />
+                    <Text style={styles.paragraph}>Earn tokens by referring friends</Text>
+                </Card>
                 <Accordion
                     style={{ flex: 1 }}
                     dataArray={this.state.events}
@@ -289,17 +354,24 @@ const styles = StyleSheet.create({
     coinsHeader: {
         alignSelf: "stretch",
         backgroundColor: "white",
-        padding: 10,
+        padding: 10
     },
     header: {
         backgroundColor: "white",
         borderBottomWidth: 1,
         borderBottomColor: "#eeeeee",
         padding: 20,
-        alignSelf: 'stretch',
+        alignSelf: "stretch"
     },
     headerText: {
         fontSize: 24
+    },
+    logo: {
+        backgroundColor: "#106ecf",
+        height: 128,
+        width: 128,
+        alignItems: "center",
+        justifyContent: "center"
     },
     button: {
         backgroundColor: "lightblue",

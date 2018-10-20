@@ -1,18 +1,19 @@
 // @flow
 import * as React from "react";
 import moment from "moment";
-import {StyleSheet, View, Dimensions, Platform} from "react-native";
+import { StyleSheet, View, Dimensions, Platform } from "react-native";
 
 import LikesAndComments from "./LikesAndComments";
 
 import FeedStore from "../FeedStore";
 import Text from "../Text";
 import Avatar from "../Avatar";
-import {Theme} from "../Theme";
+import { Theme } from "../Theme";
 import SmartImage from "../SmartImage";
 
-import type {Post, Profile} from "../Model";
-import type {NavigationProps} from "../Types";
+import type { Post, Profile } from "../Model";
+import type { NavigationProps } from "../Types";
+import Triangle from "react-native-triangle";
 
 type PostProps = NavigationProps<> & {
     post: Post,
@@ -26,21 +27,22 @@ type PostState = {
 };
 
 export default class PostComp extends React.Component<PostProps, PostState> {
-
     state: $Shape<PostState> = {};
 
     unsubscribeToPost: () => void;
     unsubscribeToProfile: () => void;
 
-    static getDerivedStateFromProps({ profile, post }: PostProps): PostState {
-        return { post, profile };
+    static getDerivedStateFromProps({ profile, post, choice }: PostProps): PostState {
+        return { post, profile, choice };
     }
 
     componentDidMount() {
-        const {post, store} = this.props;
+        const { post, store } = this.props;
         this.unsubscribeToPost = store.subscribeToPost(post.id, newPost => this.setState({ post: newPost }));
         // eslint-disable-next-line max-len
-        this.unsubscribeToProfile = store.subscribeToProfile(post.uid, newProfile => this.setState({ profile: newProfile }));
+        this.unsubscribeToProfile = store.subscribeToProfile(post.uid, newProfile =>
+            this.setState({ profile: newProfile })
+        );
     }
 
     componentWillUnmount() {
@@ -49,9 +51,9 @@ export default class PostComp extends React.Component<PostProps, PostState> {
     }
 
     render(): React.Node {
-        const {navigation} = this.props;
-        const {post, profile} = this.state;
-        const {likes, comments} = post;
+        const { navigation } = this.props;
+        const { post, profile } = this.state;
+        const { likes, comments } = post;
         const contentStyle = [styles.content];
         const nameStyle = [styles.name];
         const textStyle = [styles.text];
@@ -59,21 +61,13 @@ export default class PostComp extends React.Component<PostProps, PostState> {
         if (post.picture) {
             contentStyle.push(StyleSheet.absoluteFill);
             contentStyle.push({ backgroundColor: "rgba(0, 0, 0, 0.25)", borderRadius: 5 });
-            nameStyle.push({ color: "white" });
-            textStyle.push({ color: "white" });
+            nameStyle.push({ color: "blue" });
+            textStyle.push({ color: "green" });
             dateStyle.push({ color: "rgba(255, 255, 255, 0.8)" });
         }
         return (
             <View style={styles.container}>
-                {
-                    post.picture && (
-                        <SmartImage
-                            preview={post.picture.preview}
-                            uri={post.picture.uri}
-                            style={styles.picture}
-                        />
-                    )
-                }
+                {post.picture && <SmartImage style={styles.picture} />}
                 <View style={contentStyle}>
                     <View style={styles.header}>
                         <Avatar {...profile.picture} />
@@ -82,21 +76,35 @@ export default class PostComp extends React.Component<PostProps, PostState> {
                             <Text style={dateStyle}>{moment(post.timestamp, "X").fromNow()}</Text>
                         </View>
                     </View>
-                    <View>
-                        <Text style={textStyle} gutterBottom>{post.text}</Text>
+                    <View style={styles.rectangleOne}>
+                        <Text style={styles.rectangleOneText}>{post.choice}</Text>
                     </View>
-                    <LikesAndComments
-                        color={post.picture ? "white" : Theme.typography.color}
-                        id={post.id}
-                        {...{navigation, likes, comments}}
-                    />
+                    <View style={styles.rectangleTwo}>
+                        <Text style={styles.rectangleTwoText}>TB</Text>
+                    </View>
+                    <View>
+                        <Text style={textStyle} gutterBottom>
+                            {post.text}
+                        </Text>
+                    </View>
+                    <View style={styles.header}>
+                        <LikesAndComments
+                            color={post.picture ? "white" : Theme.typography.color}
+                            id={post.id}
+                            {...{ navigation, likes, comments }}
+                        />
+                        <View style={styles.metadata}>
+                            <Text style={nameStyle}>Competitor</Text>
+                        </View>
+                        <Avatar {...profile.picture} />
+                    </View>
                 </View>
             </View>
         );
     }
 }
 
-const {width} = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
     container: {
         borderRadius: 5,
@@ -107,7 +115,29 @@ const styles = StyleSheet.create({
         borderColor: Theme.palette.borderColor,
         borderWidth: Platform.OS === "ios" ? 0 : 1,
         marginVertical: Theme.spacing.small,
-        backgroundColor: "white"
+        backgroundColor: "lightblue"
+    },
+    rectangleOne: {
+        backgroundColor: "#106ecf",
+        height: 128,
+        width: 310,
+        alignItems: "center"
+    },
+    rectangleOneText: {
+        fontSize: 100,
+        paddingTop: 100,
+        color: "white"
+    },
+    rectangleTwo: {
+        backgroundColor: "#C83803",
+        height: 128,
+        width: 310,
+        alignItems: "center"
+    },
+    rectangleTwoText: {
+        fontSize: 100,
+        paddingTop: 100,
+        color: "white"
     },
     content: {
         padding: Theme.spacing.small

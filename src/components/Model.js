@@ -14,10 +14,12 @@ export type Post = {
     uid: string,
     id: string,
     likes: string[],
+    choice: string,
     comments: number,
     timestamp: number,
     text: string,
-    picture: Picture
+    picture: Picture,
+    opponent: string
 };
 
 export type Comment = {

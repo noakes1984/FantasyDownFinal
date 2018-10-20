@@ -1,5 +1,6 @@
 // @flow
 import { observable, computed } from "mobx";
+import * as firebase from "firebase";
 
 import { Firebase } from "../components";
 import type { Profile } from "../components/Model";

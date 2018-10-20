@@ -1,5 +1,9 @@
 {
   "projects": {
-    "default": "react-native-fiber"
+    "default": "react-native-fiber",
+    "staging": "fantasydownfinal",
+    "FDBet": "fantasydownfinal",
+    "FantasyDown": "fantasydownfinal",
+    "fantasydown": "fantasydownfinal"
   }
 }

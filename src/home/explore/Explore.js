@@ -27,7 +27,7 @@ import * as firebase from "firebase";
 
 import ImagePicker from "expo";
 
-import { Text, Theme, Avatar, Feed, FeedStore, ImageUpload } from "../../components";
+import { Text, Theme, Avatar, Feed, FeedStore, ImageUpload, Firebase } from "../../components";
 import type { ScreenProps } from "../../components/Types";
 //import type { ScreenParams } from "../../components/Types";
 import type { Post } from "../../components/Model";
@@ -68,43 +68,6 @@ export default class Explore extends React.Component<ScreenProps<Picture> & Inje
     constructor(props) {
         super(props);
     }
-    componentWillMount() {
-        //this.saveImageMessage(Pic);
-        // const images = {
-        //     profile: {
-        //         profile: require("./Artboard.jpg")
-        //     },
-        //
-        //     image1: require("./View.jpg")
-        // };
-        // console.log(images.image1.uri);
-        // const final = images.image1;
-    }
-
-    onChooseImagePress = async () => {
-        let result = await ImagePicker.launchImageLibrary();
-
-        if (!result.cancelled) {
-            this.uploadImage(result.uri, "test-image")
-                .then(() => {
-                    Alert.alert("success");
-                })
-                .catch(error => {
-                    Alert.alert(error);
-                });
-        }
-    };
-
-    uploadImage = async (uri, imageName) => {
-        const response = await fetch(uri);
-        const blob = await response.blob();
-
-        var ref = firebase
-            .storage()
-            .ref()
-            .child("images/", imageName);
-        return ref.put(blob);
-    };
 
     _renderModalContent = () => {
         this.setState({
@@ -117,64 +80,94 @@ export default class Explore extends React.Component<ScreenProps<Picture> & Inje
             isModalVisible: false
         });
     };
-
+    /*
+    @autobind
+    async upload(): Promise<void> {
+        try {
+            // const { navigation } = this.props;
+            // const picture = navigation.state.params;
+            this.id = ImageUpload.uid();
+            // this.preview = await ImageUpload.preview(picture);
+            // this.url = await ImageUpload.upload(picture);
+        } catch (e) {
+            // eslint-disable-next-line no-console
+            console.error(e);
+            Alert.alert(e);
+        }
+    }
+    async onPress(): Promise<void> {
+        // const { navigation } = this.props;
+        // const { caption } = this.state;
+        // this.setState({ loading: true });
+        try {
+            //await this.upload();
+            const { uid } = Firebase.auth.currentUser;
+            const post: Post = {
+                id: this.id,
+                uid,
+                comments: 0,
+                likes: [],
+                timestamp: parseInt(moment().format("X"), 10),
+                text: "caption"
+            };
+            await Firebase.firestore
+                .collection("feed")
+                .doc(this.id)
+                .set(post);
+            navigation.pop(1);
+            //navigation.navigate("Explore");
+        } catch (e) {
+            const message = serializeException(e);
+            Alert.alert(message);
+            this.setState({ loading: false });
+        }
+    }
+*/
     @autobind
     profile() {
         this.props.navigation.navigate("Profile");
     }
+    async upload(): Promise<void> {
+        try {
+            this.id = await ImageUpload.uid();
+        } catch (e) {
+            // eslint-disable-next-line no-console
+            console.error(e);
+            Alert.alert(e);
+        }
+    }
 
-    //
-    // async saveImageMessage(file) {
-    //     // 1 - We add a message with a loading icon that will get updated with the shared image.
-    //     console.log(file);
-    //     firebase
-    //         .database()
-    //         .ref("DisShit")
-    //         .push({
-    //             name: "firebase.auth().currentUser"
-    //         })
-    //         .then(function() {
-    //             // 2 - Upload the image to Cloud Storage.
-    //             var filePath = "firebase.auth().currentUser.uid/" + file.name;
-    //             return firebase
-    //                 .storage()
-    //                 .ref(filePath)
-    //                 .put(file)
-    //                 .then(function(fileSnapshot) {
-    //                     // 3 - Generate a public URL for the file.
-    //                     return fileSnapshot.ref.getDownloadURL().then(url => {
-    //                         // 4 - Update the chat message placeholder with the image's URL.
-    //                         return messageRef.update({
-    //                             imageUrl: url,
-    //                             storageUri: fileSnapshot.metadata.fullPath
-    //                         });
-    //                     });
-    //                 });
-    //         })
-    //         .catch(function(error) {
-    //             console.error("There was an error uploading a file to Cloud Storage: ", error);
-    //         });
-    // }
-    //
-    // handleFileUploadSubmit(selectedFile) {
-    //     const storageService = firebase.storage();
-    //     const storageRef = storageService.ref();
-    //     const uploadTask = storageRef.child(`images/`).put(selectedFile); //create a child directory called images, and place the file inside this directory
-    //     uploadTask.on(
-    //         "state_changed",
-    //         snapshot => {
-    //             // Observe state change events such as progress, pause, and resume
-    //         },
-    //         error => {
-    //             // Handle unsuccessful uploads
-    //             console.log(error);
-    //         },
-    //         () => {
-    //             // Do something once upload is complete
-    //             console.log("success");
-    //         }
-    //     );
-    // }
+    async saveImageMessage(): Promise<void> {
+        try {
+            await this.upload();
+            const { uid } = Firebase.auth.currentUser;
+            const post: Post = {
+                id: this.id,
+                uid,
+                comments: 0,
+                likes: [],
+                timestamp: parseInt(moment().format("X"), 10),
+                text: ""
+            };
+            firebase
+                .firestore()
+                .collection("feed")
+                .doc(uid)
+                .set(post)
+                .then(function() {
+                    console.log("Document successfully written!");
+                })
+                .catch(function(error) {
+                    console.error("Error writing document: ", error);
+                });
+        } catch (e) {
+            console.log(e);
+        }
+    }
+    updateFeed() {
+        this.props.feedStore.checkForNewEntriesInFeed();
+    }
+
     componentDidMount() {
         this.props.feedStore.checkForNewEntriesInFeed();
     }
@@ -224,12 +217,15 @@ export default class Explore extends React.Component<ScreenProps<Picture> & Inje
                     backdropTransitionOutTiming={500}
                     onBackdropPress={() => this._hideBetView()}
                 >
+                    <TouchableOpacity onPress={() => updateFeed()} topPadding={100}>
+                        <Icon name="x-circle" color={Theme.palette.primary} backgroundColor={"white"} size={25} />
+                    </TouchableOpacity>
                     <BetView />
                 </Modal>
                 <AnimatedSafeAreaView style={[styles.header, { shadowOpacity }]}>
                     <Animated.View style={[styles.innerHeader, { height }]}>
                         <View>
-                            {/*<Button title="Hello" onPress={this.onChooseImagePress()} />*/}
+                            <Button title="Update" onPress={() => this.updateFeed()} />
                             /*New */
                             <AnimatedText
                                 type="large"

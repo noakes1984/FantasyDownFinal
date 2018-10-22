@@ -116,6 +116,7 @@ export default class FeedStore {
     }
 
     addToFeed(entries: FeedEntry[]) {
+        console.log('addtofeed', entries);
         const feed = _.uniqBy([...this.feed.slice(), ...entries], entry => entry.post.id);
         this.feed = _.orderBy(feed, entry => entry.post.timestamp, ["desc"]);
     }

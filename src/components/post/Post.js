@@ -38,6 +38,8 @@ export default class PostComp extends React.Component<PostProps, PostState> {
 
     componentDidMount() {
         const { post, store } = this.props;
+        console.log('post mounted', post, post.id);
+
         this.unsubscribeToPost = store.subscribeToPost(post.id, newPost => this.setState({ post: newPost }));
         // eslint-disable-next-line max-len
         this.unsubscribeToProfile = store.subscribeToProfile(post.uid, newProfile =>
@@ -65,6 +67,7 @@ export default class PostComp extends React.Component<PostProps, PostState> {
             textStyle.push({ color: "green" });
             dateStyle.push({ color: "rgba(255, 255, 255, 0.8)" });
         }
+
         return (
             <View style={styles.container}>
                 {post.picture && <SmartImage style={styles.picture} />}
@@ -77,10 +80,10 @@ export default class PostComp extends React.Component<PostProps, PostState> {
                         </View>
                     </View>
                     <View style={styles.rectangleOne}>
-                        <Text style={styles.rectangleOneText}>{post.choice}</Text>
+                        <Text style={styles.rectangleOneText}>{post.bettor ? post.bettor.choice : ''}</Text>
                     </View>
                     <View style={styles.rectangleTwo}>
-                        <Text style={styles.rectangleTwoText}>TB</Text>
+                        <Text style={styles.rectangleTwoText}>{post.bettee ? post.bettee.choice : ''}</Text>
                     </View>
                     <View>
                         <Text style={textStyle} gutterBottom>

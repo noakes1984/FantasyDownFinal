@@ -169,7 +169,80 @@ export default class Explore extends React.Component<ScreenProps<Picture> & Inje
     }
 
     componentDidMount() {
+        // todo: simulating deep link
+        // let bundle = {
+        //     params: {
+        //         betId: '9d910130-d4c2-11e8-a113-c57bb73eac6f',
+        //     }
+        // };
+        // this.betFromDeepLink(bundle.params.betId);
+
+        Expo.DangerZone.Branch.subscribe((bundle) => {
+            Alert.alert(
+                'Deep link',
+                'My Alert Msg',
+                [
+                    {text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
+                    {text: 'OK', onPress: () => console.log('OK Pressed')},
+                ],
+                { cancelable: false }
+            );
+
+            if (bundle && bundle.params && !bundle.error) {
+                // `bundle.params` contains all the info about the link.
+                Alert.alert(
+                    'Deep link',
+                    'Bundle good',
+                    [
+                        {text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
+                        {text: 'OK', onPress: () => console.log('OK Pressed')},
+                    ],
+                    { cancelable: false }
+                );
+            }
+        });
+
         this.props.feedStore.checkForNewEntriesInFeed();
+    }
+
+    async betFromDeepLink(betId): Promise<void> {
+        // first get bet from firebase
+        var betRef = await firebase.firestore().collection('feed').doc(betId).get();
+        var bet = betRef.data();
+
+        var choice = bet.bettor.choice !== bet.event['-h'] ? bet.event['-h'] : bet.event['-v'];
+
+        // retrieve bettor
+        var bettor = await firebase.firestore().collection('users').doc(bet.bettor.id).get();
+        bettor = bettor.data();
+
+        Alert.alert(
+            'Confirm Bet',
+            `Would you like to bet ${bet.amount} coins on ${choice} against ${bet.bettor.choice} with ${bettor.name}`,
+            [
+                {text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
+                {text: 'OK', onPress: () => this.acceptBet(betRef.id, choice) },
+            ],
+            { cancelable: false }
+        );
+    }
+
+    async acceptBet(betId, choice): Promise<void> {
+        const { uid } = Firebase.auth.currentUser;
+
+        console.log('acceptBet uid', uid);
+
+        try {
+            var confirmBet = Firebase.functions.httpsCallable('confirmBet');
+            var result = await confirmBet({
+                betId: betId,
+                choice: choice,
+            });
+
+            console.log('acceptBet result', result);
+        } catch (e) {
+            console.log('Error accepting bet', e);
+        }
     }
 
     render(): React.Node {

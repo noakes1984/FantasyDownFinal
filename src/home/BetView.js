@@ -36,6 +36,8 @@ import { Text, Theme, Avatar, Feed, FeedStore, ImageUpload, Firebase } from "../
 import type { ScreenProps } from "../components/Types";
 import type { Post } from "../components/Model";
 //import type { Picture } from "../components/ImageUpload";
+var uuid = require('react-native-uuid');
+
 
 import { Feather as Icon } from "@expo/vector-icons";
 
@@ -145,7 +147,38 @@ export default class BetView extends Component {
         });
     };
 
-    generateBet = async (eventId, choice, amount, createDeepLink = false) => {
+    generateBet = async (event, choice, amount, createDeepLink = false) => {
+        console.log('generateBet event', event);
+
+        var betId = await this.createBet(event, event.selected, this.state.amount);
+
+        var branchUniversalObject = await Expo.DangerZone.Branch.createBranchUniversalObject(
+            betId,
+            {
+                title: 'Fantasy Down',
+                contentImageUrl: 'http://placehold.it/50x50',
+                contentDescription: 'this is the description',
+                // This metadata can be used to easily navigate back to this screen
+                // when implementing deep linking with `Branch.subscribe`.
+                metadata: {
+                    screen: 'articleScreen',
+                    params: JSON.stringify({
+                        betId: betId.toString(),
+                    }),
+                },
+            }
+        );
+
+        const shareOptions = {
+            messageHeader: 'Fantasy Down message header',
+            messageBody: `Somebody wants to make a bet!`,
+        };
+        await branchUniversalObject.showShareSheet(shareOptions);
+
+
+
+
+
         // this.setState({ generatingBet: true });
         // if (createDeepLink) {
         //     // only canonicalIdentifier is required
@@ -193,6 +226,7 @@ export default class BetView extends Component {
     profile() {
         this.props.navigation.navigate("Profile");
     }
+
     async upload(): Promise<void> {
         try {
             this.id = await ImageUpload.uid();
@@ -204,40 +238,44 @@ export default class BetView extends Component {
         }
     }
 
-    async saveImageMessage(choice, amount): Promise<void> {
-        try {
-            // this.teamHome = teamHome;
-            // this.teamAway = teamAway;
-            // this.amount = amount;
-            console.log("Selected team" + choice);
-            console.log("Amount wagered: " + amount);
+    async createBet(event, choice, amount): Promise<void> {
+        // import FieldValue from require('firebase-admin').firestore.FieldValue;
+        // var admin = require("firebase-admin");
 
-            await this.upload();
+        try {
             const { uid } = Firebase.auth.currentUser;
-            const post: Post = {
-                id: this.id,
+            // TODO: need to firestore id
+            var id = uuid.v1();
+            const bet = {
+                id: id,
                 uid,
                 comments: 0,
                 likes: [],
-                timestamp: parseInt(moment().format("X"), 10),
-                text: "",
-                teamHome: "", //this.teamHome,
-                teamAway: "", //this.teamAway,
-                amount: this.state.amount,
-                choice: choice
+                eventId: event['-eid'],
+                event: event,
+                amount: parseInt(this.state.amount),
+                bettor: {
+                    id: uid,
+                    choice: choice,
+                },
+                timestamp: parseInt(moment().format('X'), 10),
+                // timestamp: FieldValue.serverTimestamp()
             };
-            firebase
+
+            var postRef = firebase
                 .firestore()
-                .collection("feed")
-                .doc(uid)
-                .set(post)
+                .collection('feed')
+                .doc(id)
+                .set(bet)
+                // .add(bet)
                 .then(function() {
                     console.log("Document successfully written!");
-                    //this.props.feedStore.checkForNewEntriesInFeed();
                 })
                 .catch(function(error) {
                     console.error("Error writing document: ", error);
                 });
+
+            return id;
         } catch (e) {
             console.log(e);
         }
@@ -309,9 +347,7 @@ export default class BetView extends Component {
                     </View>
                     {!this.state.isGeneratingBet && (
                         <Button
-                            onPress={() =>
-                                this.saveImageMessage(event.selected, this.state.amount)
-                            } /*() => this.generateBet(event.id, event.selected, this.state.amount, true)}*/
+                            onPress={() => this.generateBet(event, event.selected, this.state.amount, true) }
                             primary
                             disabled={!(event.selected && this.state.amount)}
                         >

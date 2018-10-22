@@ -1,6 +1,6 @@
 {
     "expo": {
-        "name": "react-native-fiber-firebase",
+        "name": "Fantasy Down",
         "version": "1.1.1",
         "description": "UI elements, multi-screen implemented in React Native, now in one handy kit",
         "sdkVersion": "27.0.0",
@@ -21,7 +21,16 @@
             "barStyle": "dark-content"
         },
         "ios": {
-            "bundleIdentifier": "com.wcandillon.fiber"
+            "associatedDomains": [
+                "applinks:njkg.test-app.link",
+                "applinks:njkg-alternate.test-app.link"
+            ],
+            "bundleIdentifier": "com.fantasydown.ios",
+            "config": {
+                "branch": {
+                    "apiKey": "key_test_bfqXOnwFTN0DGxM72IJk3lcmvuojTZaL"
+                }
+            }
         }
     }
 }

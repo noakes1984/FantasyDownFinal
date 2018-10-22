@@ -1,6 +1,7 @@
 // @flow
 import * as firebase from "firebase";
 import "firebase/firestore";
+require("firebase/functions");
 
 var config = {
     apiKey: "AIzaSyBhuG9aWqOPeli7gKjMLi4Hw-9H12ILfFo",
@@ -22,5 +23,6 @@ export default class Firebase {
         Firebase.auth = firebase.auth();
         Firebase.firestore = firebase.firestore();
         Firebase.storage = firebase.storage();
+        Firebase.functions = firebase.functions();
     }
 }

@@ -22,6 +22,7 @@ import {
     // Textarea,
     // Spinner
 } from "native-base";
+import { inject } from 'mobx-react/native';
 import getTheme from "../../native-base-theme/components";
 import branch, { BranchEvent } from "react-native-branch";
 import moment from "moment";
@@ -30,37 +31,39 @@ import * as firebase from "firebase";
 //import { Feather as Icon } from "@expo/vector-icons";
 
 //import { Theme } from "../components/Theme";
-import Schedule from "../Schedule";
 import { Card } from "react-native-elements"; // 0.19.1
 import { Text, Theme, Avatar, Feed, FeedStore, ImageUpload, Firebase } from "../components";
-import type { ScreenProps } from "../components/Types";
+import type {NavigationProps, ScreenProps} from "../components/Types";
 import type { Post } from "../components/Model";
 //import type { Picture } from "../components/ImageUpload";
 var uuid = require('react-native-uuid');
 
 
-import { Feather as Icon } from "@expo/vector-icons";
+import type {AnimatedEvent} from "react-native/Libraries/Animated/src/AnimatedEvent";
 
-// type Props = {};
+type BetViewProps = NavigationProps<> & {
+    eventStore: EventStore
+};
 
-export default class BetView extends Component {
+@inject('eventStore')
+export default class BetView extends Component<BetViewProps> {
     state = {};
-
-    id: string;
-    homeTeam: string;
-    awayTeam: string;
-    amount: string;
 
     constructor(props) {
         super(props);
 
+        // for now just copy props events to state events since we need to manage opened accordion with state
+        let events = this.props.eventStore.events;
+        events = events.map(event => {
+            event.title = event.content = event;
+            return event;
+        });
+
         this.state = {
-            screen: "bet",
+            screen: 'bet',
             isGeneratingBet: false,
             visibleModal: 1,
-            events: Schedule.ss.gms[0].g.map(event => {
-                return { title: event, content: event };
-            })
+            events: events
         };
 
         this.selectTeam = this.selectTeam.bind(this);
@@ -150,9 +153,9 @@ export default class BetView extends Component {
     generateBet = async (event, choice, amount, createDeepLink = false) => {
         console.log('generateBet event', event);
 
-        var betId = await this.createBet(event, event.selected, this.state.amount);
+        const betId = await this.createBet(event, event.selected, this.state.amount);
 
-        var branchUniversalObject = await Expo.DangerZone.Branch.createBranchUniversalObject(
+        const branchUniversalObject = await Expo.DangerZone.Branch.createBranchUniversalObject(
             betId,
             {
                 title: 'Fantasy Down',
@@ -162,9 +165,10 @@ export default class BetView extends Component {
                 // when implementing deep linking with `Branch.subscribe`.
                 metadata: {
                     screen: 'articleScreen',
-                    params: JSON.stringify({
-                        betId: betId.toString(),
-                    }),
+                    betId: betId.toString()
+                    // params: JSON.stringify({
+                    //     betId: betId.toString(),
+                    // }),
                 },
             }
         );
@@ -217,7 +221,7 @@ export default class BetView extends Component {
         return (
             <View style={styles.header}>
                 <Text style={styles.headerText}>
-                    {title["-hnn"].capitalize()} vs {title["-vnn"].capitalize()}
+                    {title.hnn.capitalize()} vs {title.vnn.capitalize()}
                 </Text>
             </View>
         );
@@ -239,46 +243,22 @@ export default class BetView extends Component {
     }
 
     async createBet(event, choice, amount): Promise<void> {
-        // import FieldValue from require('firebase-admin').firestore.FieldValue;
-        // var admin = require("firebase-admin");
-
         try {
-            const { uid } = Firebase.auth.currentUser;
-            // TODO: need to firestore id
-            var id = uuid.v1();
-            const bet = {
-                id: id,
-                uid,
-                comments: 0,
-                likes: [],
-                eventId: event['-eid'],
-                event: event,
-                amount: parseInt(this.state.amount),
-                bettor: {
-                    id: uid,
-                    choice: choice,
-                },
-                timestamp: parseInt(moment().format('X'), 10),
-                // timestamp: FieldValue.serverTimestamp()
-            };
+            const createBet = Firebase.functions.httpsCallable('createBet');
+            const result = await createBet({
+                eventId: event.id,
+                amount,
+                choice
+            });
 
-            var postRef = firebase
-                .firestore()
-                .collection('feed')
-                .doc(id)
-                .set(bet)
-                // .add(bet)
-                .then(function() {
-                    console.log("Document successfully written!");
-                })
-                .catch(function(error) {
-                    console.error("Error writing document: ", error);
-                });
+            console.log('createBet result', result);
 
-            return id;
+            return result.data.id;
         } catch (e) {
-            console.log(e);
+            console.log('Error creating bet', e);
         }
+
+        return null;
     }
 
     renderContent(event) {
@@ -288,11 +268,11 @@ export default class BetView extends Component {
         let teamAwayColor = "#dddddd";
         let teamHomeText = "#000000";
         let teamAwayText = "#000000";
-        if (event.selected === event["-h"]) {
+        if (event.selected === event.h) {
             teamHomeColor = "lightgreen";
             teamHomeText = "#ffffff";
         }
-        if (event.selected === event["-v"]) {
+        if (event.selected === event.v) {
             teamAwayColor = "lightblue";
             teamAwayText = "#ffffff";
         }
@@ -314,21 +294,21 @@ export default class BetView extends Component {
                     <View style={{ flex: 1, marginBottom: 30, marginRight: 5 }}>
                         <Button
                             style={{ backgroundColor: teamHomeColor }}
-                            onPress={() => this.selectTeam(event, event["-h"])}
+                            onPress={() => this.selectTeam(event, event.h)}
                             light
                             block
                         >
-                            <Text style={{ color: teamHomeText }}>{event["-h"]}</Text>
+                            <Text style={{ color: teamHomeText }}>{event.h}</Text>
                         </Button>
                     </View>
                     <View style={{ flex: 1, marginBottom: 30, marginLeft: 5 }}>
                         <Button
                             style={{ backgroundColor: teamAwayColor }}
-                            onPress={() => this.selectTeam(event, event["-v"])}
+                            onPress={() => this.selectTeam(event, event.v)}
                             light
                             block
                         >
-                            <Text style={{ color: teamAwayText }}>{event["-v"]}</Text>
+                            <Text style={{ color: teamAwayText }}>{event.v}</Text>
                         </Button>
                     </View>
                 </View>

@@ -68,18 +68,21 @@ export default class PostComp extends React.Component<PostProps, PostState> {
             dateStyle.push({ color: "rgba(255, 255, 255, 0.8)" });
         }
 
+        console.log(post);
+
         return (
             <View style={styles.container}>
+                <Text>asdlfkaj</Text>
                 {post.picture && <SmartImage style={styles.picture} />}
                 <View style={contentStyle}>
                     <View style={styles.header}>
                         <Avatar {...profile.picture} />
                         <View style={styles.metadata}>
                             <Text style={nameStyle}>{profile.name}</Text>
-                            <Text style={dateStyle}>{moment(post.timestamp, "X").fromNow()}</Text>
+                            <Text style={dateStyle}>{moment(post.createdAt, 'X').fromNow()}</Text>
                         </View>
                     </View>
-                    <View style={styles.rectangleOne}>
+                    <View style={styles.triangleTopLeftCorner}>
                         <Text style={styles.rectangleOneText}>{post.bettor ? post.bettor.choice : ''}</Text>
                     </View>
                     <View style={styles.rectangleTwo}>
@@ -119,6 +122,16 @@ const styles = StyleSheet.create({
         borderWidth: Platform.OS === "ios" ? 0 : 1,
         marginVertical: Theme.spacing.small,
         backgroundColor: "lightblue"
+    },
+    triangleTopLeftCorner: {
+        width: 310,
+        height: 128,
+        backgroundColor: 'transparent',
+        borderStyle: 'solid',
+        borderRightWidth: 310,
+        borderTopWidth: 128,
+        borderRightColor: 'transparent',
+        borderTopColor: '#106ecf'
     },
     rectangleOne: {
         backgroundColor: "#106ecf",

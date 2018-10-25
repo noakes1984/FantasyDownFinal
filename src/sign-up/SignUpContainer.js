@@ -1,11 +1,11 @@
 // @flow
-import autobind from "autobind-decorator";
-import * as React from "react";
-import {View, StyleSheet, Dimensions} from "react-native";
-import {Content} from "native-base";
+import autobind from 'autobind-decorator';
+import * as React from 'react';
+import {View, StyleSheet, Dimensions} from 'react-native';
+import {Content} from 'native-base';
 
-import {Text, Container, Button, Theme} from "../components";
-import type {NavigationProps} from "../components/Types";
+import {Text, Container, Button, Theme} from '../components';
+import type {NavigationProps} from '../components/Types';
 
 type SignUpContainerProps = NavigationProps<*> & {
     title: string,
@@ -20,14 +20,14 @@ type SignUpContainerProps = NavigationProps<*> & {
 export default class SignUpContainer extends React.Component<SignUpContainerProps> {
 
     static defaultProps = {
-        nextLabel: "Next"
+        nextLabel: 'Next'
     };
 
     @autobind
     back() {
         const {navigation, first} = this.props;
         if (first) {
-            navigation.navigate("Welcome");
+            navigation.navigate('Welcome');
         } else {
             navigation.pop();
         }
@@ -55,13 +55,13 @@ export default class SignUpContainer extends React.Component<SignUpContainerProp
     }
 }
 
-const {height} = Dimensions.get("window");
+const {height} = Dimensions.get('window');
 const styles = StyleSheet.create({
     content: {
         padding: Theme.spacing.base
     },
     innerContainer: {
         height: height - (Theme.spacing.base * 2),
-        justifyContent: "center"
+        justifyContent: 'center'
     }
 });

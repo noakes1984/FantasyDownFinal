@@ -52,7 +52,7 @@ export default class FeedStore {
             (async () => {
                 try {
                     const profileDoc = await Firebase.firestore
-                        .collection("users")
+                        .collection('users')
                         .doc(uid)
                         .get();
                     this.profiles[uid] = profileDoc.data();
@@ -103,7 +103,10 @@ export default class FeedStore {
         }
         const posts: Post[] = [];
         snap.forEach(postDoc => {
-            posts.push(postDoc.data());
+            // todo: this is bad, needs to grab feed from a cloud function
+            var data = postDoc.data();
+            if (data.bettee)
+                posts.push(data);
         });
         const feed = await this.joinProfiles(posts);
         if (!this.feed) {
@@ -118,7 +121,7 @@ export default class FeedStore {
     addToFeed(entries: FeedEntry[]) {
         console.log('addtofeed', entries);
         const feed = _.uniqBy([...this.feed.slice(), ...entries], entry => entry.post.id);
-        this.feed = _.orderBy(feed, entry => entry.post.timestamp, ["desc"]);
+        this.feed = _.orderBy(feed, entry => entry.post.createdAt, ["desc"]);
     }
 
     subscribeToPost(id: string, callback: Post => void): Subscription {

@@ -9,7 +9,7 @@ import { useStrict } from "mobx";
 import { Provider, inject } from "mobx-react/native";
 import { Feather } from "@expo/vector-icons";
 
-import { Images, Firebase, FeedStore } from "./src/components";
+import { Images, Firebase, FeedStore, EventStore } from "./src/components";
 import type { ScreenProps } from "./src/components/Types";
 
 import { Welcome } from "./src/welcome";
@@ -58,17 +58,17 @@ String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
 }
 
-@inject("profileStore", "feedStore", "userFeedStore")
+@inject('profileStore', 'feedStore', 'userFeedStore', 'eventStore')
 class Loading extends React.Component<ScreenProps<>> {
     async componentDidMount(): Promise<void> {
-        const { navigation, profileStore, feedStore, userFeedStore } = this.props;
+        const { navigation, profileStore, feedStore, userFeedStore, eventStore } = this.props;
         await Loading.loadStaticResources();
         Firebase.init();
         Firebase.auth.onAuthStateChanged(user => {
             const isUserAuthenticated = !!user;
             if (isUserAuthenticated) {
                 const { uid } = Firebase.auth.currentUser;
-                const feedQuery = Firebase.firestore.collection("feed").orderBy("timestamp", "desc");
+                const feedQuery = Firebase.firestore.collection('feed').orderBy('createdAt', 'desc');
                 const userFeedQuery = Firebase.firestore
                     .collection("feed")
                     .where("uid", "==", uid)
@@ -77,6 +77,8 @@ class Loading extends React.Component<ScreenProps<>> {
                 feedStore.init(feedQuery);
                 userFeedStore.init(userFeedQuery);
                 navigation.navigate("Home");
+
+                eventStore.init(Firebase.firestore.collection('events'));
             } else {
                 navigation.navigate("Welcome");
             }
@@ -111,6 +113,7 @@ export default class App extends React.Component<{}> {
     profileStore = new ProfileStore();
     feedStore = new FeedStore();
     userFeedStore = new FeedStore();
+    eventStore = new EventStore();
 
     componentDidMount() {
         StatusBar.setBarStyle("dark-content");
@@ -120,10 +123,10 @@ export default class App extends React.Component<{}> {
     }
 
     render(): React.Node {
-        const { feedStore, profileStore, userFeedStore } = this;
+        const { feedStore, profileStore, userFeedStore, eventStore } = this;
         return (
             <StyleProvider style={getTheme(variables)}>
-                <Provider {...{ feedStore, profileStore, userFeedStore }}>
+                <Provider {...{ feedStore, profileStore, userFeedStore, eventStore }}>
                     <AppNavigator onNavigationStateChange={() => undefined} />
                 </Provider>
             </StyleProvider>

@@ -35,7 +35,7 @@ import type { Picture } from "../../components/ImageUpload";
 
 import { Feather as Icon } from "@expo/vector-icons";
 
-import BetView from "../BetView";
+import BetView from '../BetView';
 
 const AnimatedText = Animated.createAnimatedComponent(Text);
 const AnimatedSafeAreaView = Animated.createAnimatedComponent(SafeAreaView);
@@ -177,25 +177,25 @@ export default class Explore extends React.Component<ScreenProps<Picture> & Inje
         // };
         // this.betFromDeepLink(bundle.params.betId);
 
-        Expo.DangerZone.Branch.subscribe((bundle) => {
-            Alert.alert(
-                'Deep link',
-                'My Alert Msg',
-                [
-                    {text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
-                    {text: 'OK', onPress: () => console.log('OK Pressed')},
-                ],
-                { cancelable: false }
-            );
-
+        Expo.DangerZone.Branch.subscribe(async (bundle) => {
             if (bundle && bundle.params && !bundle.error) {
-                // `bundle.params` contains all the info about the link.
+                const { betId } = bundle.params;
+
+                const betRef = await firebase.firestore().collection('feed').doc(betId).get();
+                const bet = betRef.data();
+
+                const choice = bet.bettor.choice !== bet.event.h ? bet.event.h : bet.event.v;
+
+                // retrieve bettor
+                const bettorRef = await firebase.firestore().collection('users').doc(bet.bettor.id).get();
+                const bettor = bettorRef.data();
+
                 Alert.alert(
-                    'Deep link',
-                    'Bundle good',
+                    'Confirm Bet',
+                    `Would you like to bet ${bet.amount} coins on ${choice} against ${bet.bettor.choice} with ${bettor.name}`,
                     [
                         {text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
-                        {text: 'OK', onPress: () => console.log('OK Pressed')},
+                        {text: 'OK', onPress: () => this.acceptBet(betRef.id) },
                     ],
                     { cancelable: false }
                 );
@@ -205,41 +205,12 @@ export default class Explore extends React.Component<ScreenProps<Picture> & Inje
         this.props.feedStore.checkForNewEntriesInFeed();
     }
 
-    async betFromDeepLink(betId): Promise<void> {
-        // first get bet from firebase
-        var betRef = await firebase.firestore().collection('feed').doc(betId).get();
-        var bet = betRef.data();
-
-        var choice = bet.bettor.choice !== bet.event['-h'] ? bet.event['-h'] : bet.event['-v'];
-
-        // retrieve bettor
-        var bettor = await firebase.firestore().collection('users').doc(bet.bettor.id).get();
-        bettor = bettor.data();
-
-        Alert.alert(
-            'Confirm Bet',
-            `Would you like to bet ${bet.amount} coins on ${choice} against ${bet.bettor.choice} with ${bettor.name}`,
-            [
-                {text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
-                {text: 'OK', onPress: () => this.acceptBet(betRef.id, choice) },
-            ],
-            { cancelable: false }
-        );
-    }
-
-    async acceptBet(betId, choice): Promise<void> {
-        const { uid } = Firebase.auth.currentUser;
-
-        console.log('acceptBet uid', uid);
-
+    async acceptBet(betId): Promise<void> {
         try {
-            var confirmBet = Firebase.functions.httpsCallable('confirmBet');
-            var result = await confirmBet({
-                betId: betId,
-                choice: choice,
-            });
+            const acceptBet = Firebase.functions.httpsCallable('acceptBet');
+            await acceptBet({betId});
 
-            console.log('acceptBet result', result);
+            this.updateFeed();
         } catch (e) {
             console.log('Error accepting bet', e);
         }

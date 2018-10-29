@@ -111,7 +111,7 @@ export default class Explore extends React.Component<ScreenProps<Picture> & Inje
                 text: "caption"
             };
             await Firebase.firestore
-                .collection("feed")
+                .collection('bets')
                 .doc(this.id)
                 .set(post);
             navigation.pop(1);
@@ -147,11 +147,11 @@ export default class Explore extends React.Component<ScreenProps<Picture> & Inje
                 comments: 0,
                 likes: [],
                 timestamp: parseInt(moment().format("X"), 10),
-                text: ""
+                text: ''
             };
             firebase
                 .firestore()
-                .collection("feed")
+                .collection('bets')
                 .doc(uid)
                 .set(post)
                 .then(function() {
@@ -168,20 +168,40 @@ export default class Explore extends React.Component<ScreenProps<Picture> & Inje
         this.props.feedStore.checkForNewEntriesInFeed();
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         // todo: simulating deep link
-        // let bundle = {
+        // const bundle = {
         //     params: {
-        //         betId: '9d910130-d4c2-11e8-a113-c57bb73eac6f',
+        //         betId: 'PFLrPK77YTdd3IkoyRqT',
         //     }
         // };
-        // this.betFromDeepLink(bundle.params.betId);
+        // const { betId } = bundle.params;
+        //
+        // const betRef = await firebase.firestore().collection('bets').doc(betId).get();
+        // const bet = betRef.data();
+        //
+        // const choice = bet.bettor.choice !== bet.event.h ? bet.event.h : bet.event.v;
+        //
+        // // retrieve bettor
+        // const bettorRef = await firebase.firestore().collection('users').doc(bet.bettor.id).get();
+        // const bettor = bettorRef.data();
+        //
+        // Alert.alert(
+        //     'Confirm Bet',
+        //     `Would you like to bet ${bet.amount} coins on ${choice} against ${bet.bettor.choice} with ${bettor.name}`,
+        //     [
+        //         {text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
+        //         {text: 'OK', onPress: () => this.acceptBet(betRef.id) },
+        //     ],
+        //     { cancelable: false }
+        // );
+
 
         Expo.DangerZone.Branch.subscribe(async (bundle) => {
             if (bundle && bundle.params && !bundle.error) {
                 const { betId } = bundle.params;
 
-                const betRef = await firebase.firestore().collection('feed').doc(betId).get();
+                const betRef = await firebase.firestore().collection('bets').doc(betId).get();
                 const bet = betRef.data();
 
                 const choice = bet.bettor.choice !== bet.event.h ? bet.event.h : bet.event.v;
@@ -206,6 +226,7 @@ export default class Explore extends React.Component<ScreenProps<Picture> & Inje
     }
 
     async acceptBet(betId): Promise<void> {
+        console.log('accepting bet', betId);
         try {
             const acceptBet = Firebase.functions.httpsCallable('acceptBet');
             await acceptBet({betId});
@@ -269,15 +290,13 @@ export default class Explore extends React.Component<ScreenProps<Picture> & Inje
                 <AnimatedSafeAreaView style={[styles.header, { shadowOpacity }]}>
                     <Animated.View style={[styles.innerHeader, { height }]}>
                         <View>
-                            <Button title="Update" onPress={() => this.updateFeed()} />
-                            /*New */
+                            {/*<Button title="Update" onPress={() => this.updateFeed()} />*/}
                             <AnimatedText
                                 type="large"
                                 style={[styles.newPosts, { opacity, transform: [{ translateY }] }]}
                             >
                                 New posts
                             </AnimatedText>
-                            /*Day of the week*/
                             <AnimatedText type="header2" style={{ fontSize, marginTop }}>
                                 {moment().format("dddd")}
                             </AnimatedText>

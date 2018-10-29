@@ -1,60 +1,66 @@
 // @flow
 import * as React from "react";
 import moment from "moment";
-import { StyleSheet, View, Dimensions, Platform } from "react-native";
+import { StyleSheet, View, Dimensions, Platform, Text } from "react-native";
 
 import LikesAndComments from "./LikesAndComments";
 
 import FeedStore from "../FeedStore";
-import Text from "../Text";
+// import Text from "../Text";
 import Avatar from "../Avatar";
 import { Theme } from "../Theme";
 import SmartImage from "../SmartImage";
+import teamColor from '../../NFLColors';
 
 import type { Post, Profile } from "../Model";
 import type { NavigationProps } from "../Types";
-import Triangle from "react-native-triangle";
 
 type PostProps = NavigationProps<> & {
     post: Post,
-    profile: Profile,
+    bettor: Profile,
+    bettee: Profile,
     store: FeedStore
 };
 
 type PostState = {
     post: Post,
-    profile: Profile
+    bettor: Profile,
+    bettee: Profile
 };
 
 export default class PostComp extends React.Component<PostProps, PostState> {
     state: $Shape<PostState> = {};
 
     unsubscribeToPost: () => void;
-    unsubscribeToProfile: () => void;
+    unsubscribeToBettor: () => void;
+    unsubscribeToBettee: () => void;
 
-    static getDerivedStateFromProps({ profile, post, choice }: PostProps): PostState {
-        return { post, profile, choice };
+    static getDerivedStateFromProps({ bettor, bettee, post, choice }: PostProps): PostState {
+        return { post, bettor, bettee, choice };
     }
 
     componentDidMount() {
         const { post, store } = this.props;
-        console.log('post mounted', post, post.id);
 
         this.unsubscribeToPost = store.subscribeToPost(post.id, newPost => this.setState({ post: newPost }));
         // eslint-disable-next-line max-len
-        this.unsubscribeToProfile = store.subscribeToProfile(post.uid, newProfile =>
-            this.setState({ profile: newProfile })
+        this.unsubscribeToBettor = store.subscribeToProfile(post.bettor.id, bettor =>
+            this.setState({ bettor })
+        );
+        this.unsubscribeToBettee = store.subscribeToProfile(post.bettee.id, bettee =>
+            this.setState({ bettee })
         );
     }
 
     componentWillUnmount() {
         this.unsubscribeToPost();
-        this.unsubscribeToProfile();
+        this.unsubscribeToBettor();
+        this.unsubscribeToBettee();
     }
 
     render(): React.Node {
         const { navigation } = this.props;
-        const { post, profile } = this.state;
+        const { post, bettor, bettee } = this.state;
         const { likes, comments } = post;
         const contentStyle = [styles.content];
         const nameStyle = [styles.name];
@@ -68,30 +74,28 @@ export default class PostComp extends React.Component<PostProps, PostState> {
             dateStyle.push({ color: "rgba(255, 255, 255, 0.8)" });
         }
 
-        console.log(post);
+        console.log('post bettor', bettor);
+        console.log('post bettee', bettee);
 
         return (
             <View style={styles.container}>
-                <Text>asdlfkaj</Text>
                 {post.picture && <SmartImage style={styles.picture} />}
                 <View style={contentStyle}>
                     <View style={styles.header}>
-                        <Avatar {...profile.picture} />
+                        <Avatar {...bettor.picture} />
                         <View style={styles.metadata}>
-                            <Text style={nameStyle}>{profile.name}</Text>
+                            <Text style={nameStyle}>{bettor.name}</Text>
                             <Text style={dateStyle}>{moment(post.createdAt, 'X').fromNow()}</Text>
                         </View>
                     </View>
-                    <View style={styles.triangleTopLeftCorner}>
-                        <Text style={styles.rectangleOneText}>{post.bettor ? post.bettor.choice : ''}</Text>
-                    </View>
-                    <View style={styles.rectangleTwo}>
-                        <Text style={styles.rectangleTwoText}>{post.bettee ? post.bettee.choice : ''}</Text>
-                    </View>
-                    <View>
-                        <Text style={textStyle} gutterBottom>
-                            {post.text}
-                        </Text>
+                    <View style={[styles.choicesWrapper, {backgroundColor: teamColor(post.bettee.choice).color}]}>
+                        <View style={[styles.triangleTopLeftCorner, {position: 'absolute', borderTopColor: teamColor(post.bettor.choice).color}]}></View>
+                        <View style={[styles.choice, styles.choiceBettor]}>
+                            <Text style={styles.choiceText}>{post.bettor ? post.bettor.choice : ''}</Text>
+                        </View>
+                        <View style={[styles.choice, styles.choiceBettee]}>
+                            <Text style={styles.choiceText}>{post.bettee ? post.bettee.choice : ''}</Text>
+                        </View>
                     </View>
                     <View style={styles.header}>
                         <LikesAndComments
@@ -100,9 +104,9 @@ export default class PostComp extends React.Component<PostProps, PostState> {
                             {...{ navigation, likes, comments }}
                         />
                         <View style={styles.metadata}>
-                            <Text style={nameStyle}>Competitor</Text>
+                            <Text style={nameStyle}>{bettee.name}</Text>
                         </View>
-                        <Avatar {...profile.picture} />
+                        <Avatar {...bettee.picture} />
                     </View>
                 </View>
             </View>
@@ -113,47 +117,43 @@ export default class PostComp extends React.Component<PostProps, PostState> {
 const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
     container: {
-        borderRadius: 5,
+        // borderRadius: 5,
         shadowColor: "black",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.14,
-        shadowRadius: 6,
-        borderColor: Theme.palette.borderColor,
-        borderWidth: Platform.OS === "ios" ? 0 : 1,
+        // shadowOffset: { width: 0, height: 1 },
+        // shadowOpacity: 0.14,
+        // shadowRadius: 6,
+        // borderColor: Theme.palette.borderColor,
+        // borderWidth: Platform.OS === "ios" ? 0 : 1,
         marginVertical: Theme.spacing.small,
-        backgroundColor: "lightblue"
+        backgroundColor: "#eeeeee"
     },
     triangleTopLeftCorner: {
-        width: 310,
-        height: 128,
+        // width: 310,
+        // height: 75,
         backgroundColor: 'transparent',
         borderStyle: 'solid',
         borderRightWidth: 310,
-        borderTopWidth: 128,
+        borderTopWidth: 150,
         borderRightColor: 'transparent',
         borderTopColor: '#106ecf'
     },
-    rectangleOne: {
-        backgroundColor: "#106ecf",
-        height: 128,
-        width: 310,
-        alignItems: "center"
+    choicesWrapper: {
+        marginBottom: Theme.spacing.small,
     },
-    rectangleOneText: {
-        fontSize: 100,
-        paddingTop: 100,
-        color: "white"
+    choice: {
+        height: 75,
     },
-    rectangleTwo: {
-        backgroundColor: "#C83803",
-        height: 128,
-        width: 310,
-        alignItems: "center"
+    choiceBettor: {
+        paddingLeft: Theme.spacing.small
     },
-    rectangleTwoText: {
-        fontSize: 100,
-        paddingTop: 100,
-        color: "white"
+    choiceBettee: {
+        paddingRight: Theme.spacing.small,
+        alignItems: "flex-end",
+        justifyContent: "flex-end"
+    },
+    choiceText: {
+        fontSize: 50,
+        color: "white",
     },
     content: {
         padding: Theme.spacing.small
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
         marginBottom: Theme.spacing.small
     },
     metadata: {
-        marginLeft: Theme.spacing.small
+        marginHorizontal: Theme.spacing.tiny
     },
     name: {
         color: "black"

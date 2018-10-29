@@ -1,9 +1,10 @@
 {
   "indexes": [{
-      "collectionId": "feed",
+      "collectionId": "bets",
       "fields": [
           { "fieldPath": "uid", "mode": "ASCENDING" },
-          { "fieldPath": "timestamp", "mode": "DESCENDING" }
+          { "fieldPath": "confirmed", "mode": "ASCENDING" },
+          { "fieldPath": "createdAt", "mode": "DESCENDING" }
       ]
   }]
 }

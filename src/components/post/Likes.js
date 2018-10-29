@@ -57,7 +57,7 @@ export default class Likes extends React.Component<LikesProps, LikesState> {
         } else {
             this.setState({ isLiked: !isLiked, count: count - 1 });
         }
-        const postRef = Firebase.firestore.collection("feed").doc(post);
+        const postRef = Firebase.firestore.collection('bets').doc(post);
         Firebase.firestore.runTransaction(async transaction => {
             const postDoc = await transaction.get(postRef);
             const {likes} = postDoc.data();

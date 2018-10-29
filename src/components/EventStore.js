@@ -92,7 +92,6 @@ export default class EventStore {
             this.events.push(eventDoc.data());
         });
 
-        console.log('events', this.events);
         // const feed = await this.joinProfiles(posts);
         // if (!this.feed) {
         //     this.feed = [];

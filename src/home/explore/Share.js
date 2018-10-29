@@ -66,7 +66,7 @@ export default class Share extends React.Component<ScreenProps<>, ShareState> {
                 }
             };
             await Firebase.firestore
-                .collection("feed")
+                .collection('bets')
                 .doc(this.id)
                 .set(post);
             navigation.pop(1);

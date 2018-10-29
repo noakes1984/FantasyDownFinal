@@ -40,10 +40,10 @@ export default class Feed extends React.Component<FeedProps> {
     @autobind
     renderItem({ item }: FlatListItem<FeedEntry>): React.Node {
         const {navigation, store} = this.props;
-        const {post, profile} = item;
+        const {post, bettor, bettee} = item;
         return (
             <View style={styles.post}>
-                <Post {...{navigation, post, store, profile}} />
+                <Post {...{navigation, post, store, bettor, bettee}} />
             </View>
         );
     }

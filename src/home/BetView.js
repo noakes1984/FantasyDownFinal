@@ -42,7 +42,8 @@ var uuid = require('react-native-uuid');
 import type {AnimatedEvent} from "react-native/Libraries/Animated/src/AnimatedEvent";
 
 type BetViewProps = NavigationProps<> & {
-    eventStore: EventStore
+    eventStore: EventStore,
+    usearfeed
 };
 
 @inject('eventStore')
@@ -163,13 +164,11 @@ export default class BetView extends Component<BetViewProps> {
                 contentDescription: 'this is the description',
                 // This metadata can be used to easily navigate back to this screen
                 // when implementing deep linking with `Branch.subscribe`.
-                metadata: {
-                    screen: 'articleScreen',
-                    betId: betId.toString()
-                    // params: JSON.stringify({
-                    //     betId: betId.toString(),
-                    // }),
-                },
+                contentMetadata: {
+                    customMetadata: {
+                        betId: betId.toString()
+                    }
+                }
             }
         );
 
@@ -320,7 +319,7 @@ export default class BetView extends Component<BetViewProps> {
                                 value={this.state.amount}
                                 onChangeText={amount => this.setState({ amount: amount })}
                                 keyboardType="numeric"
-                                backgroundColor="white"
+                                style={{backgroundColor: "#ffffff"}}
                             />
                         </Item>
                         <Text>Coins</Text>

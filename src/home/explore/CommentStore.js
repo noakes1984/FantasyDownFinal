@@ -16,7 +16,7 @@ export default class CommentsStore {
     set comment(comment: string) { this._comment = comment; }
 
     async init(postId: string): Promise<void> {
-        const query = Firebase.firestore.collection("feed")
+        const query = Firebase.firestore.collection('bets')
             .doc(postId)
             .collection("comments")
             .orderBy("timestamp", "desc");
@@ -33,9 +33,9 @@ export default class CommentsStore {
     }
 
     async addComment(postId: string, comment: Comment): Promise<void> {
-        const postRef = Firebase.firestore.collection("feed").doc(postId);
-        this.comment = "";
-        await postRef.collection("comments").add(comment);
+        const postRef = Firebase.firestore.collection('bets').doc(postId);
+        this.comment = '';
+        await postRef.collection('comments').add(comment);
         await Firebase.firestore.runTransaction(async transaction => {
             const postDoc = await transaction.get(postRef);
             const comments = postDoc.data().comments + 1;

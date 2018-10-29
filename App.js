@@ -3,7 +3,7 @@
 import * as React from "react";
 import { StatusBar, Platform } from "react-native";
 import { StyleProvider } from "native-base";
-import { SwitchNavigator, StackNavigator, TabNavigator } from "react-navigation";
+import { createSwitchNavigator, createStackNavigator, createBottomTabNavigator } from "react-navigation";
 import { Font, AppLoading } from "expo";
 import { useStrict } from "mobx";
 import { Provider, inject } from "mobx-react/native";
@@ -68,19 +68,22 @@ class Loading extends React.Component<ScreenProps<>> {
             const isUserAuthenticated = !!user;
             if (isUserAuthenticated) {
                 const { uid } = Firebase.auth.currentUser;
-                const feedQuery = Firebase.firestore.collection('feed').orderBy('createdAt', 'desc');
+                const feedQuery = Firebase.firestore
+                    .collection('bets')
+                    .where('confirmed', '==', true)
+                    .orderBy('createdAt', 'desc');
                 const userFeedQuery = Firebase.firestore
-                    .collection("feed")
-                    .where("uid", "==", uid)
-                    .orderBy("timestamp", "desc");
+                    .collection('bets')
+                    .where('uid', '==', uid)
+                    .orderBy('timestamp', 'desc');
                 profileStore.init();
                 feedStore.init(feedQuery);
                 userFeedStore.init(userFeedQuery);
-                navigation.navigate("Home");
+                navigation.navigate('Home');
 
                 eventStore.init(Firebase.firestore.collection('events'));
             } else {
-                navigation.navigate("Welcome");
+                navigation.navigate('Welcome');
             }
         });
     }
@@ -89,12 +92,12 @@ class Loading extends React.Component<ScreenProps<>> {
         try {
             const images = Images.downloadAsync();
             const fonts = Font.loadAsync({
-                "SFProText-Medium": SFProTextMedium,
-                "SFProText-Heavy": SFProTextHeavy,
-                "SFProText-Bold": SFProTextBold,
-                "SFProText-Semibold": SFProTextSemibold,
-                "SFProText-Regular": SFProTextRegular,
-                "SFProText-Light": SFProTextLight
+                'SFProText-Medium': SFProTextMedium,
+                'SFProText-Heavy': SFProTextHeavy,
+                'SFProText-Bold': SFProTextBold,
+                'SFProText-Semibold': SFProTextSemibold,
+                'SFProText-Regular': SFProTextRegular,
+                'SFProText-Light': SFProTextLight
             });
             const icons = Font.loadAsync(Feather.font);
             await Promise.all([...images, fonts, icons]);
@@ -141,7 +144,7 @@ const StackNavigatorOptions = {
     }
 };
 
-const ExploreNavigator = StackNavigator(
+const ExploreNavigator = createStackNavigator(
     {
         Explore: { screen: Explore },
         Comments: { screen: Comments },
@@ -149,7 +152,7 @@ const ExploreNavigator = StackNavigator(
     StackNavigatorOptions
 );
 
-const ProfileNavigator = StackNavigator(
+const ProfileNavigator = createStackNavigator(
     {
         Profile: { screen: Profile },
         Settings: { screen: Settings },
@@ -158,7 +161,7 @@ const ProfileNavigator = StackNavigator(
     StackNavigatorOptions
 );
 
-const ShareNavigator = StackNavigator(
+const ShareNavigator = createStackNavigator(
     {
         Share: { screen: Share },
         Chat: { screen: Chat }
@@ -170,7 +173,7 @@ const ShareNavigator = StackNavigator(
     // StackNavigatorOptions
 );
 
-const HomeTabs = TabNavigator(
+const HomeTabs = createBottomTabNavigator(
     {
         Explore: { screen: ExploreNavigator },
         Share: { screen: ShareNavigator },
@@ -184,7 +187,7 @@ const HomeTabs = TabNavigator(
     }
 );
 
-const HomeNavigator = SwitchNavigator(
+const HomeNavigator = createSwitchNavigator(
     {
         // Walkthrough: { screen: Walkthrough },
         Home: { screen: HomeTabs }
@@ -192,7 +195,7 @@ const HomeNavigator = SwitchNavigator(
     StackNavigatorOptions
 );
 
-const SignUpNavigator = StackNavigator(
+const SignUpNavigator = createStackNavigator(
     {
         SignUp: { screen: SignUpName },
         SignUpEmail: { screen: SignUpEmail },
@@ -201,7 +204,7 @@ const SignUpNavigator = StackNavigator(
     StackNavigatorOptions
 );
 
-const AppNavigator = SwitchNavigator(
+const AppNavigator = createSwitchNavigator(
     {
         Loading: { screen: Loading },
         Welcome: { screen: Welcome },

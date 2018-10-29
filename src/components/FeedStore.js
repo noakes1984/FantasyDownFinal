@@ -47,14 +47,15 @@ export default class FeedStore {
     }
 
     async joinProfiles(posts: Post[]): Promise<FeedEntry[]> {
-        const uids = posts.map(post => post.uid).filter(uid => this.profiles[uid] === undefined);
+        // first get bettor ids
+        const bettorIds = posts.map(post => post.bettor.id).filter(uid => this.profiles[uid] === undefined);
+        const betteeIds = posts.map(post => post.bettee.id).filter(uid => this.profiles[uid] === undefined);
+        const uids = [...bettorIds, ...betteeIds];
+
         const profilePromises = _.uniq(uids).map(uid =>
             (async () => {
                 try {
-                    const profileDoc = await Firebase.firestore
-                        .collection('users')
-                        .doc(uid)
-                        .get();
+                    const profileDoc = await Firebase.firestore.collection('users').doc(uid).get();
                     this.profiles[uid] = profileDoc.data();
                 } catch (e) {
                     this.profiles[uid] = DEFAULT_PROFILE;
@@ -62,9 +63,11 @@ export default class FeedStore {
             })()
         );
         await Promise.all(profilePromises);
+
         return posts.map(post => {
-            const profile = this.profiles[post.uid];
-            return { profile, post };
+            const bettor = this.profiles[post.bettor.id];
+            const bettee = this.profiles[post.bettee.id];
+            return { bettor, bettee, post };
         });
     }
 
@@ -94,40 +97,45 @@ export default class FeedStore {
         if (this.cursor) {
             query = query.startAfter(this.cursor);
         }
-        const snap = await query.limit(DEFAULT_PAGE_SIZE).get();
-        if (snap.docs.length === 0) {
+
+        try {
+            const snap = await query.limit(DEFAULT_PAGE_SIZE).get();
+
+
+            if (snap.docs.length === 0) {
+                if (!this.feed) {
+                    this.feed = [];
+                }
+                return;
+            }
+            const posts: Post[] = [];
+            snap.forEach(postDoc => {
+                var data = postDoc.data();
+                posts.push(data);
+            });
+            const feed = await this.joinProfiles(posts);
             if (!this.feed) {
                 this.feed = [];
+                // eslint-disable-next-line prefer-destructuring
+                this.lastKnownEntry = snap.docs[0];
             }
-            return;
+            this.addToFeed(feed);
+            this.cursor = _.last(snap.docs);
+
+        } catch (e) {
+            console.log(e);
         }
-        const posts: Post[] = [];
-        snap.forEach(postDoc => {
-            // todo: this is bad, needs to grab feed from a cloud function
-            var data = postDoc.data();
-            if (data.bettee)
-                posts.push(data);
-        });
-        const feed = await this.joinProfiles(posts);
-        if (!this.feed) {
-            this.feed = [];
-            // eslint-disable-next-line prefer-destructuring
-            this.lastKnownEntry = snap.docs[0];
-        }
-        this.addToFeed(feed);
-        this.cursor = _.last(snap.docs);
     }
 
     addToFeed(entries: FeedEntry[]) {
-        console.log('addtofeed', entries);
         const feed = _.uniqBy([...this.feed.slice(), ...entries], entry => entry.post.id);
         this.feed = _.orderBy(feed, entry => entry.post.createdAt, ["desc"]);
     }
 
     subscribeToPost(id: string, callback: Post => void): Subscription {
         return Firebase.firestore
-            .collection("feed")
-            .where("id", "==", id)
+            .collection('bets')
+            .where('id', '==', id)
             .onSnapshot(async snap => {
                 const post = snap.docs[0].data();
                 callback(post);
